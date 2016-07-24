@@ -13,6 +13,7 @@ public class YaestaApplicationTests {
 
 	@Test
 	public void contextLoads() {
+		System.out.println("Hola");
 	}
 
 }

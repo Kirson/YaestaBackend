@@ -33,8 +33,10 @@ public class CrossFilter implements Filter{
 		
 		response.setHeader("Access-Control-Allow-Origin", "*");
 	    response.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
-	    response.setHeader("Access-Control-Allow-Headers", "Autorizacion, Content-Type");
+	    //response.setHeader("Access-Control-Allow-Headers", "Autorizacion, Content-Type");
 	    response.setHeader("Access-Control-Max-Age", "3600");
+	    response.setHeader("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+		
 	    
 	    if(!request.getMethod().equals("OPTIONS")){
 	    	System.out.println("11111");

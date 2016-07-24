@@ -1,5 +1,6 @@
 package com.yaesta.app.util;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -36,4 +37,10 @@ public class UtilDate {
 
 
 //Read more: http://javarevisited.blogspot.com/2013/02/convert-xmlgregoriancalendar-to-date-xmlgregoriancalendar-java-example-tutorial.html#ixzz4DmYjB7Ip
+    
+    public static String formatDateISO(Date date){
+		String formatted = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+	            .format(date);
+		return formatted;
+	}
 }

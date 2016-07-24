@@ -5,11 +5,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.ErrorAttributes;
+import org.springframework.boot.context.embedded.FilterRegistrationBean;
 //import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+import com.yaesta.app.auth.JwtFilter;
 import com.yaesta.app.controller.AppErrorController;
 
 @SpringBootApplication
@@ -24,11 +26,10 @@ public class YaestaApplication extends VitexSoapClient {
 
 	@Bean
 	public AppErrorController appErrorController(){
-		
-		//System.out.println("3333 ");
-		return new AppErrorController(errorAttributes);}
+		return new AppErrorController(errorAttributes);
+	}
 	
-	/*
+	
 	@Bean
 	public FilterRegistrationBean jwstFilter() {
 		
@@ -37,7 +38,7 @@ public class YaestaApplication extends VitexSoapClient {
 		registrationBean.addUrlPatterns("/api/*");		
 		return registrationBean;		
 	} 
-	*/
+	
 	public static void main(String[] args) {
 		SpringApplication.run(YaestaApplication.class, args);
 	}

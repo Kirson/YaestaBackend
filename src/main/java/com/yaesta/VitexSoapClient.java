@@ -11,7 +11,7 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 
-import com.yaesta.app.ws.WebServiceMessageSenderWithAuth;
+import com.yaesta.app.util.ws.WebServiceMessageSenderWithAuth;
 
 @Configuration
 public class VitexSoapClient extends BaseConfig{

@@ -1,0 +1,18 @@
+<html>
+	<body>
+		<h3>YaEsta.com!</h3>
+		<p>
+			from - ${mailInfo.mailSender.name}
+		</p>
+		<p>
+			email - ${mailInfo.mailSender.email}
+		</p>
+		<p>
+			topic - ${mailInfo.subject}
+		</p>
+		<p>
+			message - ${mailInfo.body}
+		</p>
+	</body>
+
+</html>
