@@ -6,15 +6,9 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.filter.GenericFilterBean;
-
-import com.yaesta.app.util.Constants;
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 
 public class JwtFilter extends GenericFilterBean {
 

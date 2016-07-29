@@ -87,6 +87,15 @@ public class Client implements Serializable {
 	
 	@Column(name = "vitex_id")
 	private String vitexId;
+	
+	@Column(name = "warehuse_code")
+	private String warehouseCode;
+	
+	@Column(name = "client_name")
+	private String clientName;
+	
+	@Column(name = "postal_code")
+	private String postalCode;
 
 	public Long getId() {
 		return id;
@@ -246,6 +255,34 @@ public class Client implements Serializable {
 
 	public void setVitexId(String vitexId) {
 		this.vitexId = vitexId;
+	}
+	
+	
+
+	public String getWarehouseCode() {
+		return warehouseCode;
+	}
+
+	public void setWarehouseCode(String warehouseCode) {
+		this.warehouseCode = warehouseCode;
+	}
+
+	public String getClientName() {
+		return clientName;
+	}
+
+	public void setClientName(String clientName) {
+		this.clientName = clientName;
+	}
+	
+	
+
+	public String getPostalCode() {
+		return postalCode;
+	}
+
+	public void setPostalCode(String postalCode) {
+		this.postalCode = postalCode;
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package com.yaesta.integration.tramaco.service;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -12,6 +13,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.stereotype.Service;
 
+import com.yaesta.app.persistence.entity.Supplier;
+import com.yaesta.app.persistence.entity.TramacoZone;
+import com.yaesta.app.persistence.repository.TramacoZoneRepository;
 import com.yaesta.app.persistence.service.TableSequenceService;
 import com.yaesta.integration.tramaco.dto.GuideDTO;
 import com.yaesta.integration.tramaco.dto.TramacoAuthDTO;
@@ -44,13 +48,21 @@ import dmz.comercial.servicio.cliente.impl.ServicioGenerarPdf;
 import dmz.comercial.servicio.cliente.impl.ServicioTrackingGuia;
 
 @Service
-public class TramacoService {
+public class TramacoService implements Serializable{
+
+	/**
+	 * Serial Version
+	 */
+	private static final long serialVersionUID = 8403748444468007479L;
 
 	@Autowired
 	PropertySourcesPlaceholderConfigurer propertyConfigurer;
 	
 	@Autowired
 	TableSequenceService tableSequenceService;
+	
+	@Autowired
+	TramacoZoneRepository tramacoZoneRepository;
 
 	private @Value("${tramaco.url}") String tramacoUrl;
 	private @Value("${tramaco.port}") String tramacoPort;
@@ -63,7 +75,7 @@ public class TramacoService {
 	public TramacoAuthDTO authService(){
 
 		TramacoAuthDTO tramacoAuth = new TramacoAuthDTO();
-		String response = "ok";
+		String response = "OK";
 		
 		System.out.println("Inicio auhtService"); 
 
@@ -140,35 +152,48 @@ public class TramacoService {
 	 */
 	public GuideDTO generateGuide(GuideDTO guideInfo){
 		
-		String response = "ok";
+		String response = "OK";
 		
 		//Autenticar
 		TramacoAuthDTO tramacoAuth = authService();
 		
 		if(response.equals(tramacoAuth.getResponse())){
+			
+			List<String> errorInfo = this.validateSupplierInfo(guideInfo.getSupplierInfo().getSupplier());
+			
+			if(errorInfo.isEmpty()){
 			String url = "http://"+tramacoUrl+":"+tramacoPort+"/";
 			//Obtener informacion para la guia
 			ServicioGenerarGuias cliente = new ServicioGenerarGuias(url);
-			/**
+			
+			String observacionText = "Orden "+ guideInfo.getOrderComplete().getOrderId() + " de " + guideInfo.getOrderComplete().getCustomerName() + " " + guideInfo.getOrderComplete().getClientProfileData().getDocument() + " " ; 
+		   /**
 			* Datos de entrada
 			*/
 			EntradaGenerarGuiaWs entGen = new EntradaGenerarGuiaWs();
+			
+	
+			
 			//***********/
 			EntityActor remitente = new EntityActor();
 			remitente.setApellidos(guideInfo.getSupplierInfo().getSupplier().getContactLastName());
 			remitente.setCallePrimaria(guideInfo.getSupplierInfo().getSupplier().getStreetMain());
 			remitente.setCalleSecundaria(guideInfo.getSupplierInfo().getSupplier().getStreetSecundary());
 			remitente.setCiRuc(yaestaRuc);
-			//if(guideInfo.getSupplierInfo().getSupplier().getPostalCode()!=null){
-				//remitente.setCodigoPostal(new Integer(guideInfo.getSupplierInfo().getSupplier().getPostalCode()));
-			//}else
-			//{
-				remitente.setCodigoPostal(468); //only for test
-			//}
+			if(guideInfo.getSupplierInfo().getSupplier().getPostalCode()!=null){
+				remitente.setCodigoPostal(new Integer(guideInfo.getSupplierInfo().getSupplier().getPostalCode()));
+			}
+			// else{remitente.setCodigoPostal(468); //only for test}
+			
+			//System.out.println("Numero 1"+guideInfo.getSupplierInfo().getSupplier().getStreetNumber());
 			
 			remitente.setEmail(guideInfo.getSupplierInfo().getSupplier().getContactEmail());
 			remitente.setNombres(guideInfo.getSupplierInfo().getSupplier().getContactName());
-			remitente.setNumero(guideInfo.getSupplierInfo().getSupplier().getStreetNumber());
+			if(guideInfo.getSupplierInfo().getSupplier().getStreetNumber()==null){
+				remitente.setNumero("0000");
+			}else{
+				remitente.setNumero(guideInfo.getSupplierInfo().getSupplier().getStreetNumber());
+			}
 			remitente.setReferencia(guideInfo.getSupplierInfo().getSupplier().getAddressReference());
 			remitente.setTelefono(guideInfo.getSupplierInfo().getSupplier().getPhone());
 			remitente.setTipoIden("04");
@@ -195,10 +220,12 @@ public class TramacoService {
 				carga.setBultos(guideInfo.getSupplierInfo().getDeliveryInfo().getPackages().intValue());
 				//carga.setCajas(5);
 				//carga.setCantidadDoc(1);
-				//carga.setContrato(tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs().getLstContrato().get(0).getId());
-				carga.setDescripcion("descripcion");
+				carga.setContrato(tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs().getLstContrato().get(0).getId());
+				carga.setDescripcion(ic.getName());
+				carga.setObservacion(observacionText);
 				
-				carga.setProducto(12);
+				
+				carga.setProducto(1);
 				//carga.setValorAsegurado(9.0);
 				carga.setAdjuntos(Boolean.FALSE);
 				carga.setLocalidad(0);
@@ -218,15 +245,20 @@ public class TramacoService {
 				//destinatario.setCiRuc(tramacoDefaultDocument);
 				destinatario.setTipoIden("05");
 				
-				//if(guideInfo.getOrderComplete().getShippingData().getAddress().getPostalCode()!=null){
-				//	destinatario.setCodigoPostal(new Integer(guideInfo.getOrderComplete().getShippingData().getAddress().getPostalCode()));
-			//	}
-				//else{
-					destinatario.setCodigoPostal(689); //only for test
-			//	}
+				if(guideInfo.getOrderComplete().getShippingData().getAddress().getCity()!=null){
+					List<TramacoZone> zones = tramacoZoneRepository.findByProvinciaAndCanton(guideInfo.getOrderComplete().getShippingData().getAddress().getState().toUpperCase(), guideInfo.getOrderComplete().getShippingData().getAddress().getCity().toUpperCase());
+					if(zones!=null && !zones.isEmpty()){
+						destinatario.setCodigoPostal(zones.get(0).getCodigo().intValue());
+					}
+					
+				}else if(guideInfo.getOrderComplete().getShippingData().getAddress().getPostalCode()!=null){
+					destinatario.setCodigoPostal(new Integer(guideInfo.getOrderComplete().getShippingData().getAddress().getPostalCode()));
+				}
+				//else{destinatario.setCodigoPostal(689); //only for test}
 				destinatario.setEmail(guideInfo.getOrderComplete().getClientProfileData().getEmail());
 				destinatario.setNombres(guideInfo.getOrderComplete().getClientProfileData().getFirstName());
 				destinatario.setNumero(guideInfo.getOrderComplete().getShippingData().getAddress().getNumber());
+				//System.out.println("Numero 2"+guideInfo.getOrderComplete().getShippingData().getAddress().getNumber());
 				destinatario.setReferencia((String)guideInfo.getOrderComplete().getShippingData().getAddress().getReference());
 				destinatario.setTelefono(guideInfo.getOrderComplete().getClientProfileData().getPhone());
 				
@@ -270,7 +302,13 @@ public class TramacoService {
 				guideInfo.getGuideResponse().setSalidaGenerarGuiaWs(respuestaGenerarGuiaWs.getSalidaGenerarGuiaWs());
 			}
 			
-			
+			}else{
+				response = "Error";
+				guideInfo.setErrorList(errorInfo);
+				for(String e:errorInfo){
+					System.out.println("Problemas en::"+e);
+				}
+			}
 			
 		}else{
 			response = tramacoAuth.getResponse();
@@ -287,14 +325,19 @@ public class TramacoService {
 	 */
 	public GuideDTO generateGuiaPDF(GuideDTO guideInfo){
 		
-		String url = "http://"+tramacoUrl+":"+tramacoPort+"/";
 		
-		String response = "ok";
+		String response = "OK";
 		
 		//Autenticar
 		TramacoAuthDTO tramacoAuth = authService();
 		
 		if(response.equals(tramacoAuth.getResponse())){
+			
+			
+			String url = "http://"+tramacoUrl+":"+tramacoPort+"/";
+			
+			String[] guidePart = guideInfo.getGuide().getVitexDispatcherId().split("%");
+			
 		
 			ServicioGenerarPdf cliente = new ServicioGenerarPdf(url);
 			/**
@@ -305,8 +348,7 @@ public class TramacoService {
 			//***********/
 			List<EntityGuia> lstGuia = new ArrayList<>();
 		
-			//EntityGuia entityGuia = new EntityGuia(2, guideInfo.getGuide().getVitexDispatcherId());
-			EntityGuia entityGuia = new EntityGuia(18, "031002000386208");
+			EntityGuia entityGuia = new EntityGuia(new Integer(guidePart[0]), guidePart[1]);
 			lstGuia.add(entityGuia);
 			entGen.setLstGuia(lstGuia);
 			
@@ -346,6 +388,8 @@ public class TramacoService {
 					
 				}
 			}
+		
+		//
 		}else{
 			response = tramacoAuth.getResponse();
 		}
@@ -363,7 +407,7 @@ public class TramacoService {
 		
 		String url = "http://"+tramacoUrl+":"+tramacoPort+"/";
 		
-		String response = "ok";
+		String response = "OK";
 		
 		//Autenticar
 		TramacoAuthDTO tramacoAuth = authService();
@@ -398,5 +442,27 @@ public class TramacoService {
 		}
 		
 		return guideInfo;
+	}
+	
+	
+	private List<String> validateSupplierInfo(Supplier supplier){
+		List<String> errorInfoList = new ArrayList<String>();
+		
+		String supplierName = "Proveedor "+supplier.getName();
+		
+		if(supplier.getContactEmail()==null){
+			errorInfoList.add(supplierName+" no posee email");
+		}
+		if(supplier.getContactName()==null){
+			errorInfoList.add(supplierName+" no posee nombre de contacto");
+		}
+		if(supplier.getContactLastName()==null){
+			errorInfoList.add(supplierName+" no posee apellido de contacto");
+		}
+		if(supplier.getPostalCode()==null){
+			errorInfoList.add(supplierName+" no posee codigo postal");
+		}
+		
+		return errorInfoList;
 	}
 }

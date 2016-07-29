@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.yaesta.app.mail.ItemInfo;
 import com.yaesta.app.mail.MailInfo;
 import com.yaesta.app.mail.MailParticipant;
 import com.yaesta.app.mail.MailService;
@@ -80,9 +81,23 @@ public class VitexIntegrationTestController {
 			receiver.setEmail("cristhian.herrera@gruppoavanti.com");
 			
 			mailInfo.setBody("Prueba de correo@");
-			mailInfo.setSubject("TEST de email");
+			mailInfo.setSubject("TEST de email ==>>");
 			
-			mailService.sendMail(mailInfo);
+			mailInfo.setMailSender(sender);
+			mailInfo.setMailReceiver(receiver);
+			
+			mailInfo.getAttachmentList().add("/home/cristhian/fugu/yaesta/GuiaPdf-1469219983583-null-648881335683-01.pdf");
+			
+			ItemInfo item = new ItemInfo();
+			item.setName("laptop");
+			item.setRefCode("234");
+			item.setUrl("http://yaesta.vteximg.com.br/arquivos/ids/155751-100-100/apple-macbook-pro-intel-core-i5-133-md101lla.jpg");
+			//mailService.sendMail(mailInfo);
+			mailInfo.setGeneralText("Prueba de correo");
+			mailInfo.setItemInfo(item);
+			mailInfo.getItemInfoList().add(item);
+			mailService.sendMailTemplate(mailInfo, "guideNotification.vm");
+			//mailService.sendEmailWithoutTemplating();
 			
 		}catch(Exception e){
 			result = "Error en email "+ e.getMessage();

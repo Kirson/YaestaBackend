@@ -18,6 +18,9 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.MultivaluedHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.stereotype.Service;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.soap.client.core.SoapActionCallback;
@@ -25,9 +28,15 @@ import org.springframework.ws.soap.client.core.SoapActionCallback;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.yaesta.app.mail.ItemInfo;
+import com.yaesta.app.mail.MailInfo;
+import com.yaesta.app.mail.MailParticipant;
+import com.yaesta.app.mail.MailService;
 import com.yaesta.app.persistence.entity.Guide;
 import com.yaesta.app.persistence.entity.Order;
 import com.yaesta.app.persistence.entity.Supplier;
+import com.yaesta.app.persistence.entity.SupplierContact;
+import com.yaesta.app.persistence.repository.SupplierContactRepository;
 import com.yaesta.app.persistence.service.GuideService;
 import com.yaesta.app.persistence.service.OrderService;
 import com.yaesta.app.persistence.service.SupplierService;
@@ -41,11 +50,14 @@ import com.yaesta.integration.tramaco.service.TramacoService;
 import com.yaesta.integration.vitex.bean.GuideInfoBean;
 import com.yaesta.integration.vitex.bean.SupplierDeliveryInfo;
 import com.yaesta.integration.vitex.json.bean.ItemComplete;
+import com.yaesta.integration.vitex.json.bean.OrderBean;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
+import com.yaesta.integration.vitex.json.bean.OrderConversation;
 import com.yaesta.integration.vitex.json.bean.OrderSchema;
 import com.yaesta.integration.vitex.json.bean.Paging;
 import com.yaesta.integration.vitex.json.bean.Total;
 import com.yaesta.integration.vitex.service.base.BaseVitexService;
+import com.yaesta.integration.vitex.util.OrderVtexUtil;
 import com.yaesta.integration.vitex.wsdl.OrderGet;
 import com.yaesta.integration.vitex.wsdl.OrderGetNext50FromIdV3;
 import com.yaesta.integration.vitex.wsdl.OrderGetNext50FromIdV3Response;
@@ -88,15 +100,42 @@ public class OrderVitexService extends BaseVitexService {
 	private SupplierService supplierService;
 	
 	@Autowired
+	private SupplierContactRepository supplierContactRepository;
+	
+	@Autowired
 	private TramacoService tramacoService;
+	
+	@Autowired
+	private MailService mailService;
 
 	private Client client;
 	private WebTarget target;
+	
+	private @Value("${mail.smtp.from}") String mailFrom;
+	private @Value("${mail.smtp.to}") String mailTo;
+	private @Value("${mail.smtp.to.name}") String mailToName;
+	private @Value("${mail.text.guide}") String mailTextGuide;
+	private @Value("${mail.text.guide.2}") String mailTextGuide2;
+	private @Value("${mail.text.guide.3}") String mailTextGuide3;
+	private @Value("${mail.text.guide.4}") String mailTextGuide4;
+	private @Value("${mail.text.guide.5}") String mailTextGuide5;
+	private @Value("${mail.text.guide.6}") String mailTextGuide6;
+	private @Value("${mail.text.guide.7}") String mailTextGuide7;
+	private @Value("${mail.text.guide.8}") String mailTextGuide8;
+	private @Value("${mail.text.guide.token}") String mailTextGuideToken;
 
 	public OrderVitexService() throws Exception {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+	
+	@Bean( name = "propertyConfigurer" )
+    public static PropertySourcesPlaceholderConfigurer propertyConfigurer() {
+        PropertySourcesPlaceholderConfigurer configurer = 
+                new PropertySourcesPlaceholderConfigurer();
+
+        return configurer;
+    }
 
 	public ArrayOfOrderDTO getOrders(Integer sequence) {
 
@@ -269,7 +308,41 @@ public class OrderVitexService extends BaseVitexService {
 		return ovo;
 	}
 
-	public OrderSchema getOrdersRest() {
+	public OrderSchema getOrdersRest(String status) {
+
+		client = ClientBuilder.newClient();
+
+		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/?per_page=100";
+		
+		if(status!=null){
+			restUrl = restUrl + "&filter=status:"+status;
+		}
+		
+		System.out.println("restUrl::"+restUrl);
+		
+		target = client.target(restUrl);
+		
+		MultivaluedMap<String, Object> myHeaders = new MultivaluedHashMap<String, Object>();
+		myHeaders.add(vitexRestAppkeyName, vitexRestAppkey);
+		myHeaders.add(vitexRestTokenName, vitexRestToken);
+		String json = target.request(MediaType.TEXT_PLAIN).headers(myHeaders).get(String.class);
+
+		OrderSchema response = new Gson().fromJson(json, OrderSchema.class);
+		
+		if(response.getList()!=null && !response.getList().isEmpty()){
+			List<OrderBean> list = new ArrayList<OrderBean>();
+			for(OrderBean ob:response.getList()){
+				OrderBean obean = OrderVtexUtil.setRealValuesToOrderBean(ob);
+				list.add(obean);
+			}
+			response.setList(list);
+		}
+		
+		return response;
+	}
+	
+	
+	public OrderSchema getOrdersRestPaging() {
 
 		client = ClientBuilder.newClient();
 
@@ -309,7 +382,11 @@ public class OrderVitexService extends BaseVitexService {
 		
 
 
-		OrderComplete response = new Gson().fromJson(json, OrderComplete.class);
+		OrderComplete responseOri = new Gson().fromJson(json, OrderComplete.class);
+		//Los precios en VTex vienen en string se considera que los dos ultimos son posiciones
+		//decimales por lo cual esta conversion los transformara en el valor real de la orden
+		OrderComplete response = OrderVtexUtil.setRealValuesToOrderComplete(responseOri);
+				
 		List<Total> updateTotals = new ArrayList<Total>();
 		BigDecimal totalPrice = new BigDecimal(0);
 		for (Total total : response.getTotals()) {
@@ -335,11 +412,45 @@ public class OrderVitexService extends BaseVitexService {
 
 		List<SupplierDeliveryInfo> sdiList = buildSupplierDeliveryInfo(response);
 		response.setSupplierDeliveryInfoList(sdiList);
-
+		
+		OrderConversation orderConversation = getOrderConversation(orderId);
+		if(!orderConversation.getCustomerEmail().equals("")){
+			response.getClientProfileData().setEmail(orderConversation.getCustomerEmail());
+		}
 		response = persistOrder(response,null);
 
 		// generateGuides(response);
 		return response;
+	}
+	
+	public OrderConversation getOrderConversation(String orderId){
+		client = ClientBuilder.newClient();
+
+		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/" + orderId + "/conversation-message";
+		target = client.target(restUrl);
+
+		MultivaluedMap<String, Object> myHeaders = new MultivaluedHashMap<String, Object>();
+		myHeaders.add(vitexRestAppkeyName, vitexRestAppkey);
+		myHeaders.add(vitexRestTokenName, vitexRestToken);
+		String json = target.request(MediaType.TEXT_PLAIN).headers(myHeaders).get(String.class);
+		String email = "";
+		if(json!=null){
+			json = json.substring(1,json.length());
+			json = json.substring(0,json.length()-1);
+			//System.out.println("json "+ json);
+			String [] partOne = json.split("\"email\":");
+			String [] emailData = partOne[1].split(",");
+			email = emailData[0];
+			email = email.replace("\"", "");
+			email = email.trim();
+		}
+		
+		OrderConversation ocon = new OrderConversation();
+		
+		ocon.setCustomerEmail(email);
+		
+		
+		return ocon;
 	}
 
 	private OrderComplete persistOrder(OrderComplete orderComplete, String status) {
@@ -423,8 +534,8 @@ public class OrderVitexService extends BaseVitexService {
 		return deliveryInfoList;
 	}
 	
-	public List<GuideDTO> generateGuides(GuideInfoBean guideInfoBean){
-		
+	public GuideInfoBean generateGuides(GuideInfoBean guideInfoBean){
+		GuideInfoBean response = guideInfoBean;
 		List<GuideDTO> responseList = new ArrayList<GuideDTO>();
 		
 		OrderComplete orderComplete = guideInfoBean.getOrderComplete();
@@ -445,19 +556,42 @@ public class OrderVitexService extends BaseVitexService {
 			guideDTO.setSupplierInfo(supplierDTO);
 			guideDTO.setOrderComplete(orderComplete);
 			guideDTO = tramacoService.generateGuide(guideDTO);
+			response.setError(guideDTO.getResponse());
+			response.getErrorList().addAll(guideDTO.getErrorList());
+			
+			System.out.println("Error " + response.getError());
+			for(String er:response.getErrorList()){
+				System.out.println("***"+er);
+			}
 			
 			Guide guide = new Guide();
 			guide.setCreateDate(new Date());
 			guide.setOrderVitexId(orderComplete.getOrderId());
+			guide.setVitexDispatcherId(guideDTO.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getId()+"%"+guideDTO.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getGuia());
 			guide.setGuideInfo(new Gson().toJson(guideDTO));
 			guideService.saveGuide(guide);
 			guideDTO.setGuide(guide);
 			
-			responseList.add(guideDTO);
+			GuideDTO gDTO=tramacoService.generateGuiaPDF(guideDTO);
+			response.getPdfPathList().add(gDTO.getPdfUrl());
+			
+			responseList.add(gDTO);
 		}
-		//tramacoService.generateGuide(guideInfo);
 		
-		return responseList;
+		response.setGuides(responseList);
+		
+		List<MailInfo> mailInfoList= prepareMailOrder(orderComplete,supplierDeliveryInfoList);
+		
+		for(MailInfo mailInfo:mailInfoList){
+			for(GuideDTO gDto:responseList){
+				if(gDto.getSupplierInfo().getSupplier().getId()==mailInfo.getRefId()){
+					mailInfo.getAttachmentList().add(gDto.getPdfUrl());
+				}
+			}
+			mailService.sendMailTemplate(mailInfo, "guideNotification.vm");	
+		}
+		
+		return response;
 	}
 
 	public String generateGuides(OrderComplete orderComplete) {
@@ -514,9 +648,11 @@ public class OrderVitexService extends BaseVitexService {
 
 	public OrderComplete changeStatus(OrderComplete orderComplete, String action) {
 
+		
 		if (orderComplete != null) {
-
+			orderComplete.setError("OK");
 			System.out.println("====>>>>1)");
+			try{
 			if(action==null){
 				action = orderComplete.getAppStatus();
 			}else{
@@ -541,9 +677,13 @@ public class OrderVitexService extends BaseVitexService {
 			}
 
 			orderComplete = persistOrder(orderComplete,action);
+			}catch(Exception e){
+				orderComplete.setError("ERROR:"+e.getMessage());
+			}
 
 		}else{
 			System.out.println("====>>>>2)");
+			
 		}
 		return orderComplete;
 	}
@@ -562,5 +702,95 @@ public class OrderVitexService extends BaseVitexService {
 		OrderComplete response = new Gson().fromJson(json, OrderComplete.class);
 
 		return response;
+	}
+	
+	
+	private List<MailInfo> prepareMailOrder(OrderComplete orderComplete,List<SupplierDeliveryInfo> supplierDeliveryInfoList){
+		
+		List<MailInfo> mailInfoList= new ArrayList<MailInfo>();
+		
+		for(SupplierDeliveryInfo sdi:supplierDeliveryInfoList){
+			
+			MailInfo mailInfo = new MailInfo();
+			
+			MailParticipant sender = new MailParticipant();
+			sender.setName("YaEsta.com");
+			sender.setEmail(mailFrom);
+			mailInfo.setMailSender(sender);
+			
+			MailParticipant receiver = new MailParticipant();
+			receiver.setName(mailToName);
+			receiver.setEmail(mailTo);
+			mailInfo.setMailReceiver(receiver);
+			
+			List<MailParticipant> receiverTotal = new ArrayList<MailParticipant>();
+				
+			
+			
+			List<MailParticipant> recSupplierList = new ArrayList<MailParticipant>();
+			Supplier supplier = sdi.getSupplier();
+			List<SupplierContact> supplierContactList = supplierContactRepository.findBySupplier(supplier);
+			if(supplierContactList!=null && !supplierContactList.isEmpty()){
+				for(SupplierContact sc:supplierContactList){
+					if(sc.getEmail()!=null){
+						MailParticipant mp = new MailParticipant();
+						mp.setEmail(sc.getEmail());
+						mp.setName(supplier.getName());
+						recSupplierList.add(mp);
+					}
+				}
+			}
+			if(supplier.getContactEmail()!=null){
+				MailParticipant mp = new MailParticipant();
+				mp.setEmail(supplier.getContactEmail());
+				mp.setName(supplier.getName());
+				recSupplierList.add(mp);
+			}
+			//Test Only
+			/*
+			MailParticipant mp = new MailParticipant();
+			mp.setEmail("Cristhian.Herrera@gmail.com");
+			mp.setName("Kirs Herrera");
+			recSupplierList.add(mp);
+			*/
+			List<ItemComplete> icSupplierList = sdi.getItems();
+			if(icSupplierList!=null && !icSupplierList.isEmpty()){
+				for(ItemComplete ic:icSupplierList){
+					ItemInfo iInfo = new ItemInfo();
+					iInfo.setName(ic.getName());
+					iInfo.setPrice(ic.getPrice());
+					iInfo.setUrl(ic.getImageUrl());
+					if(ic.getRefId()!=null){
+						iInfo.setRefCode((String)ic.getRefId());
+					}
+					mailInfo.getItemInfoList().add(iInfo);
+				}
+			}
+			
+		
+			receiverTotal.addAll(recSupplierList);	
+			mailInfo.setReceivers(receiverTotal);
+			mailInfo.setGeneralText(mailTextGuide);
+			mailInfo.setRefId(supplier.getId());
+			mailInfo.setRefVtexId(orderComplete.getOrderId());
+			mailInfo.setSubject("Notificacion de pedido");
+			
+			//Agregar textos de guia
+			mailInfo.getTextList().add(mailTextGuide2);
+			String codeText = mailTextGuide3;
+			codeText = codeText.replace(mailTextGuideToken, orderComplete.getOrderId());
+			mailInfo.getTextList().add(codeText);
+			mailInfo.getTextList().add(mailTextGuide4);
+			mailInfo.getTextList().add(mailTextGuide5);
+			mailInfo.getTextList().add(mailTextGuide6);
+			mailInfo.getTextList().add(mailTextGuide7);
+			mailInfo.getTextList().add(mailTextGuide8);
+			
+			mailInfoList.add(mailInfo);
+		}
+		
+		
+		
+		return mailInfoList;
 	}
 }

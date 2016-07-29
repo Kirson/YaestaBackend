@@ -43,8 +43,8 @@ public class FacturaRespuestaSRI {
     private Emisor emisor;
     @JsonProperty("moneda")
     private String moneda;
-    @JsonProperty("informacion_adicional")
-    private InformacionAdicional informacionAdicional;
+   // @JsonProperty("informacion_adicional")
+   // private InformacionAdicional informacionAdicional;
     @JsonProperty("totales")
     private Totales totales;
     @JsonProperty("comprador")
@@ -220,20 +220,20 @@ public class FacturaRespuestaSRI {
      * @return
      *     The informacionAdicional
      */
-    @JsonProperty("informacion_adicional")
-    public InformacionAdicional getInformacionAdicional() {
-        return informacionAdicional;
-    }
+    //@JsonProperty("informacion_adicional")
+   // public InformacionAdicional getInformacionAdicional() {
+    //    return informacionAdicional;
+    //}
 
     /**
      * 
      * @param informacionAdicional
      *     The informacion_adicional
      */
-    @JsonProperty("informacion_adicional")
-    public void setInformacionAdicional(InformacionAdicional informacionAdicional) {
-        this.informacionAdicional = informacionAdicional;
-    }
+   // @JsonProperty("informacion_adicional")
+   // public void setInformacionAdicional(InformacionAdicional informacionAdicional) {
+     //   this.informacionAdicional = informacionAdicional;
+   // }
 
     /**
      * 

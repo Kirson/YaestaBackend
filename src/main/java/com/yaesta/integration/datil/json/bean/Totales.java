@@ -15,7 +15,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "impuestos",
     "importe_total",
     "propina",
-    "descuento"
+    "descuento",
+    "descuento_adicional"
 })
 public class Totales {
 
@@ -29,6 +30,8 @@ public class Totales {
     private Double propina;
     @JsonProperty("descuento")
     private Double descuento;
+    @JsonProperty("descuento_adicional")
+    private Double descuentoAdicional;
    
     /**
      * 
@@ -129,6 +132,16 @@ public class Totales {
     public void setDescuento(Double descuento) {
         this.descuento = descuento;
     }
+
+    @JsonProperty("descuento_adicional")
+	public Double getDescuentoAdicional() {
+		return descuentoAdicional;
+	}
+
+    @JsonProperty("descuento_adicional")
+	public void setDescuentoAdicional(Double descuentoAdicional) {
+		this.descuentoAdicional = descuentoAdicional;
+	}
 
     
 

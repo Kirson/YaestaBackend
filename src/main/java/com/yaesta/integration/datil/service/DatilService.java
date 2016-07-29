@@ -2,7 +2,6 @@ package com.yaesta.integration.datil.service;
 
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,6 +32,7 @@ import com.yaesta.integration.datil.json.bean.Emisor;
 import com.yaesta.integration.datil.json.bean.Establecimiento;
 import com.yaesta.integration.datil.json.bean.FacturaRespuestaSRI;
 import com.yaesta.integration.datil.json.bean.FacturaSRI;
+import com.yaesta.integration.datil.json.bean.Impuesto;
 import com.yaesta.integration.datil.json.bean.Impuesto_;
 import com.yaesta.integration.datil.json.bean.Item;
 import com.yaesta.integration.datil.json.bean.NotaCredito;
@@ -41,6 +41,8 @@ import com.yaesta.integration.datil.json.bean.Totales;
 import com.yaesta.integration.vitex.bean.CreditNoteBean;
 import com.yaesta.integration.vitex.json.bean.ItemComplete;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
+import com.yaesta.integration.vitex.json.bean.PriceTag;
+import com.yaesta.integration.vitex.json.bean.Total;
 
 @Service
 public class DatilService implements Serializable{
@@ -71,8 +73,11 @@ public class DatilService implements Serializable{
 	private @Value("${datil.matrix.address}") String datilMatrixAddress;
 	private @Value("${datil.establishment.address}") String datilEstablishmentAddress;
 	private @Value("${datil.iva.value}") String datilIvaValue;
+	private @Value("${datil.iva.percent.value}") String datilIvaPercentValue;
 	private @Value("${datil.iva.code}") String datilIvaCode;
 	private @Value("${datil.iva.code.percent}") String datilIvaCodePercent;
+	private @Value("${datil.transport.code}") String datilTransportCode;
+
 	
 	private Client client;
 	private WebTarget target;
@@ -132,8 +137,8 @@ public class DatilService implements Serializable{
 		
 		//Preparar informacion de la factura
 		factura.setSecuencial(tableSequenceService.getNextValue("SEQ_INVOICE").intValue());
-		factura.setTipoEmision(1);
-		factura.setAmbiente(1);
+		factura.setTipoEmision(new Integer(datilEmissionType).intValue());
+		factura.setAmbiente(new Integer(datilEnviromentType).intValue());
 		factura.setMoneda(datilCurrencyCode);
 		factura.setFechaEmision(UtilDate.formatDateISO(new Date()));
 		//factura.setFechaEmision("2015-02-28T11:28:56.782Z");
@@ -142,17 +147,42 @@ public class DatilService implements Serializable{
 		factura.setEmisor(loadEmisorInfo());
 		factura.setComprador(loadComprador(orderComplete));
 		
+		Double subTotalShipping = new Double(0);
+		Double subTotalIVAShipping = new Double(0);
+		
 		for(ItemComplete ic:orderComplete.getItems()){
 			Item it = new Item();
 			it.setCantidad(ic.getQuantity().doubleValue());
 			it.setPrecioTotalSinImpuestos(ic.getListPrice());
-			it.setPrecioUnitario(ic.getSellingPrice());
+			//it.setPrecioUnitario(ic.getSellingPrice());
+			it.setPrecioUnitario(ic.getListPrice());
 			it.setDescripcion(ic.getName());
 			it.setCodigoPrincipal(ic.getProductId());
+			
+			if(ic.getPriceTags()!=null && !ic.getPriceTags().isEmpty()){
+				for(PriceTag pt:ic.getPriceTags()){
+					if(pt.getName().contains("discount@price")){
+						Double val= pt.getValue();
+						if(val.intValue()<0){
+							val = val* (-1);
+						}
+					    val = (double) Math.round(val * 100) / 100;
+						it.setDescuento(val);
+						break;
+					}
+				}
+			}else{
+				it.setDescuento(0D);
+			}
+			
 			it.setDescuento(0D);
 			//it.setImpuestos(impuestos);
 			Impuesto_ iva = new Impuesto_();
-			iva.setValor(ic.getPrice());
+			if(ic.getTax().intValue()==0){
+				iva.setValor(calculateIVA(ic.getListPrice(),new Integer(datilIvaValue)));
+			}else{
+				iva.setValor(ic.getTax());
+			}
 			iva.setCodigo(datilIvaCode);
 			iva.setCodigoPorcentaje(datilIvaCodePercent);
 			iva.setBaseImponible(ic.getListPrice());
@@ -166,19 +196,88 @@ public class DatilService implements Serializable{
 			items.add(it);
 		}
 		
-		factura.setItems(items);
+		Double subTotal = new Double(0);
 		
+		for(Total vtot: orderComplete.getTotals())
+		{
+			
+			if(vtot.getId().equals("Items")){
+				subTotal = subTotal+vtot.getValue();
+			}
+			if(vtot.getId().equals("Shipping")){
+				subTotalShipping = subTotalShipping + vtot.getValue();
+				if(vtot.getValue().intValue()>0){
+				Item it = new Item();
+				it.setCantidad(1D);
+				it.setPrecioTotalSinImpuestos(vtot.getValue());
+				it.setPrecioUnitario(vtot.getValue());
+				it.setDescripcion(vtot.getSpanishName());
+				it.setCodigoPrincipal(datilTransportCode);
+				it.setDescuento(0D);
+				
+				Impuesto_ iva = new Impuesto_();
+				iva.setValor(calculateIVA(vtot.getValue(),new Integer(datilIvaValue)));
+				iva.setCodigo(datilIvaCode);
+				iva.setCodigoPorcentaje(datilIvaCodePercent);
+				iva.setBaseImponible(vtot.getValue());
+				iva.setTarifa(new Double(datilIvaValue));
+				subTotalIVAShipping=subTotalIVAShipping+iva.getValor();
+				List<Impuesto_> impuestos = new ArrayList<Impuesto_>();
+				impuestos.add(iva);
+				
+				it.setImpuestos(impuestos);
+				items.add(it);
+				}
+			}
+		}
 		
 		
 		
 		Totales totales = new Totales();
-		totales.setTotalSinImpuestos(orderComplete.getValue().doubleValue());
-		totales.setDescuento(0D);
+		//Double taxes = subTotalIVAShipping;
+		List<Impuesto> impList = new ArrayList<Impuesto>();
+		for(Total tot: orderComplete.getTotals())
+		{
+			
+			if(tot.getId().equals("Items")){
+				Double val=(double) Math.round((subTotal+subTotalShipping) * 100) / 100;
+				totales.setTotalSinImpuestos(val);
+			}else if(tot.getId().equals("Discounts")){
+				Double val = tot.getValue();
+				if(val<0){
+					val = val * (-1);
+				}
+				totales.setDescuento(val);
+				totales.setDescuentoAdicional(val);
+				
+			}else if(tot.getId().equals("Shipping")){
+			  //NOTHING TODO
+			}else if(tot.getId().equals("Tax")){
+				//taxes = taxes + tot.getValue();
+				Impuesto imp =new Impuesto();
+				Double val=(double) Math.round(tot.getValue() * 100) / 100;
+				imp.setValor(val);
+				imp.setCodigo(datilIvaCode);
+				imp.setCodigoPorcentaje(datilIvaCodePercent);
+				imp.setBaseImponible(totales.getTotalSinImpuestos());
+				impList.add(imp);
+				
+			}
+		}
+		totales.setImpuestos(impList);	
+		
+		
+		
 		totales.setPropina(0D);
+		
+		
 		totales.setImporteTotal(orderComplete.getValue().doubleValue());
 		//totales.set
 		
+		
 		factura.setTotales(totales);
+		
+		factura.setItems(items);
 		
 		FacturaRespuestaSRI response = invoice(factura);
 		
@@ -267,4 +366,20 @@ public class DatilService implements Serializable{
 		
 		return myHeaders;
 	}
+	
+	private Double calculateIVA(Double price, int percent){
+		//System.out.println("Precio "+price);
+		//System.out.println("Porcentaje "+percent);
+		Double vpercent = new Double(datilIvaPercentValue);
+		//System.out.println("VPorcentaje "+vpercent);
+		
+		Double iva = price*vpercent;
+		//System.out.println("iva "+vpercent);
+		
+		iva = (double) Math.round(iva * 100) / 100;
+		
+		return iva;
+	}
+	
+	
 }

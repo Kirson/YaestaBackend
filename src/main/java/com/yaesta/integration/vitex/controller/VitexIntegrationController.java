@@ -12,10 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.yaesta.integration.datil.json.bean.FacturaRespuestaSRI;
+import com.yaesta.integration.datil.service.DatilService;
 import com.yaesta.integration.tramaco.dto.GuideDTO;
 import com.yaesta.integration.vitex.bean.GuideInfoBean;
 import com.yaesta.integration.vitex.bean.OrderCompleteBean;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
+import com.yaesta.integration.vitex.json.bean.OrderConversation;
 import com.yaesta.integration.vitex.json.bean.OrderSchema;
 import com.yaesta.integration.vitex.service.CategoryVitexService;
 import com.yaesta.integration.vitex.service.OrderStatusVitexService;
@@ -26,6 +29,8 @@ import com.yaesta.integration.vitex.wsdl.dto.OrderDTO;
 import com.yaesta.integration.vitex.wsdl.dto.ProductDTO;
 import com.yaesta.integration.vitex.wsdl.vo.OrderStatusVO;
 import com.yaesta.integration.vitex.wsdl.vo.OrderVO;
+
+import dmz.comercial.servicio.cliente.dto.EntityGuia;
 
 @RestController
 @RequestMapping(value = "/vitextIntegration")
@@ -42,6 +47,9 @@ public class VitexIntegrationController {
 	
 	@Autowired
 	OrderStatusVitexService orderStatusVitexService;
+	
+	@Autowired
+	DatilService datilService;
 	
 	@RequestMapping(value = "/getProductById/{id}", method = RequestMethod.GET)
 	public ResponseEntity<ProductDTO> getProductById(@PathVariable("id") Integer id) {	  		 		
@@ -100,7 +108,14 @@ public class VitexIntegrationController {
 	@RequestMapping(value = "/getOrdersRest", method = RequestMethod.GET)
 	public ResponseEntity<OrderSchema> getOrdersRest() {	  		 		
 		
-		OrderSchema json = orderVitexService.getOrdersRest();
+		OrderSchema json = orderVitexService.getOrdersRest(null);
+		return new ResponseEntity<OrderSchema>(json, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/getOrdersRestStatus{status}", method = RequestMethod.GET)
+	public ResponseEntity<OrderSchema> getOrdersRestStatus(@PathVariable("status") String status) {	  		 		
+		System.out.println("status::"+status);
+		OrderSchema json = orderVitexService.getOrdersRest(status);
 		return new ResponseEntity<OrderSchema>(json, HttpStatus.OK);
 	}
 	
@@ -109,6 +124,13 @@ public class VitexIntegrationController {
 		
 		OrderComplete json = orderVitexService.getOrderComplete(orderId);
 		return new ResponseEntity<OrderComplete>(json, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/getOrderConversation{orderId}", method = RequestMethod.GET)
+	public ResponseEntity<OrderConversation> getOrderConversation(@PathVariable("orderId") String orderId) {	  		 		
+		
+		OrderConversation json = orderVitexService.getOrderConversation(orderId);
+		return new ResponseEntity<OrderConversation>(json, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/changeStatus", method = RequestMethod.POST)
@@ -122,17 +144,27 @@ public class VitexIntegrationController {
 	public ResponseEntity<GuideInfoBean> generateGuide(@RequestBody GuideInfoBean guideInfoBean){
 		
 		GuideInfoBean response = new GuideInfoBean();
-		List<GuideDTO> guides= orderVitexService.generateGuides(guideInfoBean);
+		response = orderVitexService.generateGuides(guideInfoBean);
 		
-		/*
-		for(GuideDTO guide:guides){
-			System.out.println("==>" + guide.getGuideResponse().getSalidaGenerarGuiaWs().);
+		
+		for(GuideDTO guide:response.getGuides()){
+			System.out.println("==>" + guide.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().size());
+		    for(EntityGuia eg:guide.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias()){
+		    	response.getGuideIdList().add(eg.getId()+"%"+eg.getGuia());
+		    }
 		}
-		*/
 		
-		response.setGuides(guides);
 		
 		return new ResponseEntity<GuideInfoBean>(response, HttpStatus.OK);
+	}
+	
+	
+	@RequestMapping(value = "/invoiceOrder", method = RequestMethod.POST)
+	public ResponseEntity<FacturaRespuestaSRI> invoiceOrder(@RequestBody OrderCompleteBean orderCompleteBean) {	  		 		
+		
+		OrderComplete oc = orderCompleteBean.getOrder();
+		FacturaRespuestaSRI response=datilService.processInvoiceOrder(oc);
+		return new ResponseEntity<FacturaRespuestaSRI>(response, HttpStatus.OK);
 	}
 	
 }

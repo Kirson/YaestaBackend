@@ -181,7 +181,33 @@
     	<artifactId>jersey-client</artifactId>
     	<version>2.14</version>
 	</dependency>
-	-->	
+	-->
+	
+	<dependency>
+    	<groupId>it.ozimov</groupId>
+    	<artifactId>spring-boot-email-core</artifactId>
+    	<version>0.3.4</version>
+	</dependency>	
+	
+	<dependency>
+    	<groupId>it.ozimov</groupId>
+    	<artifactId>spring-boot-thymeleaf-email</artifactId>
+    	<version>0.3.4</version>
+	</dependency>
+	
+		<!--  
+	  <dependency>
+    		<groupId>dmz.comercial.servicio.cliente</groupId>
+    		<artifactId>cliente</artifactId>
+    		<version>1.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-client</artifactId>
+			<version>3.0.17.Final</version>
+		</dependency>
+		-->
 
 
 	</dependencies>

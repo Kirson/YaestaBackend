@@ -57,7 +57,8 @@ import com.yaesta.integration.vitex.bean.SupplierDeliveryInfo;
     "customerName",
     "appStatus",
     "totalPrice",
-    "supplierDeliveryInfoList"
+    "supplierDeliveryInfoList",
+    "error"
 })
 public class OrderComplete implements Serializable {
 
@@ -137,9 +138,14 @@ public class OrderComplete implements Serializable {
     private BigDecimal totalPrice;
     @JsonProperty("supplierDeliveryInfoList")
     private List<SupplierDeliveryInfo> supplierDeliveryInfoList;
+    @JsonProperty("error")
+    private String error;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
+    
+    public OrderComplete(){}
+    
     /**
      * 
      * @return
@@ -869,6 +875,16 @@ public class OrderComplete implements Serializable {
 	@JsonProperty("appStatus")
 	public void setAppStatus(String appStatus) {
 		this.appStatus = appStatus;
+	}
+
+	@JsonProperty("error")
+	public String getError() {
+		return error;
+	}
+
+	@JsonProperty("error")
+	public void setError(String error) {
+		this.error = error;
 	}
     
     

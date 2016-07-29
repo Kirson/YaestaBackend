@@ -80,9 +80,9 @@ public class ItemComplete implements Serializable{
     @JsonProperty("listPrice")
     private Double listPrice;
     @JsonProperty("manualPrice")
-    private Object manualPrice;
+    private Double manualPrice;
     @JsonProperty("priceTags")
-    private List<Object> priceTags = new ArrayList<Object>();
+    private List<PriceTag> priceTags = new ArrayList<PriceTag>();
     @JsonProperty("imageUrl")
     private String imageUrl;
     @JsonProperty("detailUrl")
@@ -98,7 +98,7 @@ public class ItemComplete implements Serializable{
     @JsonProperty("sellerSku")
     private String sellerSku;
     @JsonProperty("priceValidUntil")
-    private Object priceValidUntil;
+    private Double priceValidUntil;
     @JsonProperty("commission")
     private Double commission;
     @JsonProperty("tax")
@@ -116,7 +116,7 @@ public class ItemComplete implements Serializable{
     @JsonProperty("isGift")
     private Boolean isGift;
     @JsonProperty("shippingPrice")
-    private Object shippingPrice;
+    private Double shippingPrice;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -386,7 +386,7 @@ public class ItemComplete implements Serializable{
      *     The manualPrice
      */
     @JsonProperty("manualPrice")
-    public Object getManualPrice() {
+    public Double getManualPrice() {
         return manualPrice;
     }
 
@@ -396,7 +396,7 @@ public class ItemComplete implements Serializable{
      *     The manualPrice
      */
     @JsonProperty("manualPrice")
-    public void setManualPrice(Object manualPrice) {
+    public void setManualPrice(Double manualPrice) {
         this.manualPrice = manualPrice;
     }
 
@@ -406,7 +406,7 @@ public class ItemComplete implements Serializable{
      *     The priceTags
      */
     @JsonProperty("priceTags")
-    public List<Object> getPriceTags() {
+    public List<PriceTag> getPriceTags() {
         return priceTags;
     }
 
@@ -416,7 +416,7 @@ public class ItemComplete implements Serializable{
      *     The priceTags
      */
     @JsonProperty("priceTags")
-    public void setPriceTags(List<Object> priceTags) {
+    public void setPriceTags(List<PriceTag> priceTags) {
         this.priceTags = priceTags;
     }
 
@@ -566,7 +566,7 @@ public class ItemComplete implements Serializable{
      *     The priceValidUntil
      */
     @JsonProperty("priceValidUntil")
-    public Object getPriceValidUntil() {
+    public Double getPriceValidUntil() {
         return priceValidUntil;
     }
 
@@ -576,7 +576,7 @@ public class ItemComplete implements Serializable{
      *     The priceValidUntil
      */
     @JsonProperty("priceValidUntil")
-    public void setPriceValidUntil(Object priceValidUntil) {
+    public void setPriceValidUntil(Double priceValidUntil) {
         this.priceValidUntil = priceValidUntil;
     }
 
@@ -746,7 +746,7 @@ public class ItemComplete implements Serializable{
      *     The shippingPrice
      */
     @JsonProperty("shippingPrice")
-    public Object getShippingPrice() {
+    public Double getShippingPrice() {
         return shippingPrice;
     }
 
@@ -756,7 +756,7 @@ public class ItemComplete implements Serializable{
      *     The shippingPrice
      */
     @JsonProperty("shippingPrice")
-    public void setShippingPrice(Object shippingPrice) {
+    public void setShippingPrice(Double shippingPrice) {
         this.shippingPrice = shippingPrice;
     }
 

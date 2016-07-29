@@ -2,8 +2,10 @@ package com.yaesta.integration.vitex.bean;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CreditNoteBean implements Serializable {
 	
 	/**

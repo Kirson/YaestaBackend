@@ -1,7 +1,8 @@
 package com.yaesta.integration.tramaco.dto;
 
 import java.io.Serializable;
-
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -37,6 +38,12 @@ public class GuideDTO implements Serializable{
 	private String response;
 	
 	private String pdfUrl;
+	
+	private List<String> errorList;
+	
+	public GuideDTO(){
+		errorList = new ArrayList<String>();
+	}
 
 	public Guide getGuide() {
 		return guide;
@@ -104,6 +111,14 @@ public class GuideDTO implements Serializable{
 
 	public void setGuideTrackResponse(RespuestaTrackGuiaWs guideTrackResponse) {
 		this.guideTrackResponse = guideTrackResponse;
+	}
+
+	public List<String> getErrorList() {
+		return errorList;
+	}
+
+	public void setErrorList(List<String> errorList) {
+		this.errorList = errorList;
 	}
 	
 	

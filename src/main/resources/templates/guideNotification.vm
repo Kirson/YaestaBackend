@@ -1,18 +1,46 @@
 <html>
 	<body>
-		<h3>YaEsta.com!</h3>
+		<!--
+		<div id="logoYaesta">
+            <img src='cid:${logoYaesta}' width="200px" height="200px" style="display: block;float: right; margin: 0em 0em 1em 1em "/>
+            <h3>YaEsta.com!</h3>
+        </div>
+        -->
 		<p>
-			from - ${mailInfo.mailSender.name}
+			Saludos de - ${mailInfo.mailSender.name}
 		</p>
 		<p>
-			email - ${mailInfo.mailSender.email}
+			Estimado - ${mailInfo.mailReceiver.name}
 		</p>
 		<p>
-			topic - ${mailInfo.subject}
+			 ${mailInfo.generalText}
 		</p>
-		<p>
-			message - ${mailInfo.body}
-		</p>
+		<div id="Product">
+            <table>
+              <tr>
+              	<td><b>Producto</b></td>
+              	<td><b>Codigo</b></td>
+              	<td><b>Nombre</b></td>
+              </tr>
+              #foreach( $item in $mailInfo.itemInfoList )
+    				<tr>
+    					<td>
+    					   <img src='$item.url'>	
+    					</td>
+    					<td>$item.refCode	
+    					</td>
+    					<td>$item.name	
+    					</td>
+    				</tr>
+				#end
+            </table>
+            <br></br>
+            #foreach( $textInfo in $mailInfo.textList )
+            <p>
+                $textInfo
+            </p>
+            #end
+        </div>
 	</body>
 
 </html>

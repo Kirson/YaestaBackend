@@ -1,6 +1,7 @@
 
 package com.yaesta.integration.vitex.json.bean;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +48,7 @@ public class OrderBean {
     @JsonProperty("items")
     private java.util.List<Item> items = new ArrayList<Item>();
     @JsonProperty("totalValue")
-    private Integer totalValue;
+    private BigDecimal totalValue;
     @JsonProperty("paymentNames")
     private String paymentNames;
     @JsonProperty("status")
@@ -167,7 +168,7 @@ public class OrderBean {
      *     The totalValue
      */
     @JsonProperty("totalValue")
-    public Integer getTotalValue() {
+    public BigDecimal getTotalValue() {
         return totalValue;
     }
 
@@ -177,7 +178,7 @@ public class OrderBean {
      *     The totalValue
      */
     @JsonProperty("totalValue")
-    public void setTotalValue(Integer totalValue) {
+    public void setTotalValue(BigDecimal totalValue) {
         this.totalValue = totalValue;
     }
 
