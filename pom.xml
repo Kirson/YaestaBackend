@@ -76,37 +76,7 @@
 		</dependency>
 		
 		
-		<!-- jBPM 6 dependencies -->
-		<dependency>
-			<groupId>org.kie</groupId>
-			<artifactId>kie-api</artifactId>
-			<version>6.4.0.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jbpm</groupId>
-			<artifactId>jbpm-human-task-core</artifactId>
-			<version>6.4.0.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jbpm</groupId>
-			<artifactId>jbpm-kie-services</artifactId>
-			<version>6.4.0.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jbpm</groupId>
-			<artifactId>jbpm-services-api</artifactId>
-			<version>6.4.0.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jbpm</groupId>
-			<artifactId>jbpm-services-ejb-api</artifactId>
-			<version>6.4.0.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jbpm</groupId>
-			<artifactId>jbpm-services-ejb-impl</artifactId>
-			<version>6.4.0.Final</version>
-		</dependency>
+		
 
 		<!-- exclude dom4j from war in order to get it working on wildfly -->
 		<dependency>
@@ -114,12 +84,6 @@
 			<artifactId>dom4j</artifactId>
 			<version>1.6.1</version>
 			<scope>provided</scope>
-		</dependency>
-		<!-- http://mvnrepository.com/artifact/javax.ws.rs/jsr311-api -->
-		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>jsr311-api</artifactId>
-			<version>1.1.1</version>
 		</dependency>
 		<!-- http://mvnrepository.com/artifact/com.h2database/h2 -->
 		<dependency>
@@ -151,12 +115,7 @@
 			<artifactId>validation-api</artifactId>
 			<version>1.1.0.Final</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.sun.jersey/jersey-client -->
-		<dependency>
-    		<groupId>com.sun.jersey</groupId>
-    		<artifactId>jersey-client</artifactId>
-    		<version>1.19.1</version>
-		</dependency>
+	
 		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
 		<dependency>
     		<groupId>com.google.code.gson</groupId>
@@ -168,48 +127,56 @@
     		<groupId>org.apache.velocity</groupId>
     		<artifactId>velocity</artifactId>
     	</dependency>
-    	<!--  
+    	 
     	<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-client</artifactId>
 			<version>3.0.17.Final</version>
 		</dependency>
-		-->
-
-	<!--  <dependency>
-    	<groupId>org.glassfish.jersey.core</groupId>
-    	<artifactId>jersey-client</artifactId>
-    	<version>2.14</version>
-	</dependency>
-	-->
+		<dependency>  
+  			<groupId>org.jboss.resteasy</groupId>  
+  			<artifactId>resteasy-jaxrs</artifactId>  
+  			<version>3.0.17.Final</version>  
+		</dependency>  
+		<dependency>  
+  			<groupId>org.jboss.resteasy</groupId>  
+  			<artifactId>resteasy-jackson-provider</artifactId>  
+  			<version>3.0.17.Final</version>  
+		</dependency>
+		
+		<dependency>
+    		<groupId>it.ozimov</groupId>
+    		<artifactId>spring-boot-email-core</artifactId>
+    		<version>0.3.4</version>
+		</dependency>	
 	
-	<dependency>
-    	<groupId>it.ozimov</groupId>
-    	<artifactId>spring-boot-email-core</artifactId>
-    	<version>0.3.4</version>
-	</dependency>	
+		<dependency>
+    		<groupId>it.ozimov</groupId>
+    		<artifactId>spring-boot-thymeleaf-email</artifactId>
+    		<version>0.3.4</version>
+		</dependency>
 	
-	<dependency>
-    	<groupId>it.ozimov</groupId>
-    	<artifactId>spring-boot-thymeleaf-email</artifactId>
-    	<version>0.3.4</version>
-	</dependency>
+		<!-- https://mvnrepository.com/artifact/org.freemarker/freemarker -->
+		<dependency>
+    		<groupId>org.freemarker</groupId>
+    		<artifactId>freemarker</artifactId>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+    		<groupId>org.json</groupId>
+    		<artifactId>json</artifactId>
+    		<version>20160212</version>
+		</dependency>
+		
 	
-		<!--  
-	  <dependency>
+		
+	 	 <dependency>
     		<groupId>dmz.comercial.servicio.cliente</groupId>
     		<artifactId>cliente</artifactId>
     		<version>1.0</version>
 		</dependency>
-		
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-client</artifactId>
-			<version>3.0.17.Final</version>
-		</dependency>
-		-->
-
-
+		 
 	</dependencies>
 	<repositories>
 		<repository>

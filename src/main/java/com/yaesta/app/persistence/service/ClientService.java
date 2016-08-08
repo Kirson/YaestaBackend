@@ -13,6 +13,7 @@ import com.yaesta.app.persistence.entity.Client;
 import com.yaesta.app.persistence.entity.ClienteBodega;
 import com.yaesta.app.persistence.repository.ClientRepository;
 import com.yaesta.app.persistence.repository.ClienteBodegaRepository;
+
 import com.yaesta.integration.vitex.json.bean.OrderBean;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
 import com.yaesta.integration.vitex.json.bean.OrderSchema;
@@ -33,6 +34,7 @@ public class ClientService {
 	public List<Client> getClients(){
 		return clientRepository.findAll();
 	}
+	
 	
 	@Transactional
 	public String updateInfo(){

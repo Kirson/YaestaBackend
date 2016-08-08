@@ -30,8 +30,9 @@ public class TramacoIntegrationController {
 	public ResponseEntity<GuideDTO> testPDF() {
 		GuideDTO guideInfo = new GuideDTO();
 		Guide guide = new Guide();
-		guide.setGuideDispatcherId("031002000386208");
-		guide.setOrderVitexId("648881335683-01");
+		guide.setGuideDispatcherId("10%031002000386212");
+		guide.setVitexDispatcherId("10%031002000386212");
+		guide.setOrderVitexId("650182888103-01");
 		guideInfo.setGuide(guide);
 		
 		GuideDTO response=tramacoService.generateGuiaPDF(guideInfo);

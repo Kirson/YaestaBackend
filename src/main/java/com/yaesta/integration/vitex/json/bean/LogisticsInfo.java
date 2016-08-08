@@ -39,11 +39,11 @@ public class LogisticsInfo {
     @JsonProperty("lockTTL")
     private String lockTTL;
     @JsonProperty("price")
-    private Integer price;
+    private Double price;
     @JsonProperty("listPrice")
-    private Integer listPrice;
+    private Double listPrice;
     @JsonProperty("sellingPrice")
-    private Integer sellingPrice;
+    private Double sellingPrice;
     @JsonProperty("deliveryWindow")
     private Object deliveryWindow;
     @JsonProperty("deliveryCompany")
@@ -127,7 +127,7 @@ public class LogisticsInfo {
      *     The price
      */
     @JsonProperty("price")
-    public Integer getPrice() {
+    public Double getPrice() {
         return price;
     }
 
@@ -137,7 +137,7 @@ public class LogisticsInfo {
      *     The price
      */
     @JsonProperty("price")
-    public void setPrice(Integer price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
@@ -147,7 +147,7 @@ public class LogisticsInfo {
      *     The listPrice
      */
     @JsonProperty("listPrice")
-    public Integer getListPrice() {
+    public Double getListPrice() {
         return listPrice;
     }
 
@@ -157,7 +157,7 @@ public class LogisticsInfo {
      *     The listPrice
      */
     @JsonProperty("listPrice")
-    public void setListPrice(Integer listPrice) {
+    public void setListPrice(Double listPrice) {
         this.listPrice = listPrice;
     }
 
@@ -167,7 +167,7 @@ public class LogisticsInfo {
      *     The sellingPrice
      */
     @JsonProperty("sellingPrice")
-    public Integer getSellingPrice() {
+    public Double getSellingPrice() {
         return sellingPrice;
     }
 
@@ -177,7 +177,7 @@ public class LogisticsInfo {
      *     The sellingPrice
      */
     @JsonProperty("sellingPrice")
-    public void setSellingPrice(Integer sellingPrice) {
+    public void setSellingPrice(Double sellingPrice) {
         this.sellingPrice = sellingPrice;
     }
 

@@ -48,11 +48,11 @@ public class Address {
     @JsonProperty("number")
     private String number;
     @JsonProperty("neighborhood")
-    private Object neighborhood;
+    private String neighborhood;
     @JsonProperty("complement")
-    private Object complement;
+    private String complement;
     @JsonProperty("reference")
-    private Object reference;
+    private String reference;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -242,7 +242,7 @@ public class Address {
      *     The neighborhood
      */
     @JsonProperty("neighborhood")
-    public Object getNeighborhood() {
+    public String getNeighborhood() {
         return neighborhood;
     }
 
@@ -252,7 +252,7 @@ public class Address {
      *     The neighborhood
      */
     @JsonProperty("neighborhood")
-    public void setNeighborhood(Object neighborhood) {
+    public void setNeighborhood(String neighborhood) {
         this.neighborhood = neighborhood;
     }
 
@@ -262,7 +262,7 @@ public class Address {
      *     The complement
      */
     @JsonProperty("complement")
-    public Object getComplement() {
+    public String getComplement() {
         return complement;
     }
 
@@ -272,7 +272,7 @@ public class Address {
      *     The complement
      */
     @JsonProperty("complement")
-    public void setComplement(Object complement) {
+    public void setComplement(String complement) {
         this.complement = complement;
     }
 
@@ -282,7 +282,7 @@ public class Address {
      *     The reference
      */
     @JsonProperty("reference")
-    public Object getReference() {
+    public String getReference() {
         return reference;
     }
 
@@ -292,7 +292,7 @@ public class Address {
      *     The reference
      */
     @JsonProperty("reference")
-    public void setReference(Object reference) {
+    public void setReference(String reference) {
         this.reference = reference;
     }
 

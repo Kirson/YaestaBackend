@@ -66,6 +66,14 @@ public class Order implements Serializable{
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date updDate;
 	
+	@org.hibernate.annotations.Type(type="com.yaesta.app.persistence.util.SQLXMLType")
+	@Column(name="invoice")
+	private String invoice;
+	
+	@org.hibernate.annotations.Type(type="com.yaesta.app.persistence.util.SQLXMLType")
+	@Column(name="credit_note")
+	private String creditNote;
+	
 	@Transient
 	private List<OrderItem> items;
 	
@@ -162,6 +170,24 @@ public class Order implements Serializable{
 
 	public void setItems(List<OrderItem> items) {
 		this.items = items;
+	}
+	
+	
+
+	public String getInvoice() {
+		return invoice;
+	}
+
+	public void setInvoice(String invoice) {
+		this.invoice = invoice;
+	}
+
+	public String getCreditNote() {
+		return creditNote;
+	}
+
+	public void setCreditNote(String creditNote) {
+		this.creditNote = creditNote;
 	}
 
 	@Override

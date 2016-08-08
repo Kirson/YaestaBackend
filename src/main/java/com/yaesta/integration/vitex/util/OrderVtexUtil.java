@@ -7,10 +7,13 @@ import java.util.List;
 
 import com.yaesta.integration.vitex.json.bean.Item;
 import com.yaesta.integration.vitex.json.bean.ItemComplete;
+import com.yaesta.integration.vitex.json.bean.LogisticsInfo;
 import com.yaesta.integration.vitex.json.bean.OrderBean;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
+import com.yaesta.integration.vitex.json.bean.Payment;
 import com.yaesta.integration.vitex.json.bean.PriceTag;
 import com.yaesta.integration.vitex.json.bean.Total;
+import com.yaesta.integration.vitex.json.bean.Transaction;
 
 public class OrderVtexUtil implements Serializable {
 
@@ -54,10 +57,7 @@ public class OrderVtexUtil implements Serializable {
 			   if(ic.getSellingPrice()!=null){
 				   itC.setSellingPrice(ic.getSellingPrice()/oneHundredD);
 			   }
-			   /*
-			   if(ic.getSellingPrice()!=null){
-				   itC.setSellingPrice(ic.getSellingPrice()/oneHundredD);
-			   }*/
+			   
 			   if(ic.getManualPrice()!=null){
 				   itC.setManualPrice(ic.getManualPrice()/oneHundredD);
 			   }
@@ -81,6 +81,36 @@ public class OrderVtexUtil implements Serializable {
 			}
 			response.setItems(items);
 		}
+		
+		if(ori.getPaymentData().getTransactions()!=null  && !ori.getPaymentData().getTransactions().isEmpty()){
+			List<Transaction> transList = new ArrayList<Transaction>();
+			for(Transaction tr:ori.getPaymentData().getTransactions()){
+				Transaction tran = tr;
+				List<Payment> payList= new ArrayList<Payment>();
+				for(Payment pa:tran.getPayments()){
+					Payment py=pa;
+					py.setValue(pa.getValue()/oneHundredD);
+					py.setReferenceValue(pa.getReferenceValue()/oneHundredD);
+					payList.add(py);
+				}
+				tran.setPayments(payList);
+				transList.add(tran);
+			}//fin for
+			response.getPaymentData().setTransactions(transList);
+		}
+		
+		if(ori.getShippingData().getLogisticsInfo()!=null && !ori.getShippingData().getLogisticsInfo().isEmpty()){
+			List<LogisticsInfo> logiInfoList = new ArrayList<LogisticsInfo>();
+			for(LogisticsInfo li:ori.getShippingData().getLogisticsInfo()){
+				LogisticsInfo lInfo = li;
+				lInfo.setPrice(li.getPrice()/oneHundredD);
+				lInfo.setListPrice(li.getListPrice()/oneHundredD);
+				lInfo.setSellingPrice(li.getSellingPrice()/oneHundredD);
+				logiInfoList.add(lInfo);
+			}
+			response.getShippingData().setLogisticsInfo(logiInfoList);
+		}
+		
 		return response;
 	}
 	

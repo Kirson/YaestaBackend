@@ -46,11 +46,11 @@ public class Payment {
     @JsonProperty("paymentSystemName")
     private String paymentSystemName;
     @JsonProperty("value")
-    private Integer value;
+    private Double value;
     @JsonProperty("installments")
     private Integer installments;
     @JsonProperty("referenceValue")
-    private Integer referenceValue;
+    private Double referenceValue;
     @JsonProperty("cardHolder")
     private Object cardHolder;
     @JsonProperty("cardNumber")
@@ -152,7 +152,7 @@ public class Payment {
      *     The value
      */
     @JsonProperty("value")
-    public Integer getValue() {
+    public Double getValue() {
         return value;
     }
 
@@ -162,7 +162,7 @@ public class Payment {
      *     The value
      */
     @JsonProperty("value")
-    public void setValue(Integer value) {
+    public void setValue(Double value) {
         this.value = value;
     }
 
@@ -192,7 +192,7 @@ public class Payment {
      *     The referenceValue
      */
     @JsonProperty("referenceValue")
-    public Integer getReferenceValue() {
+    public Double getReferenceValue() {
         return referenceValue;
     }
 
@@ -202,7 +202,7 @@ public class Payment {
      *     The referenceValue
      */
     @JsonProperty("referenceValue")
-    public void setReferenceValue(Integer referenceValue) {
+    public void setReferenceValue(Double referenceValue) {
         this.referenceValue = referenceValue;
     }
 

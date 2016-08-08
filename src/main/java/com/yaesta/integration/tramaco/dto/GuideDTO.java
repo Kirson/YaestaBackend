@@ -41,6 +41,8 @@ public class GuideDTO implements Serializable{
 	
 	private List<String> errorList;
 	
+	private String customerAdditionalInfo;
+	
 	public GuideDTO(){
 		errorList = new ArrayList<String>();
 	}
@@ -119,6 +121,14 @@ public class GuideDTO implements Serializable{
 
 	public void setErrorList(List<String> errorList) {
 		this.errorList = errorList;
+	}
+
+	public String getCustomerAdditionalInfo() {
+		return customerAdditionalInfo;
+	}
+
+	public void setCustomerAdditionalInfo(String customerAdditionalInfo) {
+		this.customerAdditionalInfo = customerAdditionalInfo;
 	}
 	
 	

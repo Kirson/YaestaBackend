@@ -1,5 +1,7 @@
 package com.yaesta.integration.tramaco.service;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +23,10 @@ import com.yaesta.integration.tramaco.dto.GuideDTO;
 import com.yaesta.integration.tramaco.dto.TramacoAuthDTO;
 import com.yaesta.integration.vitex.json.bean.Dimension;
 import com.yaesta.integration.vitex.json.bean.ItemComplete;
+import com.yaesta.integration.vitex.json.bean.Payment;
+import com.yaesta.integration.vitex.json.bean.Transaction;
+import com.yaesta.integration.vitex.json.bean.enums.PaymentEnum;
+
 
 import dmz.comercial.servicio.cliente.dto.EntityActor;
 import dmz.comercial.servicio.cliente.dto.EntityCarga;
@@ -166,7 +172,11 @@ public class TramacoService implements Serializable{
 			//Obtener informacion para la guia
 			ServicioGenerarGuias cliente = new ServicioGenerarGuias(url);
 			
-			String observacionText = "Orden "+ guideInfo.getOrderComplete().getOrderId() + " de " + guideInfo.getOrderComplete().getCustomerName() + " " + guideInfo.getOrderComplete().getClientProfileData().getDocument() + " " ; 
+			String observacionText = "Orden "+ guideInfo.getOrderComplete().getOrderId() + " de " + guideInfo.getOrderComplete().getCustomerName() + " " + guideInfo.getOrderComplete().getClientProfileData().getDocument() + " \n " ;
+			
+			if(guideInfo.getCustomerAdditionalInfo()!=null && !guideInfo.getCustomerAdditionalInfo().equals("")){
+				observacionText = observacionText + "Referencia"+  guideInfo.getCustomerAdditionalInfo();
+			}
 		   /**
 			* Datos de entrada
 			*/
@@ -183,9 +193,9 @@ public class TramacoService implements Serializable{
 			if(guideInfo.getSupplierInfo().getSupplier().getPostalCode()!=null){
 				remitente.setCodigoPostal(new Integer(guideInfo.getSupplierInfo().getSupplier().getPostalCode()));
 			}
-			// else{remitente.setCodigoPostal(468); //only for test}
 			
-			//System.out.println("Numero 1"+guideInfo.getSupplierInfo().getSupplier().getStreetNumber());
+			
+			
 			
 			remitente.setEmail(guideInfo.getSupplierInfo().getSupplier().getContactEmail());
 			remitente.setNombres(guideInfo.getSupplierInfo().getSupplier().getContactName());
@@ -197,6 +207,25 @@ public class TramacoService implements Serializable{
 			remitente.setReferencia(guideInfo.getSupplierInfo().getSupplier().getAddressReference());
 			remitente.setTelefono(guideInfo.getSupplierInfo().getSupplier().getPhone());
 			remitente.setTipoIden("04");
+			
+			
+			Boolean hasAdjunto = false;
+			if(guideInfo.getOrderComplete().getPaymentData().getTransactions()!=null && !guideInfo.getOrderComplete().getPaymentData().getTransactions().isEmpty()){
+				for(Transaction tr:guideInfo.getOrderComplete().getPaymentData().getTransactions()){
+					if(tr.getPayments()!=null && !tr.getPayments().isEmpty()){
+						for(Payment py:tr.getPayments()){
+							if(py.getPaymentSystemName().trim().toLowerCase().equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName().toLowerCase())){
+								hasAdjunto = true; 
+								//System.out.println("Si debe tener adjunto");
+							}
+						}//fin for
+						
+					}//
+				}
+			}
+			
+			
+			
 			//*****//
 			List<EntityCargaDestino> lstCargaDestino = new ArrayList<>();
 			//................................TRANSACCION 1.........................................//
@@ -217,17 +246,34 @@ public class TramacoService implements Serializable{
 					carga.setLargo(dim.getLength());
 					carga.setPeso(dim.getWeight());
 				}
+				else{
+					carga.setAlto(0D);
+					carga.setAncho(0D);
+					carga.setLargo(0D);
+					carga.setPeso(0D);
+					
+				}
 				carga.setBultos(guideInfo.getSupplierInfo().getDeliveryInfo().getPackages().intValue());
 				//carga.setCajas(5);
 				//carga.setCantidadDoc(1);
 				carga.setContrato(tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs().getLstContrato().get(0).getId());
 				carga.setDescripcion(ic.getName());
 				carga.setObservacion(observacionText);
+				carga.setValorAsegurado(ic.getPrice());
+				carga.setValorCobro(ic.getShippingPrice());
 				
+				if(hasAdjunto){
+					carga.setAdjuntos(Boolean.TRUE);
+					String codigoAdjunto =  getTramacoAdjCode();
+					System.out.println("Codigo Adjunto "+codigoAdjunto);
+					carga.setCodigoAdjunto(codigoAdjunto);
+				}else{
+					carga.setAdjuntos(Boolean.FALSE);
+					System.out.println("No hay adjunto");
+				}
 				
 				carga.setProducto(1);
-				//carga.setValorAsegurado(9.0);
-				carga.setAdjuntos(Boolean.FALSE);
+				carga.setValorAsegurado(ic.getPrice());
 				carga.setLocalidad(0);
 				carga.setGuia(guideInfo.getOrderComplete().getOrderId());
 				entCargaDestino.setCarga(carga);
@@ -235,8 +281,11 @@ public class TramacoService implements Serializable{
 				EntityActor destinatario = new EntityActor();
 				destinatario.setApellidos(guideInfo.getOrderComplete().getClientProfileData().getLastName());
 				destinatario.setCallePrimaria(guideInfo.getOrderComplete().getShippingData().getAddress().getStreet());
-				destinatario.setCalleSecundaria((String)guideInfo.getOrderComplete().getShippingData().getAddress().getComplement());
-				
+				if(guideInfo.getOrderComplete().getShippingData().getAddress().getComplement()!=null){
+					destinatario.setCalleSecundaria(guideInfo.getOrderComplete().getShippingData().getAddress().getComplement());
+				}else{
+					destinatario.setCalleSecundaria("");
+				}
 				if(guideInfo.getOrderComplete().getClientProfileData().getDocument()!=null){
 					destinatario.setCiRuc(guideInfo.getOrderComplete().getClientProfileData().getDocument());
 				}else{
@@ -253,12 +302,13 @@ public class TramacoService implements Serializable{
 					
 				}else if(guideInfo.getOrderComplete().getShippingData().getAddress().getPostalCode()!=null){
 					destinatario.setCodigoPostal(new Integer(guideInfo.getOrderComplete().getShippingData().getAddress().getPostalCode()));
+				}else{
+					destinatario.setCodigoPostal(0);
 				}
-				//else{destinatario.setCodigoPostal(689); //only for test}
+				
 				destinatario.setEmail(guideInfo.getOrderComplete().getClientProfileData().getEmail());
 				destinatario.setNombres(guideInfo.getOrderComplete().getClientProfileData().getFirstName());
 				destinatario.setNumero(guideInfo.getOrderComplete().getShippingData().getAddress().getNumber());
-				//System.out.println("Numero 2"+guideInfo.getOrderComplete().getShippingData().getAddress().getNumber());
 				destinatario.setReferencia((String)guideInfo.getOrderComplete().getShippingData().getAddress().getReference());
 				destinatario.setTelefono(guideInfo.getOrderComplete().getClientProfileData().getPhone());
 				
@@ -291,6 +341,12 @@ public class TramacoService implements Serializable{
 					System.out.println("CODIGO:"	+ respuestaGenerarGuiaWs.getCuerpoRespuesta().getCodigo());
 					System.out.println("MENSAJE:"   + respuestaGenerarGuiaWs.getCuerpoRespuesta().getMensaje());
 					System.out.println("EXCEPCION:" + respuestaGenerarGuiaWs.getCuerpoRespuesta().getExcepcion());
+				   
+					if(respuestaGenerarGuiaWs.getCuerpoRespuesta().getCodigo()!="1"){
+						response = respuestaGenerarGuiaWs.getCuerpoRespuesta().getMensaje();
+						errorInfo.add(response);
+					}
+				
 				}
 				if (respuestaGenerarGuiaWs.getSalidaGenerarGuiaWs() != null) {
 					SalidaGenerarGuiaWs salida = respuestaGenerarGuiaWs.getSalidaGenerarGuiaWs();
@@ -333,7 +389,7 @@ public class TramacoService implements Serializable{
 		
 		if(response.equals(tramacoAuth.getResponse())){
 			
-			
+			System.out.println("Esta Auth");
 			String url = "http://"+tramacoUrl+":"+tramacoPort+"/";
 			
 			String[] guidePart = guideInfo.getGuide().getVitexDispatcherId().split("%");
@@ -344,11 +400,16 @@ public class TramacoService implements Serializable{
 			 * Datos de entrada
 			 */
 			EntradaGenerarPdfWs entGen = new EntradaGenerarPdfWs();
+			
+			System.out.println("URL:" + url);
+			
+			
 			entGen.setUsuario(tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs().getUsuario());
 			//***********/
 			List<EntityGuia> lstGuia = new ArrayList<>();
 		
 			EntityGuia entityGuia = new EntityGuia(new Integer(guidePart[0]), guidePart[1]);
+			System.out.println("Guia: "+ guidePart[1]);
 			lstGuia.add(entityGuia);
 			entGen.setLstGuia(lstGuia);
 			
@@ -364,33 +425,56 @@ public class TramacoService implements Serializable{
 					System.out.println("EXCEPCION:" + respuestaGenerarPdfWs.getCuerpoRespuesta().getExcepcion());
 				}
 				if (respuestaGenerarPdfWs.getSalidaGenerarPdfWs() != null) {
+					System.out.println("Esta Tiene salida PDF");
+					String location = tramacoPdfPath +"/GuiaPdf-" + (new Date()).getTime()+ "-" + guideInfo.getGuide().getVitexDispatcherId() +"-" + guideInfo.getGuide().getOrderVitexId() + ".pdf";
+					System.out.println("location:"+location);
 					SalidaGenerarPdfWs salida = respuestaGenerarPdfWs.getSalidaGenerarPdfWs();
 					if (salida.getInStrPfd() != null) {
-						String location = tramacoPdfPath +"/GuiaPdf-" + (new Date()).getTime()+ "-" + guideInfo.getGuide().getVitexDispatcherId() +"-" + guideInfo.getGuide().getOrderVitexId() + ".pdf";
+						//String location = tramacoPdfPath +"/GuiaPdf-" + (new Date()).getTime()+ "-" + guideInfo.getGuide().getVitexDispatcherId() +"-" + guideInfo.getGuide().getOrderVitexId() + ".pdf";
+						//System.out.println("location:"+location);
 						FileOutputStream out;
 						try {
 							out = new FileOutputStream(location);
+							
+
+							
 							try (InputStream is = salida.getInStrPfd()) {
+								
+								ByteArrayOutputStream baos = new ByteArrayOutputStream();
+								org.apache.commons.io.IOUtils.copy(is, baos);
+								InputStream is2 = new ByteArrayInputStream(baos.toByteArray()); 
+								
 								int len;
+								//System.out.println("Hay inputStream");
+								
 								byte[] buffer = new byte[4096];
-								while ((len = is.read(buffer)) != -1) {
+								while ((len = is2.read(buffer)) != -1) {
+									//System.out.println("++"+new String(buffer));
 									out.write(buffer, 0, len);
 								}
 								out.flush();
 								out.close();
 							}
 						} catch (IOException ex) {
-							System.out.println(ex);
+							System.out.println("==>>"+ex);
+							ex.printStackTrace();
 						}
 					  guideInfo.setPdfUrl(location);
+					 // System.out.println("location:"+location);
 					  guideInfo.setGuidePdfResponse(respuestaGenerarPdfWs);
+					}else{
+						System.out.println("salida.getInStrPfd() es nulo");
 					}
 					
+				}
+				else{
+					System.out.println("NO tienes salida");
 				}
 			}
 		
 		//
 		}else{
+			System.out.println("NO es AUTH");
 			response = tramacoAuth.getResponse();
 		}
 		
@@ -464,5 +548,15 @@ public class TramacoService implements Serializable{
 		}
 		
 		return errorInfoList;
+	}
+	
+	private String getTramacoAdjCode(){
+		String code = tableSequenceService.getNextValue("SEQ_TRAMACO_ADJ")+"";
+		
+		if(code.length()<7){
+			code = "0"+code;
+		}
+		
+		return code;
 	}
 }

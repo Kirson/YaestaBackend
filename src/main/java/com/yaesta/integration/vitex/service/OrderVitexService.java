@@ -1,6 +1,7 @@
 package com.yaesta.integration.vitex.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -12,6 +13,7 @@ import com.sun.jersey.api.client.WebResource;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -43,13 +45,20 @@ import com.yaesta.app.persistence.service.SupplierService;
 import com.yaesta.app.persistence.util.HibernateProxyTypeAdapter;
 import com.yaesta.app.util.SupplierUtil;
 import com.yaesta.app.util.UtilDate;
+import com.yaesta.integration.datil.json.bean.FacturaConsulta;
+import com.yaesta.integration.datil.json.bean.FacturaRespuestaSRI;
+import com.yaesta.integration.datil.service.DatilService;
 import com.yaesta.integration.tramaco.dto.DeliveryInfoDTO;
 import com.yaesta.integration.tramaco.dto.GuideDTO;
 import com.yaesta.integration.tramaco.dto.SupplierDTO;
 import com.yaesta.integration.tramaco.service.TramacoService;
 import com.yaesta.integration.vitex.bean.GuideInfoBean;
+import com.yaesta.integration.vitex.bean.InvoiceSchemaBean;
 import com.yaesta.integration.vitex.bean.SupplierDeliveryInfo;
+import com.yaesta.integration.vitex.json.bean.InvoiceResponse;
+import com.yaesta.integration.vitex.json.bean.InvoiceSchema;
 import com.yaesta.integration.vitex.json.bean.ItemComplete;
+import com.yaesta.integration.vitex.json.bean.ItemInvoice;
 import com.yaesta.integration.vitex.json.bean.OrderBean;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
 import com.yaesta.integration.vitex.json.bean.OrderConversation;
@@ -70,7 +79,6 @@ import com.yaesta.integration.vitex.wsdl.dto.OrderDeliveryDTO;
 import com.yaesta.integration.vitex.wsdl.dto.OrderItemDTO;
 import com.yaesta.integration.vitex.wsdl.dto.OrderItemDiscountDTO;
 import com.yaesta.integration.vitex.wsdl.dto.ProductDTO;
-import com.yaesta.integration.vitex.wsdl.vo.GuideVO;
 import com.yaesta.integration.vitex.wsdl.vo.ItemDiscountVO;
 import com.yaesta.integration.vitex.wsdl.vo.OrderDeliveryVO;
 import com.yaesta.integration.vitex.wsdl.vo.OrderItemVO;
@@ -107,6 +115,9 @@ public class OrderVitexService extends BaseVitexService {
 	
 	@Autowired
 	private MailService mailService;
+	
+	@Autowired
+	private DatilService datilService;
 
 	private Client client;
 	private WebTarget target;
@@ -389,6 +400,8 @@ public class OrderVitexService extends BaseVitexService {
 				
 		List<Total> updateTotals = new ArrayList<Total>();
 		BigDecimal totalPrice = new BigDecimal(0);
+		BigDecimal totalDiscounts = new BigDecimal(0);
+		BigDecimal totalShipping = new BigDecimal(0);
 		for (Total total : response.getTotals()) {
 			// System.out.println("====>>>>"+total.getName());
 			if (total.getId().equals("Items")) {
@@ -398,9 +411,11 @@ public class OrderVitexService extends BaseVitexService {
 			} else if (total.getId().equals("Discounts")) {
 				total.setSpanishName("Total Descuentos");
 				totalPrice.subtract(new BigDecimal(total.getValue()));
+				totalDiscounts = new BigDecimal(total.getValue());
 			} else if (total.getId().equals("Shipping")) {
 				total.setSpanishName("Costo de Envio");
 				totalPrice.add(new BigDecimal(total.getValue()));
+				totalShipping = new BigDecimal(total.getValue());
 			} else if (total.getId().equals("Tax")) {
 				total.setSpanishName("Total Impuestos");
 				totalPrice.add(new BigDecimal(total.getValue()));
@@ -409,6 +424,25 @@ public class OrderVitexService extends BaseVitexService {
 		}
 		response.setTotalPrice(totalPrice);
 		response.setTotals(updateTotals);
+		
+		List<ItemComplete> icList = new ArrayList<ItemComplete>();
+		
+		
+		
+		if(response.getItems()!=null && !response.getItems().isEmpty()){
+			
+			BigDecimal partialSellerPrice = totalShipping.divide(new BigDecimal(response.getItems().size()), 2,RoundingMode.CEILING);
+			BigDecimal partialDiscount = totalDiscounts.divide(new BigDecimal(response.getItems().size()), 2, RoundingMode.CEILING);
+			
+			for(ItemComplete ic:response.getItems()){
+				ItemComplete itc = ic;
+				itc.setDiscount(partialDiscount.doubleValue());
+				itc.setSellingPrice(partialSellerPrice.doubleValue());
+				icList.add(itc);
+			}
+			
+			response.setItems(icList);
+		}
 
 		List<SupplierDeliveryInfo> sdiList = buildSupplierDeliveryInfo(response);
 		response.setSupplierDeliveryInfoList(sdiList);
@@ -437,8 +471,9 @@ public class OrderVitexService extends BaseVitexService {
 		if(json!=null){
 			json = json.substring(1,json.length());
 			json = json.substring(0,json.length()-1);
-			//System.out.println("json "+ json);
-			String [] partOne = json.split("\"email\":");
+			System.out.println("json "+ json);
+			String [] partZero = json.split("\"to\":");
+			String [] partOne = partZero[1].split("\"email\":");
 			String [] emailData = partOne[1].split(",");
 			email = emailData[0];
 			email = email.replace("\"", "");
@@ -540,6 +575,8 @@ public class OrderVitexService extends BaseVitexService {
 		
 		OrderComplete orderComplete = guideInfoBean.getOrderComplete();
 		
+		Order order = orderService.findByVitexId(orderComplete.getOrderId());
+		
 		List<SupplierDeliveryInfo> supplierDeliveryInfoList = guideInfoBean.getSupplierDeliveryInfoList();
 		
 		for(SupplierDeliveryInfo sdi:supplierDeliveryInfoList ){
@@ -555,6 +592,7 @@ public class OrderVitexService extends BaseVitexService {
 			supplierDTO.setDeliveryInfo(dif);
 			guideDTO.setSupplierInfo(supplierDTO);
 			guideDTO.setOrderComplete(orderComplete);
+			guideDTO.setCustomerAdditionalInfo(guideInfoBean.getCustomerAdditionalInfo());
 			guideDTO = tramacoService.generateGuide(guideDTO);
 			response.setError(guideDTO.getResponse());
 			response.getErrorList().addAll(guideDTO.getErrorList());
@@ -569,10 +607,15 @@ public class OrderVitexService extends BaseVitexService {
 			guide.setOrderVitexId(orderComplete.getOrderId());
 			guide.setVitexDispatcherId(guideDTO.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getId()+"%"+guideDTO.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getGuia());
 			guide.setGuideInfo(new Gson().toJson(guideDTO));
+			guide.setOrder(order);
 			guideService.saveGuide(guide);
 			guideDTO.setGuide(guide);
 			
 			GuideDTO gDTO=tramacoService.generateGuiaPDF(guideDTO);
+			guide.setStatus("GENERATED");
+			//guide.setGuideInfo(new Gson().toJson(guideDTO));
+			guideService.saveGuide(guide);
+			
 			response.getPdfPathList().add(gDTO.getPdfUrl());
 			
 			responseList.add(gDTO);
@@ -594,6 +637,7 @@ public class OrderVitexService extends BaseVitexService {
 		return response;
 	}
 
+	/*
 	public String generateGuides(OrderComplete orderComplete) {
 
 		String result = "OK";
@@ -645,7 +689,7 @@ public class OrderVitexService extends BaseVitexService {
 
 		return result;
 	}
-
+*/
 	public OrderComplete changeStatus(OrderComplete orderComplete, String action) {
 
 		
@@ -792,5 +836,84 @@ public class OrderVitexService extends BaseVitexService {
 		
 		
 		return mailInfoList;
+	}
+	
+	public MultivaluedMap<String, Object> buildHeaders(){
+	
+		MultivaluedMap<String, Object> myHeaders = new MultivaluedHashMap<String, Object>();
+		myHeaders.add(vitexRestAppkeyName, vitexRestAppkey);
+		myHeaders.add(vitexRestTokenName, vitexRestToken);
+		return myHeaders;
+	}
+	
+	public InvoiceResponse prepareVitexInvoice(OrderComplete orderComplete){
+		InvoiceResponse response = new InvoiceResponse();
+		Order order = orderService.findByVitexId(orderComplete.getOrderId());
+		if(order.getInvoice()!=null){
+			Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+			FacturaRespuestaSRI facturaRespuestaSRI = gson.fromJson(order.getInvoice(),FacturaRespuestaSRI.class);
+		    String trackNumber =  "";
+			List<Guide> guides = guideService.findByOrder(order);
+			if(guides!=null && !guides.isEmpty()){
+			   String vitexDispatcherId = guides.get(0).getVitexDispatcherId();
+			   String[] codes = vitexDispatcherId.split("%");
+			   if(codes.length>0){
+				   trackNumber = codes[1];
+			   }
+			}
+			
+			InvoiceSchemaBean isb = new InvoiceSchemaBean();
+			isb.setOrderComplete(orderComplete);
+			InvoiceSchema is = new InvoiceSchema();
+			is.setType("OUTPUT");
+			is.setTrackingNumber(trackNumber);
+			
+			FacturaConsulta fc = datilService.findInvoice(facturaRespuestaSRI.getId());
+			if(fc!=null){
+		       is.setInvoiceNumber(fc.getAutorizacion().getNumero());
+		       is.setIssuanceDate(fc.getFechaEmision());
+		       is.setCourier("");
+		       is.setInvoiceValue(facturaRespuestaSRI.getTotales().getImporteTotal());
+		       List<ItemInvoice> itemInvoiceList = new ArrayList<ItemInvoice>();
+		       for(ItemComplete ic:orderComplete.getItems()){
+		    	   ItemInvoice ii = new ItemInvoice();
+		    	   ii.setId(ic.getId());
+		    	   ii.setPrice(ic.getPrice());
+		    	   ii.setQuantity(ic.getQuantity());
+		    	   itemInvoiceList.add(ii);
+		       }
+		       is.setItems(itemInvoiceList);
+			}
+			isb.setInvoiceSchema(is);
+		  response = invoiceVitexOrder(isb);
+		}
+		
+		return response;
+	}
+	
+	public InvoiceResponse invoiceVitexOrder(InvoiceSchemaBean invoiceSchemaBean){
+		InvoiceResponse response = new InvoiceResponse();
+		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/" + invoiceSchemaBean.getOrderComplete().getOrderId() + "/invoice";
+		
+		System.out.println("URL" + restUrl);
+		
+		client = ClientBuilder.newClient();
+		target = client.target(restUrl);
+		
+		Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+		
+		String json = gson.toJson(invoiceSchemaBean.getInvoiceSchema());
+		
+		System.out.println("VTEXT INVOICE:"+json);
+		
+		
+		
+		String responseJson = target.request(MediaType.APPLICATION_JSON_TYPE).headers(buildHeaders()).post(Entity.json(json), String.class);
+		
+		System.out.println("==>>"+responseJson);
+		
+		response = gson.fromJson(responseJson, InvoiceResponse.class);
+		
+		return response;
 	}
 }

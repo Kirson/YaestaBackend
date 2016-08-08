@@ -13,10 +13,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yaesta.integration.datil.json.bean.FacturaRespuestaSRI;
+import com.yaesta.integration.datil.json.bean.NotaCreditoRespuesta;
 import com.yaesta.integration.datil.service.DatilService;
 import com.yaesta.integration.tramaco.dto.GuideDTO;
+import com.yaesta.integration.vitex.bean.CreditNoteBean;
 import com.yaesta.integration.vitex.bean.GuideInfoBean;
 import com.yaesta.integration.vitex.bean.OrderCompleteBean;
+import com.yaesta.integration.vitex.json.bean.InvoiceResponse;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
 import com.yaesta.integration.vitex.json.bean.OrderConversation;
 import com.yaesta.integration.vitex.json.bean.OrderSchema;
@@ -146,13 +149,13 @@ public class VitexIntegrationController {
 		GuideInfoBean response = new GuideInfoBean();
 		response = orderVitexService.generateGuides(guideInfoBean);
 		
-		
+		/*
 		for(GuideDTO guide:response.getGuides()){
 			System.out.println("==>" + guide.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().size());
 		    for(EntityGuia eg:guide.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias()){
 		    	response.getGuideIdList().add(eg.getId()+"%"+eg.getGuia());
 		    }
-		}
+		}*/
 		
 		
 		return new ResponseEntity<GuideInfoBean>(response, HttpStatus.OK);
@@ -164,7 +167,25 @@ public class VitexIntegrationController {
 		
 		OrderComplete oc = orderCompleteBean.getOrder();
 		FacturaRespuestaSRI response=datilService.processInvoiceOrder(oc);
+		
+		
 		return new ResponseEntity<FacturaRespuestaSRI>(response, HttpStatus.OK);
 	}
 	
+	@RequestMapping(value = "/invoiceOrderVtex", method = RequestMethod.POST)
+	public ResponseEntity<InvoiceResponse> invoiceOrderVTex(@RequestBody OrderCompleteBean orderCompleteBean) {	  		 		
+		
+		OrderComplete oc = orderCompleteBean.getOrder();
+		InvoiceResponse response=orderVitexService.prepareVitexInvoice(oc);
+		
+		
+		return new ResponseEntity<InvoiceResponse>(response, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/creditNoteOrder", method = RequestMethod.POST)
+	public ResponseEntity<NotaCreditoRespuesta> creditNoteOrder(@RequestBody CreditNoteBean creditNoteBean) {	  		 		
+		
+		NotaCreditoRespuesta response = datilService.processCreditNote(creditNoteBean);
+		return new ResponseEntity<NotaCreditoRespuesta>(response, HttpStatus.OK);
+	}
 }

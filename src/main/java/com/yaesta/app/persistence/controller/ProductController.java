@@ -39,6 +39,7 @@ public class ProductController {
 	    }
 	}
 	
+	
 	@RequestMapping(value = "/getProductFromVitex/{productId}", method = RequestMethod.GET)
 	public  ResponseEntity<Product> getProductFromVitex(@PathVariable("productId")Integer productId){
 		

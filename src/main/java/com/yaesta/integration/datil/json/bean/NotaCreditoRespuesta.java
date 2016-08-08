@@ -22,7 +22,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "informacion_adicional",
     "totales",
     "comprador",
-    "items"
+    "items",
+    "errors"
 })
 public class NotaCreditoRespuesta {
 
@@ -50,7 +51,8 @@ public class NotaCreditoRespuesta {
     private Comprador comprador;
     @JsonProperty("items")
     private List<Item> items = new ArrayList<Item>();
-   
+    @JsonProperty("errors")
+    private List<Error> errors = new ArrayList<Error>();
     /**
      * 
      * @return
@@ -289,6 +291,26 @@ public class NotaCreditoRespuesta {
     @JsonProperty("items")
     public void setItems(List<Item> items) {
         this.items = items;
+    }
+    
+    /**
+     * 
+     * @return
+     *     The errors
+     */
+    @JsonProperty("errors")
+    public List<Error> getErrors() {
+        return errors;
+    }
+
+    /**
+     * 
+     * @param errors
+     *     The errors
+     */
+    @JsonProperty("errors")
+    public void setErrors(List<Error> errors) {
+        this.errors = errors;
     }
 
     

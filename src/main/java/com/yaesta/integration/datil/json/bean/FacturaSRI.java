@@ -22,7 +22,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "items",
     "version",
     "retenciones",
-    "clave_acceso"
+    "clave_acceso",
+    "pagos"
 })
 public class FacturaSRI {
 
@@ -52,6 +53,8 @@ public class FacturaSRI {
     private String claveAcceso;
     @JsonProperty("fecha_emision")
     private String fechaEmision;
+    @JsonProperty("pagos")
+    private List<Pago> pagos = new ArrayList<Pago>();
     
 
     /**
@@ -304,6 +307,16 @@ public class FacturaSRI {
     @JsonProperty("fecha_emision")
 	public void setFechaEmision(String fechaEmision) {
 		this.fechaEmision = fechaEmision;
+	}
+
+    @JsonProperty("pagos")
+	public List<Pago> getPagos() {
+		return pagos;
+	}
+
+    @JsonProperty("pagos")
+	public void setPagos(List<Pago> pagos) {
+		this.pagos = pagos;
 	}
     
     

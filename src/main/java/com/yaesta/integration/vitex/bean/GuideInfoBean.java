@@ -27,12 +27,14 @@ public class GuideInfoBean implements Serializable {
 	private List<String> guideIdList;
 	private List<String> errorList;
 	private List<String> pdfPathList;
+	private String customerAdditionalInfo;
 	
 	public GuideInfoBean(){
 		error="OK";
 		guideIdList = new ArrayList<String>();
 		errorList = new ArrayList<String>();
 		pdfPathList = new ArrayList<String>();
+		customerAdditionalInfo = "";
 	}
 	
 	public OrderComplete getOrderComplete() {
@@ -84,6 +86,14 @@ public class GuideInfoBean implements Serializable {
 
 	public void setPdfPathList(List<String> pdfPathList) {
 		this.pdfPathList = pdfPathList;
+	}
+
+	public String getCustomerAdditionalInfo() {
+		return customerAdditionalInfo;
+	}
+
+	public void setCustomerAdditionalInfo(String customerAdditionalInfo) {
+		this.customerAdditionalInfo = customerAdditionalInfo;
 	}
 	
 	

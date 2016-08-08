@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.yaesta.app.persistence.entity.Supplier;
 import com.yaesta.app.persistence.service.AddressService;
 import com.yaesta.app.persistence.service.SupplierService;
+import com.yaesta.app.persistence.vo.SupplierVO;
 
 @RestController
 @RequestMapping(value = "/supplier")
@@ -45,17 +47,17 @@ public class SupplierController {
 	}
 	
 	@RequestMapping(value = "/create", method = RequestMethod.POST)
-	public ResponseEntity<Supplier> create(Supplier supplier){
+	public ResponseEntity<Supplier> create(@RequestBody SupplierVO supplierVO){
 		
-		Supplier response = supplierService.save(supplier, null);
+		Supplier response = supplierService.save(supplierVO.getSupplier(), null);
 		
 		return new ResponseEntity<Supplier>(response,HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/update", method = RequestMethod.POST)
-	public ResponseEntity<Supplier> update(Supplier supplier){
+	public ResponseEntity<Supplier> update(@RequestBody SupplierVO supplierVO){
 		
-		Supplier response = supplierService.save(supplier, null);
+		Supplier response = supplierService.save(supplierVO.getSupplier(), null);
 		
 		return new ResponseEntity<Supplier>(response,HttpStatus.OK);
 	}

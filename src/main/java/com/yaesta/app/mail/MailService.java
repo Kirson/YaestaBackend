@@ -1,13 +1,10 @@
 package com.yaesta.app.mail;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.mail.internet.InternetAddress;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,18 +19,13 @@ import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
-import com.google.common.collect.Lists;
-
-import it.ozimov.springboot.templating.mail.model.Email;
-import it.ozimov.springboot.templating.mail.model.impl.EmailImpl;
-import it.ozimov.springboot.templating.mail.service.EmailService;
 
 
+
+@SuppressWarnings("deprecation")
 @Service
 public class MailService {
 	
-	@Autowired
-	public EmailService emailService;
 	
 	
 	@Autowired
@@ -82,12 +74,10 @@ public class MailService {
 	        return javaMailSender;
 	    }
 
-	//yaestacom-logo.jpg
-	
 	public void sendMailTemplate(MailInfo mailInfo, String template){
 		
 		MimeMessagePreparator preparator = new MimeMessagePreparator() {
-            public void prepare(javax.mail.internet.MimeMessage mimeMessage) throws Exception {
+          public void prepare(javax.mail.internet.MimeMessage mimeMessage) throws Exception {
                 
             	File logo= new File (mailPathLogoImage);
             	FileSystemResource resLogo = new FileSystemResource(mailPathLogoImage);
@@ -106,11 +96,14 @@ public class MailService {
                 message.addInline("logoYaesta", new FileSystemResource(logo));
                 message.addAttachment(resLogo.getFilename(), resLogo);
                 
-                for(String attachement:mailInfo.getAttachmentList()){
-                	FileSystemResource resAttachement = new FileSystemResource(attachement);
-                	message.addAttachment(resAttachement.getFilename(), resAttachement);
+                if(mailInfo.getAttachmentList()!=null && !mailInfo.getAttachmentList().isEmpty()){
+                	for(String attachement:mailInfo.getAttachmentList()){
+                		if(attachement!=null && !attachement.equals("")){
+                			FileSystemResource resAttachement = new FileSystemResource(attachement);
+                			message.addAttachment(resAttachement.getFilename(), resAttachement);
+                		}
+                	}
                 }
-                
                 Map<String, Object> model = new HashMap<String, Object>();
                 model.put("mailInfo", mailInfo);
                 model.put("cid", "logoYaesta");
@@ -145,16 +138,6 @@ public class MailService {
 		
 	}
 	
-	@Deprecated
-	public void sendEmailWithoutTemplating() throws UnsupportedEncodingException{
-		   final Email email = EmailImpl.builder()
-		        .from(new InternetAddress("cristhian.herrera@gmail.com", "Cristhian Herrera"))
-		        .to(Lists.newArrayList(new InternetAddress("cristhian.herrera@gmail.com", "Kirs Herrera")))
-		        .subject("Laelius de amicitia")
-		        .body("Firmamentum autem stabilitatis constantiaeque eius, quam in amicitia quaerimus, fides est.")
-		        .encoding(Charset.forName("UTF-8")).build();
-
-		   emailService.send(email);
-		}
+	
 	
 }

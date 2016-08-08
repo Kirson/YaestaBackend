@@ -117,6 +117,9 @@ public class ItemComplete implements Serializable{
     private Boolean isGift;
     @JsonProperty("shippingPrice")
     private Double shippingPrice;
+    @JsonProperty("discount")
+    private Double discount;
+    
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -759,8 +762,19 @@ public class ItemComplete implements Serializable{
     public void setShippingPrice(Double shippingPrice) {
         this.shippingPrice = shippingPrice;
     }
+    
+    
+    @JsonProperty("discount")
+    public Double getDiscount() {
+		return discount;
+	}
 
-    @JsonAnyGetter
+    @JsonProperty("discount")
+	public void setDiscount(Double discount) {
+		this.discount = discount;
+	}
+
+	@JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
     }
