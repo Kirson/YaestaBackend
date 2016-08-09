@@ -43,6 +43,10 @@ public class GuideDTO implements Serializable{
 	
 	private String customerAdditionalInfo;
 	
+	private Double deliveryCost;
+	private Double deliveryPayment;
+	private Double itemValue;
+	
 	public GuideDTO(){
 		errorList = new ArrayList<String>();
 	}
@@ -129,6 +133,30 @@ public class GuideDTO implements Serializable{
 
 	public void setCustomerAdditionalInfo(String customerAdditionalInfo) {
 		this.customerAdditionalInfo = customerAdditionalInfo;
+	}
+
+	public Double getDeliveryCost() {
+		return deliveryCost;
+	}
+
+	public void setDeliveryCost(Double deliveryCost) {
+		this.deliveryCost = deliveryCost;
+	}
+
+	public Double getDeliveryPayment() {
+		return deliveryPayment;
+	}
+
+	public void setDeliveryPayment(Double deliveryPayment) {
+		this.deliveryPayment = deliveryPayment;
+	}
+
+	public Double getItemValue() {
+		return itemValue;
+	}
+
+	public void setItemValue(Double itemValue) {
+		this.itemValue = itemValue;
 	}
 	
 	

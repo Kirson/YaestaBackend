@@ -78,6 +78,28 @@ public class Guide implements Serializable{
     @ManyToOne(fetch = FetchType.LAZY)
 	private Order order;
 	
+	@Column(name="latitude")
+	private String latitude;
+	
+	@Column(name="longitude")
+	private String longitude;
+	
+	@Column(name="delivery_cost")
+	private Double deliveryCost;
+	
+	@Column(name="item_value")
+	private Double itemValue;
+	
+	@Column(name="delivery_payment")
+	private Double deliveryPayment;
+	
+	@Column(name="delivery_status")
+	private String deliveryStatus;
+	
+	@JoinColumn(name = "supplier_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+	private Supplier supplier;
+	
 	@Transient
 	private List<GuideDetail> details;
 
@@ -194,6 +216,24 @@ public class Guide implements Serializable{
 	public void setVitexDispatcherId(String vitexDispatcherId) {
 		this.vitexDispatcherId = vitexDispatcherId;
 	}
+	
+	
+
+	public String getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(String latitude) {
+		this.latitude = latitude;
+	}
+
+	public String getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(String longitude) {
+		this.longitude = longitude;
+	}
 
 	public List<GuideDetail> getDetails() {
 		return details;
@@ -201,6 +241,50 @@ public class Guide implements Serializable{
 
 	public void setDetails(List<GuideDetail> details) {
 		this.details = details;
+	}
+	
+	
+
+	public Double getDeliveryCost() {
+		return deliveryCost;
+	}
+
+	public void setDeliveryCost(Double deliveryCost) {
+		this.deliveryCost = deliveryCost;
+	}
+
+	public Double getItemValue() {
+		return itemValue;
+	}
+
+	public void setItemValue(Double itemValue) {
+		this.itemValue = itemValue;
+	}
+
+	public Double getDeliveryPayment() {
+		return deliveryPayment;
+	}
+
+	public void setDeliveryPayment(Double deliveryPayment) {
+		this.deliveryPayment = deliveryPayment;
+	}
+
+	public String getDeliveryStatus() {
+		return deliveryStatus;
+	}
+
+	public void setDeliveryStatus(String deliveryStatus) {
+		this.deliveryStatus = deliveryStatus;
+	}
+	
+	
+
+	public Supplier getSupplier() {
+		return supplier;
+	}
+
+	public void setSupplier(Supplier supplier) {
+		this.supplier = supplier;
 	}
 
 	@Override

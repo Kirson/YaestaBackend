@@ -200,15 +200,26 @@ public class TramacoService implements Serializable{
 			remitente.setEmail(guideInfo.getSupplierInfo().getSupplier().getContactEmail());
 			remitente.setNombres(guideInfo.getSupplierInfo().getSupplier().getContactName());
 			if(guideInfo.getSupplierInfo().getSupplier().getStreetNumber()==null){
-				remitente.setNumero("0000");
+				remitente.setNumero("SN");
 			}else{
 				remitente.setNumero(guideInfo.getSupplierInfo().getSupplier().getStreetNumber());
 			}
-			remitente.setReferencia(guideInfo.getSupplierInfo().getSupplier().getAddressReference());
-			remitente.setTelefono(guideInfo.getSupplierInfo().getSupplier().getPhone());
+			
+			if(guideInfo.getSupplierInfo().getSupplier().getAddressReference()==null){
+				remitente.setReferencia(guideInfo.getSupplierInfo().getSupplier().getAddressReference());
+			}else{
+				remitente.setReferencia("");
+			}
+			if(guideInfo.getSupplierInfo().getSupplier().getPhone()==null){
+				remitente.setTelefono(guideInfo.getSupplierInfo().getSupplier().getPhone());
+			}else{
+				remitente.setTelefono("         ");
+			}
 			remitente.setTipoIden("04");
 			
-			
+			Double deliveryCost = 0D;
+			Double deliveryPayment = 0D;
+			Double itemValue = 0D;
 			Boolean hasAdjunto = false;
 			if(guideInfo.getOrderComplete().getPaymentData().getTransactions()!=null && !guideInfo.getOrderComplete().getPaymentData().getTransactions().isEmpty()){
 				for(Transaction tr:guideInfo.getOrderComplete().getPaymentData().getTransactions()){
@@ -217,6 +228,7 @@ public class TramacoService implements Serializable{
 							if(py.getPaymentSystemName().trim().toLowerCase().equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName().toLowerCase())){
 								hasAdjunto = true; 
 								//System.out.println("Si debe tener adjunto");
+								deliveryPayment = deliveryPayment+py.getValue();
 							}
 						}//fin for
 						
@@ -251,16 +263,20 @@ public class TramacoService implements Serializable{
 					carga.setAncho(0D);
 					carga.setLargo(0D);
 					carga.setPeso(0D);
-					
 				}
 				carga.setBultos(guideInfo.getSupplierInfo().getDeliveryInfo().getPackages().intValue());
-				//carga.setCajas(5);
-				//carga.setCantidadDoc(1);
 				carga.setContrato(tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs().getLstContrato().get(0).getId());
 				carga.setDescripcion(ic.getName());
 				carga.setObservacion(observacionText);
 				carga.setValorAsegurado(ic.getPrice());
-				carga.setValorCobro(ic.getShippingPrice());
+				
+				if(ic.getShippingPrice()!=null){
+					carga.setValorCobro(ic.getShippingPrice());
+					deliveryCost = deliveryCost+ic.getShippingPrice();
+				}else{
+					carga.setValorCobro(0D);
+				}
+				itemValue = itemValue+ic.getPrice();
 				
 				if(hasAdjunto){
 					carga.setAdjuntos(Boolean.TRUE);
@@ -309,9 +325,16 @@ public class TramacoService implements Serializable{
 				destinatario.setEmail(guideInfo.getOrderComplete().getClientProfileData().getEmail());
 				destinatario.setNombres(guideInfo.getOrderComplete().getClientProfileData().getFirstName());
 				destinatario.setNumero(guideInfo.getOrderComplete().getShippingData().getAddress().getNumber());
-				destinatario.setReferencia((String)guideInfo.getOrderComplete().getShippingData().getAddress().getReference());
-				destinatario.setTelefono(guideInfo.getOrderComplete().getClientProfileData().getPhone());
-				
+				if(guideInfo.getOrderComplete().getShippingData().getAddress().getReference()!=null){
+					destinatario.setReferencia(guideInfo.getOrderComplete().getShippingData().getAddress().getReference());
+				}else{
+					destinatario.setReferencia("");
+				}
+				if(guideInfo.getOrderComplete().getClientProfileData().getPhone()!=null){
+					destinatario.setTelefono(guideInfo.getOrderComplete().getClientProfileData().getPhone());
+				}else{
+					destinatario.setTelefono("         ");
+				}
 				entCargaDestino.setDestinatario(destinatario);
 				//*************//
 				List<EntityServicio> lstServicio = new ArrayList<>();
@@ -356,6 +379,9 @@ public class TramacoService implements Serializable{
 				}
 				guideInfo.setGuideResponse(respuestaGenerarGuiaWs);
 				guideInfo.getGuideResponse().setSalidaGenerarGuiaWs(respuestaGenerarGuiaWs.getSalidaGenerarGuiaWs());
+				guideInfo.setDeliveryCost(deliveryCost);
+				guideInfo.setDeliveryPayment(deliveryPayment);
+				guideInfo.setItemValue(itemValue);
 			}
 			
 			}else{

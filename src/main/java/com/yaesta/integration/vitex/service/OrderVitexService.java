@@ -608,6 +608,11 @@ public class OrderVitexService extends BaseVitexService {
 			guide.setVitexDispatcherId(guideDTO.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getId()+"%"+guideDTO.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getGuia());
 			guide.setGuideInfo(new Gson().toJson(guideDTO));
 			guide.setOrder(order);
+			guide.setDeliveryCost(guideDTO.getDeliveryCost());
+			guide.setDeliveryPayment(guideDTO.getDeliveryPayment());
+			guide.setItemValue(guideDTO.getItemValue());
+			guide.setDeliveryStatus("GENERATED");
+			guide.setSupplier(sdi.getSupplier());
 			guideService.saveGuide(guide);
 			guideDTO.setGuide(guide);
 			
