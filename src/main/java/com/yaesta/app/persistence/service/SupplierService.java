@@ -9,18 +9,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yaesta.app.util.Constants;
+import com.google.gson.Gson;
 import com.yaesta.app.persistence.entity.Address;
+import com.yaesta.app.persistence.entity.Proveedor;
 import com.yaesta.app.persistence.entity.Supplier;
 import com.yaesta.app.persistence.entity.SupplierContact;
 import com.yaesta.app.persistence.entity.SupplierDeliveryCalendar;
 import com.yaesta.app.persistence.entity.TramacoSupplier;
 import com.yaesta.app.persistence.entity.TramacoZone;
 import com.yaesta.app.persistence.repository.AddressRepository;
+import com.yaesta.app.persistence.repository.ProveedorRepository;
 import com.yaesta.app.persistence.repository.SupplierContactRepository;
 import com.yaesta.app.persistence.repository.SupplierDeliveryCalendarRepository;
 import com.yaesta.app.persistence.repository.SupplierRepository;
 import com.yaesta.app.persistence.repository.TramacoSupplierRepository;
 import com.yaesta.app.persistence.repository.TramacoZoneRepository;
+import com.yaesta.app.persistence.util.ContactInfoUtil;
+import com.yaesta.app.persistence.vo.ContactInfoVO;
 
 
 @Service
@@ -48,6 +53,9 @@ public class SupplierService implements Serializable {
 	
 	@Autowired
 	private TramacoZoneRepository tramacoZoneRepository;
+	
+	@Autowired
+	private ProveedorRepository proveedorRepository;
 	
 	@Transactional
 	public Supplier save(Supplier entity, List<SupplierDeliveryCalendar> deliveryCalendar){
@@ -77,6 +85,82 @@ public class SupplierService implements Serializable {
 	public List<Supplier> getSuppliers(){
 		return supplierRepository.findAll();
 	}
+	
+	
+	
+	@Transactional
+	public String updateSupplier(){
+		String response = "OK";
+		
+		try{
+			List<Proveedor> proveedores = proveedorRepository.findAll();
+			int count = 0;
+			
+			for(Proveedor proveedor:proveedores){
+				Boolean found = false;
+				Supplier updSupplier = supplierRepository.findOne(proveedor.getCodigo());
+				
+				
+				
+				ContactInfoVO contactInfo = ContactInfoUtil.extractContactInfoFromSupplier(proveedor);
+				
+				if(updSupplier==null){
+				
+					updSupplier = new Supplier();
+					
+					System.out.println("NO Encuentra "+proveedor.getNombreProveedor() +" "+ proveedor.getCodigo());
+				}else{
+					count++;
+					found=true;
+					System.out.println("Encuentra "+updSupplier.getName() +" "+ updSupplier.getId());
+				}
+				
+				updSupplier.setName(proveedor.getNombreProveedor());
+				updSupplier.setAddress(proveedor.getDireccion());
+				updSupplier.setStreetMain(proveedor.getDireccion());
+				updSupplier.setProvince(proveedor.getProvincia());
+				updSupplier.setCanton(proveedor.getCanton());
+				updSupplier.setDeliveryManager(proveedor.getGestorEntrega());
+				updSupplier.setOfficeHours(proveedor.getHorarioAtencion());
+				updSupplier.setZone(proveedor.getZona());
+				updSupplier.setPostalCode(proveedor.getZona().getCodigo()+"");
+				updSupplier.setFound(found);
+				if(contactInfo.getPrincipalEmail()!=null){
+				updSupplier.setContactEmail(contactInfo.getPrincipalEmail().getEmail());
+				}
+				updSupplier.setContactName(contactInfo.getPrincipalContact().getFirstName());
+				updSupplier.setContactLastName(contactInfo.getPrincipalContact().getLastName());
+				if(contactInfo.getPrincipalPhone()!=null){
+				updSupplier.setPhone(contactInfo.getPrincipalPhone().getPhone());
+				}
+				Gson gson = new Gson();
+				if(!contactInfo.getPhoneList().isEmpty()){
+					String phoneList = gson.toJson(contactInfo.getPhoneList());
+					updSupplier.setPhoneList(phoneList);
+				}
+				if(!contactInfo.getContactList().isEmpty()){
+					String contactList = gson.toJson(contactInfo.getContactList());
+					updSupplier.setContactList(contactList);
+				}
+				if(!contactInfo.getEmailList().isEmpty()){
+					String emailList = gson.toJson(contactInfo.getEmailList());
+					updSupplier.setEmailList(emailList);
+				}
+				
+				supplierRepository.save(updSupplier);
+			}
+			
+			
+			System.out.println("Encontrados "+count);
+			
+		}catch(Exception e){
+			System.out.println("Error en "+e.getMessage());
+			e.printStackTrace();
+		}
+		
+		return response;
+	}
+	
 	
 	@Transactional
 	public String updateSupplierFromAddress(){

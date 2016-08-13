@@ -18,12 +18,15 @@
 		<div id="Product">
             <table>
               <tr>
+                <td><b>Proveedor</b></td>
               	<td><b>Producto</b></td>
               	<td><b>Codigo</b></td>
               	<td><b>Nombre</b></td>
               </tr>
               #foreach( $item in $mailInfo.itemInfoList )
     				<tr>
+    					<td>$item.supplierName	
+    					</td>
     					<td>
     					   <img src='$item.url'>	
     					</td>

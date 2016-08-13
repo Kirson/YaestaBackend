@@ -22,7 +22,7 @@ import org.springframework.ui.velocity.VelocityEngineUtils;
 
 
 
-@SuppressWarnings("deprecation")
+
 @Service
 public class MailService {
 	

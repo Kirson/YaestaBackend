@@ -64,7 +64,7 @@ public class DatilIntegrationController {
 	public NotaCreditoRespuesta testNotaCredito(){
 		
 		String orderId = "650141505758-01";
-		Order order = orderService.findByVitexId(orderId);
+		//Order order = orderService.findByVitexId(orderId);
 		
 		OrderComplete oc = orderVitexService.getOrderComplete(orderId);
 		

@@ -176,9 +176,16 @@ public class DatilService implements Serializable{
 		
 		for(ItemComplete ic:orderComplete.getItems()){
 			Item it = new Item();
-			it.setCantidad(ic.getQuantity().doubleValue());
-			it.setPrecioTotalSinImpuestos(ic.getListPrice());
-			it.setPrecioUnitario(ic.getListPrice());
+			Double quantity = 1D;
+			
+			if(ic.getQuantity()!=null){
+				quantity = ic.getQuantity().doubleValue();
+			}
+			it.setCantidad(quantity);
+			Double itemPrice = ic.getPrice() * quantity;
+			itemPrice = (double) Math.round(itemPrice * 100) / 100;
+			it.setPrecioTotalSinImpuestos(itemPrice);
+			it.setPrecioUnitario(ic.getPrice());
 			it.setDescripcion(ic.getName());
 			it.setCodigoPrincipal(ic.getProductId());
 			
@@ -208,7 +215,7 @@ public class DatilService implements Serializable{
 			}
 			iva.setCodigo(datilIvaCode);
 			iva.setCodigoPorcentaje(datilIvaCodePercent);
-			iva.setBaseImponible(ic.getListPrice());
+			iva.setBaseImponible(itemPrice);
 			iva.setTarifa(new Double(datilIvaValue));
 			
 			List<Impuesto_> impuestos = new ArrayList<Impuesto_>();
@@ -305,11 +312,16 @@ public class DatilService implements Serializable{
 					for(Payment py:tr.getPayments()){
 						Pago pago = new Pago();
 						pago.setTotal(py.getValue());
+						
+						System.out.println("SystemPaymentname "+py.getPaymentSystemName());
 						if(py.getPaymentSystemName().equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName())){
 							pago.setMedio(PagoEnum.EFECTIVO.getCodigoDatil());
 						}else if(py.getPaymentSystemName().equals(PaymentEnum.SAFETYPAY.getPaymentSystemName())){
 							pago.setMedio(PagoEnum.TRANSFER_OTRO_BANCO.getCodigoDatil());
-						}else if(py.getPaymentSystemName().equals(PaymentEnum.PAYCLUB.getPaymentSystemName())){
+						}else if(py.getPaymentSystemName().equals(PaymentEnum.TRANSFERENCIA_BANCARIA_OTRAS_ENTIDADES.getPaymentSystemName())){
+							pago.setMedio(PagoEnum.TRANSFER_OTRO_BANCO.getCodigoDatil());
+						}
+						else if(py.getPaymentSystemName().equals(PaymentEnum.PAYCLUB.getPaymentSystemName())){
 							pago.setMedio(PagoEnum.TARJETA_CREDITO_NACIONAL.getCodigoDatil());
 						}else if(py.getPaymentSystemName().equals(PaymentEnum.TARJETA_ALIA.getPaymentSystemName())){
 							pago.setMedio(PagoEnum.TARJETA_CREDITO_NACIONAL.getCodigoDatil());
@@ -320,6 +332,7 @@ public class DatilService implements Serializable{
 							pago.setMedio(PagoEnum.TARJETA_CREDITO_INTERNACIONAL.getCodigoDatil());
 						}
 						
+						System.out.println("Medio " +pago.getMedio());
 						pagos.add(pago);
 					}//fin for
 					
@@ -413,9 +426,18 @@ public class DatilService implements Serializable{
 		
 		for(ItemComplete ic:creditNoteBean.getOrderComplete().getItems()){
 			Item it = new Item();
-			it.setCantidad(ic.getQuantity().doubleValue());
-			it.setPrecioTotalSinImpuestos(ic.getListPrice());
-			it.setPrecioUnitario(ic.getListPrice());
+			
+			Double quantity = 1D;
+			
+			if(ic.getQuantity()!=null){
+				quantity = ic.getQuantity().doubleValue();
+			}
+			it.setCantidad(quantity);
+			Double itemPrice = ic.getPrice() * quantity;
+			itemPrice = (double) Math.round(itemPrice * 100) / 100;
+			
+			it.setPrecioTotalSinImpuestos(itemPrice);
+			it.setPrecioUnitario(ic.getPrice());
 			it.setDescripcion(ic.getName());
 			it.setCodigoPrincipal(ic.getProductId());
 			
@@ -445,7 +467,7 @@ public class DatilService implements Serializable{
 			}
 			iva.setCodigo(datilIvaCode);
 			iva.setCodigoPorcentaje(datilIvaCodePercent);
-			iva.setBaseImponible(ic.getListPrice());
+			iva.setBaseImponible(itemPrice);
 			iva.setTarifa(new Double(datilIvaValue));
 			
 			List<Impuesto_> impuestos = new ArrayList<Impuesto_>();

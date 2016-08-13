@@ -125,6 +125,8 @@ public class OrderVitexService extends BaseVitexService {
 	private @Value("${mail.smtp.from}") String mailFrom;
 	private @Value("${mail.smtp.to}") String mailTo;
 	private @Value("${mail.smtp.to.name}") String mailToName;
+	private @Value("${mail.smtp.cc}") String mailCc;
+	private @Value("${mail.smtp.cc.name}") String mailCcName;
 	private @Value("${mail.text.guide}") String mailTextGuide;
 	private @Value("${mail.text.guide.2}") String mailTextGuide2;
 	private @Value("${mail.text.guide.3}") String mailTextGuide3;
@@ -773,7 +775,11 @@ public class OrderVitexService extends BaseVitexService {
 			mailInfo.setMailReceiver(receiver);
 			
 			List<MailParticipant> receiverTotal = new ArrayList<MailParticipant>();
-				
+			
+			MailParticipant mpCc = new MailParticipant();
+			mpCc.setEmail(mailCc);
+			mpCc.setName(mailCcName);
+			receiverTotal.add(mpCc);
 			
 			
 			List<MailParticipant> recSupplierList = new ArrayList<MailParticipant>();
@@ -795,17 +801,15 @@ public class OrderVitexService extends BaseVitexService {
 				mp.setName(supplier.getName());
 				recSupplierList.add(mp);
 			}
-			//Test Only
-			/*
-			MailParticipant mp = new MailParticipant();
-			mp.setEmail("Cristhian.Herrera@gmail.com");
-			mp.setName("Kirs Herrera");
-			recSupplierList.add(mp);
-			*/
+			
+			
+			
+			
 			List<ItemComplete> icSupplierList = sdi.getItems();
 			if(icSupplierList!=null && !icSupplierList.isEmpty()){
 				for(ItemComplete ic:icSupplierList){
 					ItemInfo iInfo = new ItemInfo();
+					iInfo.setSupplierName(sdi.getSupplier().getName());
 					iInfo.setName(ic.getName());
 					iInfo.setPrice(ic.getPrice());
 					iInfo.setUrl(ic.getImageUrl());

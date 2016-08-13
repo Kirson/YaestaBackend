@@ -94,6 +94,38 @@ public class Supplier implements Serializable{
     @ManyToOne(fetch = FetchType.LAZY)
 	private Catalog country;
 	
+	@org.hibernate.annotations.Type(type="com.yaesta.app.persistence.util.SQLXMLType")
+	@Column(name="phone_list")
+	private String phoneList;
+	
+	@org.hibernate.annotations.Type(type="com.yaesta.app.persistence.util.SQLXMLType")
+	@Column(name="email_list")
+	private String emailList;
+	
+	@org.hibernate.annotations.Type(type="com.yaesta.app.persistence.util.SQLXMLType")
+	@Column(name="contact_list")
+	private String contactList;
+	
+	@Column(name="province")
+	private String province;
+	
+	@Column(name="canton")
+	private String canton;
+	
+	@Column(name="delivery_manager")
+	private String deliveryManager;
+	
+	@Column(name="office_hours")
+	private String officeHours;
+	
+	@JoinColumn(name = "tramaco_zone", referencedColumnName = "codigo")
+    @ManyToOne(fetch = FetchType.LAZY)
+	private TramacoZone zone;
+	
+	@Column(name="found")
+	private Boolean found;
+	
+	
 	@Transient
 	private String shippingAddress;
 
@@ -262,6 +294,81 @@ public class Supplier implements Serializable{
 	}
 	
 	
+	
+
+	public String getPhoneList() {
+		return phoneList;
+	}
+
+	public void setPhoneList(String phoneList) {
+		this.phoneList = phoneList;
+	}
+
+	public String getEmailList() {
+		return emailList;
+	}
+
+	public void setEmailList(String emailList) {
+		this.emailList = emailList;
+	}
+
+	public String getContactList() {
+		return contactList;
+	}
+
+	public void setContactList(String contactList) {
+		this.contactList = contactList;
+	}
+
+	public String getProvince() {
+		return province;
+	}
+
+	public void setProvince(String province) {
+		this.province = province;
+	}
+
+	public String getCanton() {
+		return canton;
+	}
+
+	public void setCanton(String canton) {
+		this.canton = canton;
+	}
+
+	public String getDeliveryManager() {
+		return deliveryManager;
+	}
+
+	public void setDeliveryManager(String deliveryManager) {
+		this.deliveryManager = deliveryManager;
+	}
+
+	public String getOfficeHours() {
+		return officeHours;
+	}
+
+	public void setOfficeHours(String officeHours) {
+		this.officeHours = officeHours;
+	}
+
+	public TramacoZone getZone() {
+		return zone;
+	}
+
+	public void setZone(TramacoZone zone) {
+		this.zone = zone;
+	}
+	
+	
+
+	public Boolean getFound() {
+		return found;
+	}
+
+	public void setFound(Boolean found) {
+		this.found = found;
+	}
 
 	public String getShippingAddress() {
 		

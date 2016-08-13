@@ -8,6 +8,7 @@ public class ItemInfo implements Serializable{
 	 * Serial version
 	 */
 	private static final long serialVersionUID = 4937448085916455345L;
+	private String supplierName;
 	private String name;
 	private Double price;
 	private String url;
@@ -36,6 +37,12 @@ public class ItemInfo implements Serializable{
 	}
 	public void setRefCode(String refCode) {
 		this.refCode = refCode;
+	}
+	public String getSupplierName() {
+		return supplierName;
+	}
+	public void setSupplierName(String supplierName) {
+		this.supplierName = supplierName;
 	}
 	
 	

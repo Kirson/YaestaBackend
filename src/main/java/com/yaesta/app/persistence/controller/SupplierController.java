@@ -46,6 +46,14 @@ public class SupplierController {
 		return new ResponseEntity<String>(response, HttpStatus.OK);
 	}
 	
+	@RequestMapping(value = "/updateSupplier", method = RequestMethod.GET)
+	public ResponseEntity<String> updateSupplier(){
+		
+		String response= supplierService.updateSupplier();
+		
+		return new ResponseEntity<String>(response, HttpStatus.OK);
+	}
+	
 	@RequestMapping(value = "/create", method = RequestMethod.POST)
 	public ResponseEntity<Supplier> create(@RequestBody SupplierVO supplierVO){
 		
