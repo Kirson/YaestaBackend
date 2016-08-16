@@ -15,6 +15,7 @@ import com.yaesta.integration.datil.json.bean.FacturaRespuestaSRI;
 import com.yaesta.integration.datil.json.bean.NotaCreditoRespuesta;
 import com.yaesta.integration.datil.service.DatilService;
 import com.yaesta.integration.vitex.bean.CreditNoteBean;
+import com.yaesta.integration.vitex.bean.WayBillSchema;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
 import com.yaesta.integration.vitex.service.OrderVitexService;
 
@@ -75,6 +76,14 @@ public class DatilIntegrationController {
 		NotaCreditoRespuesta ncr =datilService.processCreditNote(cnb);
 		
 		return ncr;
+	}
+	
+	@RequestMapping(value = "/testGuiaRemision/", method = RequestMethod.POST)
+	public WayBillSchema testGuiaRemision(){
+		
+		OrderComplete oc = orderVitexService.getOrderComplete("648410909096-01");
+		
+		return datilService.processWayBill(oc);
 	}
 	
 }

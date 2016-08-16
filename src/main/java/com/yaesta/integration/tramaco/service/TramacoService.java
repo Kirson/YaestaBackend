@@ -561,7 +561,9 @@ public class TramacoService implements Serializable{
 				destinatario.setTipoIden("05");
 				
 				if(guideInfo.getOrderComplete().getShippingData().getAddress().getCity()!=null){
-					List<TramacoZone> zones = tramacoZoneRepository.findByProvinciaAndCanton(guideInfo.getOrderComplete().getShippingData().getAddress().getState().toUpperCase(), guideInfo.getOrderComplete().getShippingData().getAddress().getCity().toUpperCase());
+					String province =guideInfo.getOrderComplete().getShippingData().getAddress().getState().toUpperCase();
+					String canton = guideInfo.getOrderComplete().getShippingData().getAddress().getCity().toUpperCase();
+					List<TramacoZone> zones = tramacoZoneRepository.findByProvinciaAndCantonAndParroquia(province, canton, canton);
 					if(zones!=null && !zones.isEmpty()){
 						destinatario.setCodigoPostal(zones.get(0).getCodigo().intValue());
 					}

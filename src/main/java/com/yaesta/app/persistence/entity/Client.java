@@ -88,7 +88,7 @@ public class Client implements Serializable {
 	@Column(name = "vitex_id")
 	private String vitexId;
 	
-	@Column(name = "warehuse_code")
+	@Column(name = "warehouse_code")
 	private String warehouseCode;
 	
 	@Column(name = "client_name")
@@ -96,6 +96,24 @@ public class Client implements Serializable {
 	
 	@Column(name = "postal_code")
 	private String postalCode;
+	
+	@Column(name = "is_new")
+	private String isNew;
+	
+	@Column(name = "geo_zone")
+	private String geoZone;
+	
+	@Column(name = "province")
+	private String province;
+	
+	@Column(name = "canton")
+	private String canton;
+	
+	@Column(name = "last_payment_method")
+	private String lastPaymentMethod;
+	
+	@Column(name = "use_credit_card")
+	private Boolean useCreditCard;
 
 	public Long getId() {
 		return id;
@@ -283,6 +301,59 @@ public class Client implements Serializable {
 
 	public void setPostalCode(String postalCode) {
 		this.postalCode = postalCode;
+	}
+	
+
+	public String getGeoZone() {
+		return geoZone;
+	}
+
+	public void setGeoZone(String geoZone) {
+		this.geoZone = geoZone;
+	}
+
+	public String getIsNew() {
+		return isNew;
+	}
+
+	public void setIsNew(String isNew) {
+		this.isNew = isNew;
+	}
+
+	public String getProvince() {
+		return province;
+	}
+
+	public void setProvince(String province) {
+		this.province = province;
+	}
+
+	public String getCanton() {
+		return canton;
+	}
+
+	public void setCanton(String canton) {
+		this.canton = canton;
+	}
+	
+	
+
+	public String getLastPaymentMethod() {
+		return lastPaymentMethod;
+	}
+
+	public void setLastPaymentMethod(String lastPaymentMethod) {
+		this.lastPaymentMethod = lastPaymentMethod;
+	}
+	
+	
+
+	public Boolean getUseCreditCard() {
+		return useCreditCard;
+	}
+
+	public void setUseCreditCard(Boolean useCreditCard) {
+		this.useCreditCard = useCreditCard;
 	}
 
 	@Override

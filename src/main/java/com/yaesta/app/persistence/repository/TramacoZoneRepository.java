@@ -13,4 +13,5 @@ public interface TramacoZoneRepository extends JpaRepository<TramacoZone, Long> 
 	public List<TramacoZone> findByCanton(String canton);
 	public List<TramacoZone> findByProvincia(String provincia);
 	public List<TramacoZone> findByProvinciaAndCanton(String provincia,String canton);
+	public List<TramacoZone> findByProvinciaAndCantonAndParroquia(String provincia,String canton, String parroquia);
 }

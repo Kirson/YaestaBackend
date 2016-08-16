@@ -25,27 +25,38 @@ import org.springframework.stereotype.Service;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.yaesta.app.persistence.entity.Guide;
 import com.yaesta.app.persistence.entity.Order;
+import com.yaesta.app.persistence.service.GuideService;
 import com.yaesta.app.persistence.service.OrderService;
 import com.yaesta.app.persistence.service.TableSequenceService;
 import com.yaesta.app.util.UtilDate;
 import com.yaesta.integration.datil.json.bean.Comprador;
+import com.yaesta.integration.datil.json.bean.Destinatario;
+import com.yaesta.integration.datil.json.bean.DetallesAdicionales;
 import com.yaesta.integration.datil.json.bean.Emisor;
 import com.yaesta.integration.datil.json.bean.Establecimiento;
 import com.yaesta.integration.datil.json.bean.FacturaConsulta;
 import com.yaesta.integration.datil.json.bean.FacturaRespuestaSRI;
 import com.yaesta.integration.datil.json.bean.FacturaSRI;
+import com.yaesta.integration.datil.json.bean.GuiaRemision;
+import com.yaesta.integration.datil.json.bean.GuiaRemisionRespuesta;
 import com.yaesta.integration.datil.json.bean.Impuesto;
 import com.yaesta.integration.datil.json.bean.Impuesto_;
+import com.yaesta.integration.datil.json.bean.InformacionAdicional;
 import com.yaesta.integration.datil.json.bean.Item;
+import com.yaesta.integration.datil.json.bean.ItemGuiaRemision;
 import com.yaesta.integration.datil.json.bean.NotaCredito;
 import com.yaesta.integration.datil.json.bean.NotaCreditoRespuesta;
 import com.yaesta.integration.datil.json.bean.Pago;
 import com.yaesta.integration.datil.json.bean.ResponseError;
 import com.yaesta.integration.datil.json.bean.Totales;
+import com.yaesta.integration.datil.json.bean.Transportista;
 import com.yaesta.integration.datil.json.enums.PagoEnum;
 import com.yaesta.integration.datil.json.enums.TipoDocumentoEnum;
 import com.yaesta.integration.vitex.bean.CreditNoteBean;
+import com.yaesta.integration.vitex.bean.SupplierDeliveryInfo;
+import com.yaesta.integration.vitex.bean.WayBillSchema;
 import com.yaesta.integration.vitex.json.bean.ItemComplete;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
 import com.yaesta.integration.vitex.json.bean.Payment;
@@ -70,7 +81,11 @@ public class DatilService implements Serializable{
 	
 	@Autowired
 	OrderService orderService;
+	
+	@Autowired
+	GuideService guideService;
 
+	private @Value("${mail.smtp.to}") String mailSmtpTo;
 	private @Value("${datil.api.key}") String datilApiKey;
 	private @Value("${datil.webservice.url}") String datilWebServiceUrl;
 	private @Value("${datil.webhook.url}") String datilWebhookUrl;
@@ -90,11 +105,20 @@ public class DatilService implements Serializable{
 	private @Value("${datil.iva.code}") String datilIvaCode;
 	private @Value("${datil.iva.code.percent}") String datilIvaCodePercent;
 	private @Value("${datil.transport.code}") String datilTransportCode;
+	private @Value("${datil.carrier.name}") String datilCarrierName;
+	private @Value("${datil.carrier.document}") String datilCarrierDocument;
+	private @Value("${datil.carrier.contact}") String datilCarrierContact;
+	private @Value("${datil.carrier.phone}") String datilCarrierPhone;
+	private @Value("${datil.carrier.email}") String datilCarrierEmail;
+	private @Value("${datil.carrier.address}") String datilCarrierAddress;
+	private @Value("${datil.carrier.license.plate}") String datilCarrierLicensePlate;
+	private @Value("${datil.carrier.motive}") String datilCarrierMotive;
+	private @Value("${datil.carrier.route}") String datilCarrierRoute;
 
 	
 	private Client client;
 	private WebTarget target;
-	
+
 	private FacturaRespuestaSRI invoice(FacturaSRI input){
 		FacturaRespuestaSRI response = new FacturaRespuestaSRI();
 		
@@ -110,18 +134,32 @@ public class DatilService implements Serializable{
 		String json = gson.toJson(input);
 		
 		System.out.println("Factura:"+json);
-		
-		
-		
 		String responseJson = target.request(MediaType.APPLICATION_JSON_TYPE).headers(buildHeaders()).post(Entity.json(json), String.class);
-		
 		System.out.println("==>>"+responseJson);
 		
 		response = gson.fromJson(responseJson, FacturaRespuestaSRI.class);
-		
+		return response;
+	}
 	
+	private GuiaRemisionRespuesta waybill(GuiaRemision input){
+		GuiaRemisionRespuesta response = new GuiaRemisionRespuesta();
 		
+		String restUrl = datilWebServiceUrl + "/waybills/issue";
 		
+		System.out.println("URL" + restUrl);
+		
+		client = ClientBuilder.newClient();
+		target = client.target(restUrl);
+		
+		Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+		
+		String json = gson.toJson(input);
+		
+		System.out.println("Guia de Remision:"+json);
+		String responseJson = target.request(MediaType.APPLICATION_JSON_TYPE).headers(buildHeaders()).post(Entity.json(json), String.class);
+		System.out.println("==>>"+responseJson);
+		
+		response = gson.fromJson(responseJson, GuiaRemisionRespuesta.class);
 		return response;
 	}
 	
@@ -396,14 +434,9 @@ public class DatilService implements Serializable{
 	
 		System.out.println("Obtiene factura "+fr.getId());
 		
-		//FacturaConsulta fc = findInvoice(fr.getId());
-		//if(creditNoteBean.getInvoiceNumber()==null){
-			creditNoteBean.setInvoiceNumber(formatInvoiceNumber(fr.getSecuencial()+""));
-		//}
-		//if(creditNoteBean.getInvoiceDate()==null){
-			//creditNoteBean.setInvoiceDate(fc.getAutorizacion().getFecha());
-			creditNoteBean.setInvoiceDate(fr.getFechaEmision());
-		//}
+		creditNoteBean.setInvoiceNumber(formatInvoiceNumber(fr.getSecuencial()+""));
+		creditNoteBean.setInvoiceDate(fr.getFechaEmision());
+		
 		NotaCredito notaCredito = new NotaCredito();
 		
 		notaCredito.setAmbiente(new Integer(datilEnviromentType).intValue());
@@ -588,6 +621,19 @@ public class DatilService implements Serializable{
 		return emisor;
 	}
 	
+	private Transportista loadCarrier(){
+		Transportista carrier = new Transportista();
+		carrier.setTipoIdentificacion(determineDocumentType(datilCarrierDocument));
+		carrier.setRazonSocial(datilCarrierName + " " + datilCarrierContact);
+		carrier.setEmail(datilCarrierEmail);
+		carrier.setDireccion(datilCarrierAddress);
+		carrier.setIdentificacion(datilCarrierDocument);
+		carrier.setPlaca(datilCarrierLicensePlate);
+		carrier.setTelefono(datilCarrierPhone);
+		
+		return carrier;
+	}
+	
 	private Comprador loadComprador(OrderComplete orderComplete){
 		Comprador comprador = new Comprador();
 		comprador.setEmail(orderComplete.getClientProfileData().getEmail());
@@ -611,7 +657,34 @@ public class DatilService implements Serializable{
 	}
 	
 	
-	
+	private Destinatario loadAddressee(OrderComplete orderComplete){
+		
+		Destinatario addressee = new Destinatario();
+		addressee.setDocumentoAduaneroUnico("");
+		String [] authNumber = orderComplete.getOrderId().split("-");
+		addressee.setNumeroAutorizacionDocumentoSustento(authNumber[0]);
+		addressee.setIdentificacion(orderComplete.getClientProfileData().getDocument());
+		addressee.setEmail(orderComplete.getClientProfileData().getEmail());
+		addressee.setRazonSocial(orderComplete.getCustomerName());
+		addressee.setTipoIdentificacion(determineDocumentType(orderComplete.getClientProfileData().getDocument()));
+		addressee.setTelefono(orderComplete.getClientProfileData().getPhone());
+		String direccion = "";
+		if(orderComplete.getShippingData()!=null){
+			direccion = direccion+ orderComplete.getShippingData().getAddress().getCountry();
+			direccion = direccion+ " - " + orderComplete.getShippingData().getAddress().getState();
+			direccion = direccion+ " - " + orderComplete.getShippingData().getAddress().getCity();
+			direccion = direccion+ " : " + orderComplete.getShippingData().getAddress().getStreet();
+			direccion = direccion+ " - " + orderComplete.getShippingData().getAddress().getNumber();
+			direccion = direccion+ " - " + orderComplete.getShippingData().getAddress().getComplement();
+		}
+		addressee.setDireccion(direccion);
+		addressee.setCodigoEstablecimientoDestino(datilEstablishmentCode);
+		addressee.setMotivoTraslado(datilCarrierMotive);
+		addressee.setRuta(datilCarrierRoute);
+		
+		
+		return addressee;
+	}
 	
 	
 	private String determineDocumentType(String document){
@@ -658,6 +731,92 @@ public class DatilService implements Serializable{
 		
 		String invoiceNumber = datilEstablishmentCode + "-" + datilEmissionCode+ "-" + sequencePart;
 		return invoiceNumber;
+	}
+	
+	
+public WayBillSchema processWayBill(OrderComplete orderComplete){
+		
+	WayBillSchema response = new WayBillSchema();
+	
+	for(SupplierDeliveryInfo sdi:orderComplete.getSupplierDeliveryInfoList()){
+	
+		GuiaRemision guiaRemision = new GuiaRemision();
+		InformacionAdicional informacionAdicional = new InformacionAdicional();
+		
+		//Preparar informacion de la Guia de Remision
+		guiaRemision.setSecuencial(tableSequenceService.getNextValue("SEQ_WAY_BILL").intValue());
+		guiaRemision.setTipoEmision(new Integer(datilEmissionType).intValue());
+		guiaRemision.setAmbiente(new Integer(datilEnviromentType).intValue());
+		guiaRemision.setFechaInicioTransporte(UtilDate.formatDateISO(new Date()));
+		guiaRemision.setFechaFinTransporte(UtilDate.formatDateISO(new Date()));
+		guiaRemision.setEmisor(loadEmisorInfo());
+		guiaRemision.setTransportista(loadCarrier());
+		guiaRemision.setDireccionPartida("[Proveedor:"+sdi.getSupplier().getName()+"] [Dir: " +sdi.getSupplier().getAddress()+ "] [Tel:"+sdi.getSupplier().getPhone() + "] [email:"+sdi.getSupplier().getContactEmail()+"]");
+		List<Destinatario> destinatarios = new ArrayList<Destinatario>();
+		Destinatario destinatario = loadAddressee(orderComplete);
+		informacionAdicional.setValorACobrar(0D);
+		
+		if(orderComplete.getPaymentData().getTransactions()!=null && !orderComplete.getPaymentData().getTransactions().isEmpty()){
+			for(Transaction tr:orderComplete.getPaymentData().getTransactions()){
+				if(tr.getPayments()!=null && !tr.getPayments().isEmpty()){
+					for(Payment py:tr.getPayments()){
+						informacionAdicional.setFormaPago(py.getPaymentSystemName());
+						System.out.println("SystemPaymentname "+py.getPaymentSystemName());
+						if(py.getPaymentSystemName().equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName())){
+							informacionAdicional.setValorACobrar(orderComplete.getValue().doubleValue());
+						}
+						
+					}//fin for
+				}//
+			}//fin for de transaction
+		}
+		
+		informacionAdicional.setNombreProveedor(sdi.getSupplier().getName());
+		
+		List<ItemGuiaRemision> items = new ArrayList<ItemGuiaRemision>();
+		
+		String auxMotive = "[Forma de Pago: " + informacionAdicional.getFormaPago() + "] [Valor a Cobrar: "+informacionAdicional.getValorACobrar()+"]"; 
+		
+		destinatario.setMotivoTraslado(datilCarrierMotive + ": " + auxMotive);
+		
+		for(ItemComplete ic:sdi.getItems()){
+			ItemGuiaRemision item = new ItemGuiaRemision();
+			item.setCantidad(new Double(ic.getQuantity()));
+			item.setCodigoPrincipal(ic.getId());
+			item.setCodigoAuxiliar(ic.getEan());
+			item.setDescripcion(ic.getName());
+			DetallesAdicionales da = new DetallesAdicionales();
+			da.setNumero(ic.getId());
+			da.setSerie(ic.getProductId());
+			item.setDetallesAdicionales(da);
+			items.add(item);
+		}
+		
+		
+		
+		guiaRemision.setInformacionAdicional(informacionAdicional);
+		destinatario.setItems(items);
+		destinatarios.add(destinatario);
+		guiaRemision.setDestinatarios(destinatarios);
+		
+		GuiaRemisionRespuesta grr = waybill(guiaRemision);
+		
+		Order order = orderService.findByVitexId(orderComplete.getOrderId());
+		
+		Guide guide = new Guide();
+		guide.setOrder(order);
+		
+		
+		Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+		
+		String toJson = gson.toJson(grr);
+		guide.setGuideInfo(toJson);
+		
+		guideService.saveGuide(guide);
+		
+		response.getGuideList().add(grr);
+	}
+		return response;
 	}
 	
 	

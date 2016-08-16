@@ -1,5 +1,6 @@
 package com.yaesta.app.persistence.controller;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,12 @@ import com.yaesta.app.persistence.service.ClientService;
 
 @RestController
 @RequestMapping(value = "/client")
-public class ClientController {
+public class ClientController implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6996880275325906054L;
 	@Autowired
 	ClientService clientService;
 	

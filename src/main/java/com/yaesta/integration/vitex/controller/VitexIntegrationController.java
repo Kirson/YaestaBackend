@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.yaesta.integration.datil.json.bean.FacturaRespuestaSRI;
 import com.yaesta.integration.datil.json.bean.NotaCreditoRespuesta;
 import com.yaesta.integration.datil.service.DatilService;
-import com.yaesta.integration.tramaco.dto.GuideDTO;
 import com.yaesta.integration.vitex.bean.CreditNoteBean;
 import com.yaesta.integration.vitex.bean.GuideInfoBean;
 import com.yaesta.integration.vitex.bean.OrderCompleteBean;
@@ -33,7 +32,7 @@ import com.yaesta.integration.vitex.wsdl.dto.ProductDTO;
 import com.yaesta.integration.vitex.wsdl.vo.OrderStatusVO;
 import com.yaesta.integration.vitex.wsdl.vo.OrderVO;
 
-import dmz.comercial.servicio.cliente.dto.EntityGuia;
+
 
 @RestController
 @RequestMapping(value = "/vitextIntegration")

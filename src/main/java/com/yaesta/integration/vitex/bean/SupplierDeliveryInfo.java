@@ -1,6 +1,8 @@
 package com.yaesta.integration.vitex.bean;
 
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,6 +21,7 @@ public class SupplierDeliveryInfo implements Serializable{
 	private String supplierId;
 	private Supplier supplier;
 	private Date deliveryDate;
+	private String strDeliveryDate;
 	private Long packages;
 	private List<ItemComplete> items;
 	
@@ -27,6 +30,8 @@ public class SupplierDeliveryInfo implements Serializable{
 		items = new ArrayList<ItemComplete>();
 		packages = 1L;
 		deliveryDate = new Date();
+		DateFormat f = new SimpleDateFormat("yyyy-MM-dd");
+		strDeliveryDate = f.format(deliveryDate);
 	}
 	
 	public String getSupplierId() {
@@ -58,6 +63,14 @@ public class SupplierDeliveryInfo implements Serializable{
 	}
 	public void setItems(List<ItemComplete> items) {
 		this.items = items;
+	}
+
+	public String getStrDeliveryDate() {
+		return strDeliveryDate;
+	}
+
+	public void setStrDeliveryDate(String strDeliveryDate) {
+		this.strDeliveryDate = strDeliveryDate;
 	}
 	
 	

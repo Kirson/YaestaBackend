@@ -30,4 +30,13 @@ public class TramacoZoneService {
 		return tramacoZoneRepository.findByProvinciaAndCanton(provincia, canton);
 	}
 	
+	public TramacoZone getByProvinciaCantonParroquia(String provincia, String canton, String parroquia){
+		List<TramacoZone> query = tramacoZoneRepository.findByProvinciaAndCanton(provincia, canton);
+		if(query!=null && !query.isEmpty()){
+			return query.get(0);
+		}else{
+			return null;
+		}
+	}
+	
 }
