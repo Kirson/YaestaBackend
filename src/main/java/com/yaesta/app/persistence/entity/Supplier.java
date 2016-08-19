@@ -30,8 +30,8 @@ public class Supplier implements Serializable{
 	private static final long serialVersionUID = 4505763694357162649L;
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "supplier_seq_gen")
-	@SequenceGenerator(name = "supplier_seq_gen", sequenceName = "supplier_id_seq")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "supplier_id_seq")
+	@SequenceGenerator(name = "supplier_id_seq", sequenceName = "yaesta.supplier_id_seq",allocationSize=1)
 	private Long id;
 	
 	@Column(name = "name")

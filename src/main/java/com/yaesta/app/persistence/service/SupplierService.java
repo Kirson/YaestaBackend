@@ -9,7 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yaesta.app.util.Constants;
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.yaesta.app.persistence.entity.Address;
 import com.yaesta.app.persistence.entity.Proveedor;
 import com.yaesta.app.persistence.entity.Supplier;
@@ -25,7 +28,13 @@ import com.yaesta.app.persistence.repository.SupplierRepository;
 import com.yaesta.app.persistence.repository.TramacoSupplierRepository;
 import com.yaesta.app.persistence.repository.TramacoZoneRepository;
 import com.yaesta.app.persistence.util.ContactInfoUtil;
+import com.yaesta.app.persistence.vo.ContactContainerVO;
 import com.yaesta.app.persistence.vo.ContactInfoVO;
+import com.yaesta.app.persistence.vo.ContactVO;
+import com.yaesta.app.persistence.vo.EmailContainerVO;
+import com.yaesta.app.persistence.vo.EmailVO;
+import com.yaesta.app.persistence.vo.PhoneContainerVO;
+import com.yaesta.app.persistence.vo.PhoneVO;
 
 
 @Service
@@ -38,6 +47,8 @@ public class SupplierService implements Serializable {
 
 	@Autowired
 	private SupplierRepository supplierRepository;
+	
+	
 	
 	@Autowired
 	private SupplierContactRepository supplierContactRepository;
@@ -58,8 +69,14 @@ public class SupplierService implements Serializable {
 	private ProveedorRepository proveedorRepository;
 	
 	@Transactional
-	public Supplier save(Supplier entity, List<SupplierDeliveryCalendar> deliveryCalendar){
+	public Supplier save(Supplier entity, List<SupplierDeliveryCalendar> deliveryCalendar, List<SupplierContact> contactList, List<SupplierContact> removeContactList){
 		
+		
+		String postalCode = entity.getPostalCode();
+		if(postalCode!=null){
+			TramacoZone zone = tramacoZoneRepository.findOne(new Long(postalCode));
+			entity.setZone(zone);
+		}
 		supplierRepository.save(entity);
 		
 		if(deliveryCalendar!=null && !deliveryCalendar.isEmpty()){
@@ -70,8 +87,48 @@ public class SupplierService implements Serializable {
 			supplierDeliveryCalendarRepository.save(deliveryCalendar);
 		}
 		
+		if(contactList!=null && !contactList.isEmpty()){
+			for(SupplierContact sc:contactList){
+				sc.setSupplier(entity);
+				saveContact(sc);
+			}
+		}
+		
+		if(removeContactList!=null && !removeContactList.isEmpty()){
+			for(SupplierContact sc:removeContactList){
+				removeContact(sc);
+			}
+		}
 		
 		return entity;
+	}
+	
+	@Transactional
+	public SupplierContact saveContact(SupplierContact contact){
+		
+		if(contact.getId().intValue()==-1){
+			contact.setId(null);
+		}
+		supplierContactRepository.save(contact);
+		return contact;
+	}
+	@Transactional
+	public void removeContact(SupplierContact contact){
+		
+		SupplierContact found = supplierContactRepository.findOne(contact.getId());
+		
+		if(found!=null){
+			supplierContactRepository.delete(found);
+		}
+	}
+	
+	@Transactional
+	public void removeAllContact(List<SupplierContact> contactList){
+		supplierContactRepository.delete(contactList);
+	}
+	
+	public List<SupplierContact> getContacts(Supplier supplier){
+		return supplierContactRepository.findBySupplier(supplier);
 	}
 	
 	public Supplier findByVitexId(String vitexId){
@@ -84,6 +141,10 @@ public class SupplierService implements Serializable {
 	
 	public List<Supplier> getSuppliers(){
 		return supplierRepository.findAll();
+	}
+	
+	public Supplier findOne(Long id){
+		return supplierRepository.findOne(id);
 	}
 	
 	
@@ -155,6 +216,109 @@ public class SupplierService implements Serializable {
 			
 		}catch(Exception e){
 			System.out.println("Error en "+e.getMessage());
+			e.printStackTrace();
+		}
+		
+		return response;
+	}
+	
+	
+	public String updateContacts(){
+		String response = "OK";
+		
+		try{
+			
+			List<Supplier> supplierList = supplierRepository.findAll();
+			
+			for(Supplier supplier:supplierList){
+				Gson gson =  new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+				ContactContainerVO contactContainer = new ContactContainerVO();
+				EmailContainerVO emailContainer = new EmailContainerVO();
+				PhoneContainerVO phoneContainer = new PhoneContainerVO();
+				if(supplier.getContactList()!=null){
+					String strContactList = "{ contact_list:"+supplier.getContactList()+"}";
+					strContactList = strContactList.replace("\"name\"", "name");
+					System.out.println("contact_list "+strContactList);
+					contactContainer = gson.fromJson(strContactList, ContactContainerVO.class);
+					System.out.println("contactContainer "+contactContainer.getContactList().size());
+				}
+				if(supplier.getEmailList()!=null){
+					String strEmailList = "{ email_list:"+supplier.getEmailList()+"}";
+					strEmailList = strEmailList.replace("\"email\"", "email");
+					emailContainer = gson.fromJson(strEmailList, EmailContainerVO.class);
+				}
+				if(supplier.getPhoneList()!=null){
+					String strPhoneList = "{ phone_list: "+ supplier.getPhoneList() + " }";
+					strPhoneList = strPhoneList.replace("\"phone\"", "phone");
+					strPhoneList = strPhoneList.replace("\"ext\"", "ext");
+					phoneContainer = gson.fromJson(strPhoneList, PhoneContainerVO.class);
+				}
+				
+				if(!contactContainer.getContactList().isEmpty()){
+				   int i,j;
+				   i=0; j=0;
+				   for(ContactVO cvo:contactContainer.getContactList()){
+					   SupplierContact sc = new SupplierContact();
+					   sc.setName(cvo.getName());
+					   if(!emailContainer.getEmailList().isEmpty() && i<emailContainer.getEmailList().size()){
+						   sc.setEmail(emailContainer.getEmailList().get(i).getEmail());
+						   i++;
+					   }
+					   if(!phoneContainer.getPhoneList().isEmpty() && j<phoneContainer.getPhoneList().size()){
+						   sc.setPhone(phoneContainer.getPhoneList().get(j).getPhone());
+						   /*if(phoneContainer.getPhoneList().get(j).getExt()!=null){
+								sc.setExt(phoneContainer.getPhoneList().get(j).getExt().get(0));
+							}*/
+						   j++;
+					   }
+					   sc.setSupplier(supplier);
+					   System.out.println("==>>1");
+					   supplierContactRepository.save(sc);
+					   System.out.println("==>>"+sc.getId());
+				   }	
+				}//
+				else{
+					if(!emailContainer.getEmailList().isEmpty()){
+						int i;
+						   i=0;
+						   for(EmailVO evo:emailContainer.getEmailList()){
+							   SupplierContact sc = new SupplierContact();
+							   sc.setEmail(evo.getEmail());
+							   if(!phoneContainer.getPhoneList().isEmpty() && i<phoneContainer.getPhoneList().size()){
+								   sc.setPhone(phoneContainer.getPhoneList().get(i).getPhone());
+								   /*if(phoneContainer.getPhoneList().get(i).getExt()!=null){
+										sc.setExt(phoneContainer.getPhoneList().get(i).getExt().get(0));
+									}*/
+								   i++;
+							   }
+							   sc.setSupplier(supplier);
+							   System.out.println("==>>2");
+							   supplierContactRepository.save(sc);
+							   System.out.println("==>>"+sc.getId());
+						   }
+					}else{
+						if(!phoneContainer.getPhoneList().isEmpty()){
+							for(PhoneVO pvo:phoneContainer.getPhoneList()){
+								SupplierContact sc = new SupplierContact();
+								sc.setPhone(pvo.getPhone());
+								/*if(pvo.getExt()!=null){
+									sc.setExt(pvo.getExt().get(0));
+								}*/
+								System.out.println("==>>3");
+								sc.setSupplier(supplier);
+								supplierContactRepository.save(sc);
+								System.out.println("==>>"+sc.getId());
+							}
+						}
+					}
+				}
+			}
+			
+		}catch(JsonSyntaxException e){
+			System.out.println("Error actualizando contactos formatException");
+			e.printStackTrace();
+		}catch(Exception e){
+			System.out.println("Error actualizando contactos");
 			e.printStackTrace();
 		}
 		

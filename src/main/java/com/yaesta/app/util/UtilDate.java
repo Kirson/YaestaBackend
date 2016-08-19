@@ -1,6 +1,8 @@
 package com.yaesta.app.util;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -43,4 +45,28 @@ public class UtilDate {
 	            .format(date);
 		return formatted;
 	}
+    
+    /** Transform ISO 8601 string to Date. */
+    public static Date fromIsoToDate(final String iso8601string) throws ParseException {
+        String s = iso8601string.replace("+00:00", "Z");
+        try {
+        	String s1 = s.substring(0, 19);
+        	//String s2 = s.substring(27);
+        	//s2=s2.replace(":", "");
+            s = s1;  // to get rid of the ":"
+        } catch (IndexOutOfBoundsException e) {
+            throw new ParseException("Invalid length", 0);
+        }
+        Date date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(s);
+       
+        return date;
+    }
+    
+    /** Transform ISO 8601 string to Calendar. */
+    public static Calendar fromIsoToCalendar(final String iso8601string) throws ParseException {
+        Calendar calendar = GregorianCalendar.getInstance();
+        Date date = fromIsoToDate(iso8601string);
+        calendar.setTime(date);
+        return calendar;
+    }
 }

@@ -19,6 +19,7 @@ import com.yaesta.app.persistence.entity.Supplier;
 import com.yaesta.app.persistence.entity.TramacoZone;
 import com.yaesta.app.persistence.repository.TramacoZoneRepository;
 import com.yaesta.app.persistence.service.TableSequenceService;
+import com.yaesta.integration.datil.json.enums.PagoEnum;
 import com.yaesta.integration.tramaco.dto.GuideDTO;
 import com.yaesta.integration.tramaco.dto.TramacoAuthDTO;
 import com.yaesta.integration.vitex.json.bean.Dimension;
@@ -416,8 +417,38 @@ public class TramacoService implements Serializable{
 			String url = "http://"+tramacoUrl+":"+tramacoPort+"/";
 			//Obtener informacion para la guia
 			ServicioGenerarGuias cliente = new ServicioGenerarGuias(url);
+			String formaPago = "N/A";
+			if(guideInfo.getOrderComplete().getPaymentData().getTransactions()!=null && !guideInfo.getOrderComplete().getPaymentData().getTransactions().isEmpty()){
+				for(Transaction tr:guideInfo.getOrderComplete().getPaymentData().getTransactions()){
+					if(tr.getPayments()!=null && !tr.getPayments().isEmpty()){
+						for(Payment py:tr.getPayments()){
+							formaPago = py.getPaymentSystemName();
+							if(py.getPaymentSystemName().equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName())){
+								formaPago = formaPago + ": " + PagoEnum.EFECTIVO.getDescripcionSRI();
+							}else if(py.getPaymentSystemName().equals(PaymentEnum.SAFETYPAY.getPaymentSystemName())){
+								formaPago = formaPago + ": " + PagoEnum.TRANSFER_OTRO_BANCO.getDescripcionSRI();
+							}else if(py.getPaymentSystemName().equals(PaymentEnum.TRANSFERENCIA_BANCARIA_OTRAS_ENTIDADES.getPaymentSystemName())){
+								formaPago = formaPago + ": " + PagoEnum.TRANSFER_OTRO_BANCO.getDescripcionSRI();
+							}
+							else if(py.getPaymentSystemName().equals(PaymentEnum.PAYCLUB.getPaymentSystemName())){
+								formaPago = formaPago + ": " +PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
+							}else if(py.getPaymentSystemName().equals(PaymentEnum.TARJETA_ALIA.getPaymentSystemName())){
+								formaPago = formaPago + ": " +PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
+							}else if(py.getPaymentSystemName().equals(PaymentEnum.TARJETA_CREDITO.getPaymentSystemName())){
+								formaPago = formaPago + ": " +PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
+							}
+							else if(py.getPaymentSystemName().equals(PaymentEnum.PAYPAL.getPaymentSystemName())){
+								formaPago = formaPago + ": " +PagoEnum.TARJETA_CREDITO_INTERNACIONAL.getDescripcionSRI();
+							}
+							
+						}//fin for
+						
+					}//
+				}
+			}
 			
-			String observacionText = "Orden "+ guideInfo.getOrderComplete().getOrderId() + " de " + guideInfo.getOrderComplete().getCustomerName() + " " + guideInfo.getOrderComplete().getClientProfileData().getDocument() + " \n " ;
+			String observacionText = "Orden: "+ guideInfo.getOrderComplete().getOrderId() + " de " + guideInfo.getOrderComplete().getCustomerName() + " " + guideInfo.getOrderComplete().getClientProfileData().getDocument() + " \n " ;
+			observacionText = observacionText + "Forma de Pago: "+formaPago;
 			
 			if(guideInfo.getCustomerAdditionalInfo()!=null && !guideInfo.getCustomerAdditionalInfo().equals("")){
 				observacionText = observacionText + "Referencia"+  guideInfo.getCustomerAdditionalInfo();
@@ -431,7 +462,8 @@ public class TramacoService implements Serializable{
 			
 			//***********/
 			EntityActor remitente = new EntityActor();
-			remitente.setApellidos(guideInfo.getSupplierInfo().getSupplier().getContactLastName());
+			remitente.setNombres(guideInfo.getSupplierInfo().getSupplier().getName() + " - ");
+			remitente.setApellidos(guideInfo.getSupplierInfo().getSupplier().getContactName() + " " + guideInfo.getSupplierInfo().getSupplier().getContactLastName());
 			remitente.setCallePrimaria(guideInfo.getSupplierInfo().getSupplier().getStreetMain());
 			remitente.setCalleSecundaria(guideInfo.getSupplierInfo().getSupplier().getStreetSecundary());
 			remitente.setCiRuc(yaestaRuc);
@@ -443,7 +475,7 @@ public class TramacoService implements Serializable{
 			
 			
 			remitente.setEmail(guideInfo.getSupplierInfo().getSupplier().getContactEmail());
-			remitente.setNombres(guideInfo.getSupplierInfo().getSupplier().getContactName());
+			
 			if(guideInfo.getSupplierInfo().getSupplier().getStreetNumber()==null){
 				remitente.setNumero("SN");
 			}else{
@@ -510,7 +542,14 @@ public class TramacoService implements Serializable{
 					carga.setPeso(0D);
 				}
 				carga.setBultos(guideInfo.getSupplierInfo().getDeliveryInfo().getPackages().intValue());
-				carga.setContrato(tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs().getLstContrato().get(0).getId());
+				Integer contrato = 0;
+				for(EntityContrato entityContrato:tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs().getLstContrato()){
+					contrato = entityContrato.getId();
+					if(contrato==2977){
+						break;
+					}
+				}
+				carga.setContrato(contrato);
 				carga.setDescripcion(ic.getName());
 				carga.setObservacion(observacionText);
 				carga.setValorAsegurado(ic.getPrice());
@@ -525,7 +564,6 @@ public class TramacoService implements Serializable{
 					
 				}
 				
-				System.out.println("Valor a cobrar" + carga.getValorCobro());
 				itemValue = itemValue+ic.getPrice();
 				
 				if(hasAdjunto){
@@ -533,13 +571,17 @@ public class TramacoService implements Serializable{
 					String codigoAdjunto =  getTramacoAdjCode();
 					System.out.println("Codigo Adjunto "+codigoAdjunto);
 					carga.setCodigoAdjunto(codigoAdjunto);
+					carga.setValorCobro(itemValue);
 				}else{
 					carga.setAdjuntos(Boolean.FALSE);
 					System.out.println("No hay adjunto");
 				}
 				
+				System.out.println("Valor a cobrar" + carga.getValorCobro());
+				
+				
 				carga.setProducto(1);
-				carga.setValorAsegurado(ic.getPrice());
+				carga.setValorAsegurado(itemValue);
 				carga.setLocalidad(0);
 				carga.setGuia(guideInfo.getOrderComplete().getOrderId());
 				entCargaDestino.setCarga(carga);

@@ -82,4 +82,19 @@ public class OrderService {
 		orderRepository.save(order);
 		return order;
 	}
+	
+	public OrderItem saveOrderItem(OrderItem orderItem){
+		orderItemRepository.save(orderItem);
+		return orderItem;
+	}
+	
+	public List<OrderItem> getAllItems(){
+		List<OrderItem> found =orderItemRepository.findAll();
+		return found;
+	}
+	
+	public List<Order> getAll(){
+		List<Order> found = orderRepository.findAll();
+		return found;
+	}
 }

@@ -36,6 +36,7 @@ import com.yaesta.app.mail.MailParticipant;
 import com.yaesta.app.mail.MailService;
 import com.yaesta.app.persistence.entity.Guide;
 import com.yaesta.app.persistence.entity.Order;
+import com.yaesta.app.persistence.entity.OrderItem;
 import com.yaesta.app.persistence.entity.Supplier;
 import com.yaesta.app.persistence.entity.SupplierContact;
 import com.yaesta.app.persistence.repository.SupplierContactRepository;
@@ -47,6 +48,7 @@ import com.yaesta.app.util.SupplierUtil;
 import com.yaesta.app.util.UtilDate;
 import com.yaesta.integration.datil.json.bean.FacturaConsulta;
 import com.yaesta.integration.datil.json.bean.FacturaRespuestaSRI;
+import com.yaesta.integration.datil.json.enums.PagoEnum;
 import com.yaesta.integration.datil.service.DatilService;
 import com.yaesta.integration.tramaco.dto.DeliveryInfoDTO;
 import com.yaesta.integration.tramaco.dto.GuideDTO;
@@ -60,13 +62,19 @@ import com.yaesta.integration.vitex.json.bean.InvoiceSchema;
 import com.yaesta.integration.vitex.json.bean.ItemComplete;
 import com.yaesta.integration.vitex.json.bean.ItemInvoice;
 import com.yaesta.integration.vitex.json.bean.OrderBean;
+import com.yaesta.integration.vitex.json.bean.OrderCancel;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
 import com.yaesta.integration.vitex.json.bean.OrderConversation;
 import com.yaesta.integration.vitex.json.bean.OrderSchema;
 import com.yaesta.integration.vitex.json.bean.Paging;
+import com.yaesta.integration.vitex.json.bean.Payment;
 import com.yaesta.integration.vitex.json.bean.Total;
+import com.yaesta.integration.vitex.json.bean.Transaction;
+import com.yaesta.integration.vitex.json.bean.enums.PaymentEnum;
 import com.yaesta.integration.vitex.service.base.BaseVitexService;
 import com.yaesta.integration.vitex.util.OrderVtexUtil;
+import com.yaesta.integration.vitex.wsdl.OrderChangeStatus;
+import com.yaesta.integration.vitex.wsdl.OrderChangeStatusResponse;
 import com.yaesta.integration.vitex.wsdl.OrderGet;
 import com.yaesta.integration.vitex.wsdl.OrderGetNext50FromIdV3;
 import com.yaesta.integration.vitex.wsdl.OrderGetNext50FromIdV3Response;
@@ -644,59 +652,26 @@ public class OrderVitexService extends BaseVitexService {
 		return response;
 	}
 
-	/*
-	public String generateGuides(OrderComplete orderComplete) {
+	
+	public OrderCancel cancelOrder(OrderComplete orderComplete){
+		
+		client = ClientBuilder.newClient();
 
-		String result = "OK";
+		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/" + orderComplete.getOrderId() + "/cancel";
+		target = client.target(restUrl);
 
-		List<String> supplierCodes = new ArrayList<String>();
+		MultivaluedMap<String, Object> myHeaders = new MultivaluedHashMap<String, Object>();
+		myHeaders.add(vitexRestAppkeyName, vitexRestAppkey);
+		myHeaders.add(vitexRestTokenName, vitexRestToken);
+		String json = target.request(MediaType.TEXT_PLAIN).headers(myHeaders).post(Entity.json(orderComplete.getOrderId()), String.class);
 
-		// Obtener los codigos de proveedores
-		for (ItemComplete ic : orderComplete.getItems()) {
-			if (ic.getRefId() != null) {
-				String refId = (String) ic.getRefId();
-				String[] supplierCode = SupplierUtil.returnSupplierCode(refId);
-				if (!supplierCodes.contains(supplierCode[0])) {
-					supplierCodes.add(supplierCode[0]);
-				}
-			} else {
-				result = "Error:refIf:nulo";
-			}
-		}
 
-		List<GuideVO> guides = new ArrayList<GuideVO>();
-
-		for (String s : supplierCodes) {
-			GuideVO guide = new GuideVO();
-			guide.setSupplierVitexId(s);
-			guides.add(guide);
-		}
-
-		// Iterar los Items y formar informacion de guias
-		for (ItemComplete ic : orderComplete.getItems()) {
-			for (GuideVO guide : guides) {
-				String refId = (String) ic.getRefId();
-				String[] supplierCode = SupplierUtil.returnSupplierCode(refId);
-				if (guide.getSupplierVitexId().equals(supplierCode[0])) {
-					guide.getItems().add(ic);
-				}
-			}
-		}
-
-		// persistir guias
-		for (GuideVO gvo : guides) {
-			Guide guide = new Guide();
-			guide.setCreateDate(new Date());
-			guide.setOrderVitexId(orderComplete.getOrderId());
-			guide.setGuideInfo(new Gson().toJson(gvo));
-			guideService.saveGuide(guide);
-		}
-		orderComplete.setAppStatus("generated-guide");
-		orderComplete = persistOrder(orderComplete,"generated-guide");
-
-		return result;
+		OrderCancel response = new Gson().fromJson(json, OrderCancel.class);
+		
+		return response;
 	}
-*/
+	
+	
 	public OrderComplete changeStatus(OrderComplete orderComplete, String action) {
 
 		
@@ -742,13 +717,13 @@ public class OrderVitexService extends BaseVitexService {
 	private OrderComplete changeVitexOrder(String orderId, String action) {
 		client = ClientBuilder.newClient();
 
-		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/" + orderId + action;
+		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/" + orderId + "/changestatus/"+action;
 		target = client.target(restUrl);
 
 		MultivaluedMap<String, Object> myHeaders = new MultivaluedHashMap<String, Object>();
 		myHeaders.add(vitexRestAppkeyName, vitexRestAppkey);
 		myHeaders.add(vitexRestTokenName, vitexRestToken);
-		String json = target.request(MediaType.TEXT_PLAIN).headers(myHeaders).get(String.class);
+		String json = target.request(MediaType.TEXT_PLAIN).headers(myHeaders).post(Entity.json(orderId), String.class);
 
 		OrderComplete response = new Gson().fromJson(json, OrderComplete.class);
 
@@ -816,6 +791,7 @@ public class OrderVitexService extends BaseVitexService {
 					if(ic.getRefId()!=null){
 						iInfo.setRefCode((String)ic.getRefId());
 					}
+					iInfo.setQuantity(ic.getQuantity());
 					mailInfo.getItemInfoList().add(iInfo);
 				}
 			}
@@ -894,13 +870,15 @@ public class OrderVitexService extends BaseVitexService {
 		       is.setItems(itemInvoiceList);
 			}
 			isb.setInvoiceSchema(is);
-		  response = invoiceVitexOrder(isb);
+		  response = prepareInvoiceVitexOrder(isb);
 		}
 		
 		return response;
 	}
 	
-	public InvoiceResponse invoiceVitexOrder(InvoiceSchemaBean invoiceSchemaBean){
+	
+	
+	private InvoiceResponse prepareInvoiceVitexOrder(InvoiceSchemaBean invoiceSchemaBean){
 		InvoiceResponse response = new InvoiceResponse();
 		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/" + invoiceSchemaBean.getOrderComplete().getOrderId() + "/invoice";
 		
@@ -923,6 +901,93 @@ public class OrderVitexService extends BaseVitexService {
 		
 		response = gson.fromJson(responseJson, InvoiceResponse.class);
 		
+		return response;
+	}
+	
+	@SuppressWarnings("unused")
+	public OrderComplete changeStatus(String orderId,String status) {
+		OrderComplete oc = this.getOrderComplete(orderId);
+		OrderChangeStatus query = objectFactory.createOrderChangeStatus();
+		query.setIdOrder(new Integer(oc.getSequence()));
+		query.setStatusOrder(objectFactory.createString(status));
+		
+
+		OrderChangeStatusResponse response = (OrderChangeStatusResponse) webServiceTemplate.marshalSendAndReceive(query,
+				new SoapActionCallback("http://tempuri.org/IService/OrderChangeStatus"));
+		return this.getOrderComplete(orderId);
+	}
+	
+	public String loadOrderItem(){
+		String response = "OK";
+		try{
+		OrderSchema os = getOrdersRest(null);
+		
+		if(os!=null){
+			for(OrderBean ob:os.getList()){
+				OrderComplete oc = getOrderComplete(ob.getOrderId());
+				Order order = orderService.findByVitexId(ob.getOrderId());
+				
+				String formaPago = "N/A";
+				if(oc.getPaymentData().getTransactions()!=null && !oc.getPaymentData().getTransactions().isEmpty()){
+					for(Transaction tr:oc.getPaymentData().getTransactions()){
+						if(tr.getPayments()!=null && !tr.getPayments().isEmpty()){
+							for(Payment py:tr.getPayments()){
+								formaPago = py.getPaymentSystemName();
+								if(py.getPaymentSystemName().equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName())){
+									formaPago = formaPago + ": " + PagoEnum.EFECTIVO.getDescripcionSRI();
+								}else if(py.getPaymentSystemName().equals(PaymentEnum.SAFETYPAY.getPaymentSystemName())){
+									formaPago = formaPago + ": " + PagoEnum.TRANSFER_OTRO_BANCO.getDescripcionSRI();
+								}else if(py.getPaymentSystemName().equals(PaymentEnum.TRANSFERENCIA_BANCARIA_OTRAS_ENTIDADES.getPaymentSystemName())){
+									formaPago = formaPago + ": " + PagoEnum.TRANSFER_OTRO_BANCO.getDescripcionSRI();
+								}
+								else if(py.getPaymentSystemName().equals(PaymentEnum.PAYCLUB.getPaymentSystemName())){
+									formaPago = formaPago + ": " +PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
+								}else if(py.getPaymentSystemName().equals(PaymentEnum.TARJETA_ALIA.getPaymentSystemName())){
+									formaPago = formaPago + ": " +PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
+								}else if(py.getPaymentSystemName().equals(PaymentEnum.TARJETA_CREDITO.getPaymentSystemName())){
+									formaPago = formaPago + ": " +PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
+								}
+								else if(py.getPaymentSystemName().equals(PaymentEnum.PAYPAL.getPaymentSystemName())){
+									formaPago = formaPago + ": " +PagoEnum.TARJETA_CREDITO_INTERNACIONAL.getDescripcionSRI();
+								}
+								
+							}//fin for
+							
+						}//
+					}
+				}
+				
+				for(SupplierDeliveryInfo sdi:oc.getSupplierDeliveryInfoList()){
+					for(ItemComplete ic:sdi.getItems()){
+						OrderItem oi = new OrderItem();
+						oi.setOrder(order);
+						oi.setCustomerName(oc.getCustomerName());
+						oi.setCustomerDocument(oc.getClientProfileData().getDocument());
+						oi.setCustomerPhone(oc.getClientProfileData().getPhone());
+						oi.setCustomerState(oc.getShippingData().getAddress().getState());
+						oi.setCustomerCanton(oc.getShippingData().getAddress().getCity());
+						String address = oc.getShippingData().getAddress().getStreet() + " " + oc.getShippingData().getAddress().getNumber() + " " + oc.getShippingData().getAddress().getComplement(); 
+						oi.setCustomerAddress(address);
+						oi.setSupplierName(sdi.getSupplier().getName());
+						oi.setSupplier(sdi.getSupplier());
+						oi.setVitexId(oc.getOrderId());
+						oi.setPrice(ic.getPrice());
+						oi.setQuantity(new Long(ic.getQuantity()));
+						oi.setProductDescription(ic.getName());
+						oi.setProductKey((String)ic.getRefId());
+						oi.setOrderSequence(oc.getSequence());
+						oi.setOrderDate(UtilDate.fromIsoToDate(oc.getCreationDate()));
+						oi.setWayToPay(formaPago);
+						orderService.saveOrderItem(oi);
+					}
+				}
+			}
+		}
+		}catch(Exception e){
+			response="ERROR";
+			System.out.println("Error en "+e.getMessage());
+			e.printStackTrace();
+		}
 		return response;
 	}
 }

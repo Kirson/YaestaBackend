@@ -41,5 +41,9 @@ public class GuideService {
 		guideRepository.save(guide);
 		return guide;
 	}
+	
+	public List<Guide> getAll(){
+		return guideRepository.findAll();
+	}
 
 }

@@ -6,12 +6,14 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yaesta.app.persistence.entity.Supplier;
+import com.yaesta.app.persistence.entity.SupplierContact;
 import com.yaesta.app.persistence.service.AddressService;
 import com.yaesta.app.persistence.service.SupplierService;
 import com.yaesta.app.persistence.vo.SupplierVO;
@@ -38,6 +40,25 @@ public class SupplierController {
 	    }
 	}
 	
+	@RequestMapping(value = "/getContacts{supplierId}", method = RequestMethod.GET)
+	public  ResponseEntity<List<SupplierContact>> getContacts(@PathVariable("supplierId") Long supplierId){
+		
+		List<SupplierContact> found = null;
+		Supplier supplier = supplierService.findById(supplierId);
+		
+		if(supplier!=null){
+		
+		 found = supplierService.getContacts(supplier);
+	
+		}
+		
+	    if(found!=null && !found.isEmpty()){
+	    	return new ResponseEntity<List<SupplierContact>>(found, HttpStatus.OK);
+	    }else{
+	    	return new ResponseEntity<List<SupplierContact>>(new ArrayList<SupplierContact>(),HttpStatus.OK);
+	    }
+	}
+	
 	@RequestMapping(value = "/updateInfo", method = RequestMethod.GET)
 	public ResponseEntity<String> updateInfo(){
 		
@@ -54,18 +75,36 @@ public class SupplierController {
 		return new ResponseEntity<String>(response, HttpStatus.OK);
 	}
 	
+	@RequestMapping(value = "/updateContacts", method = RequestMethod.GET)
+	public ResponseEntity<String> updateContacts(){
+		
+		String response= supplierService.updateContacts();
+		
+		return new ResponseEntity<String>(response, HttpStatus.OK);
+	}
+	
 	@RequestMapping(value = "/create", method = RequestMethod.POST)
 	public ResponseEntity<Supplier> create(@RequestBody SupplierVO supplierVO){
 		
-		Supplier response = supplierService.save(supplierVO.getSupplier(), null);
+		Supplier response = supplierService.save(supplierVO.getSupplier(), null,supplierVO.getContactList(),null);
 		
 		return new ResponseEntity<Supplier>(response,HttpStatus.OK);
+	}
+	
+	
+	@RequestMapping(value = "/removeContact", method = RequestMethod.POST)
+	public ResponseEntity<String> removeContact(@RequestBody SupplierVO supplierVO){
+		String response = "OK";
+		 
+		supplierService.removeContact(supplierVO.getContact());
+		
+		return new ResponseEntity<String>(response,HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/update", method = RequestMethod.POST)
 	public ResponseEntity<Supplier> update(@RequestBody SupplierVO supplierVO){
 		
-		Supplier response = supplierService.save(supplierVO.getSupplier(), null);
+		Supplier response = supplierService.save(supplierVO.getSupplier(), null, supplierVO.getContactList(),supplierVO.getRemoveContactList());
 		
 		return new ResponseEntity<Supplier>(response,HttpStatus.OK);
 	}

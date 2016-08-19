@@ -15,7 +15,10 @@ import com.yaesta.app.persistence.entity.Brand;
 import com.yaesta.app.persistence.entity.Category;
 import com.yaesta.app.persistence.entity.Product;
 import com.yaesta.app.persistence.entity.Supplier;
+import com.yaesta.integration.vitex.json.bean.OrderCancel;
+import com.yaesta.integration.vitex.json.bean.OrderComplete;
 import com.yaesta.integration.vitex.service.CategoryVitexService;
+import com.yaesta.integration.vitex.service.OrderVitexService;
 import com.yaesta.integration.vitex.service.ProductVitexService;
 import com.yaesta.integration.vitex.wsdl.dto.CategoryDTO;
 import com.yaesta.integration.vitex.wsdl.dto.ProductDTO;
@@ -29,6 +32,9 @@ public class VitexIntegrationTestController {
 	
 	@Autowired
 	CategoryVitexService categoryVitexService;
+	
+	@Autowired
+	OrderVitexService orderVitexService;
 	
 	@Autowired
 	MailService mailService;
@@ -106,4 +112,24 @@ public class VitexIntegrationTestController {
 		
 		return new ResponseEntity<String>(result, HttpStatus.OK);
 	}
+	
+	@RequestMapping(value = "/testCancelOrder/", method = RequestMethod.GET)
+	public ResponseEntity<OrderCancel> testCancelOrder(){
+		String orderId = "655002549427-01";
+		
+		OrderComplete oc = orderVitexService.getOrderComplete(orderId);
+		OrderCancel response = orderVitexService.cancelOrder(oc);
+		
+		return new ResponseEntity<OrderCancel>(response, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/testChangeOrder/", method = RequestMethod.GET)
+	public ResponseEntity<OrderComplete> testChangeOrder(){
+		String orderId = "655012405841-01";
+		String action = "approved";
+		OrderComplete response = orderVitexService.changeStatus(orderId, action);
+		
+		return new ResponseEntity<OrderComplete>(response, HttpStatus.OK);
+	}
+	
 }

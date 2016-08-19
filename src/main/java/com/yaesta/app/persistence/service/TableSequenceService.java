@@ -1,7 +1,11 @@
 package com.yaesta.app.persistence.service;
 
+import java.util.List;
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 
 import com.yaesta.app.persistence.entity.TableSequence;
 import com.yaesta.app.persistence.repository.TableSequenceRepository;
@@ -38,4 +42,15 @@ public class TableSequenceService {
 		
 	}
 	
+	
+	public List<TableSequence> getAll(){
+		return tableSequenceRepository.findAll();
+	}
+	
+	@Transactional
+	public TableSequence save(TableSequence tableSequence){
+		TableSequence response = tableSequenceRepository.saveAndFlush(tableSequence);
+		
+		return response;
+	}
 }

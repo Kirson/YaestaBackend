@@ -13,6 +13,11 @@ public class ItemInfo implements Serializable{
 	private Double price;
 	private String url;
 	private String refCode;
+	private Integer quantity;
+	
+	public ItemInfo(){
+		quantity = 1;
+	}
 	
 	public String getName() {
 		return name;
@@ -43,6 +48,12 @@ public class ItemInfo implements Serializable{
 	}
 	public void setSupplierName(String supplierName) {
 		this.supplierName = supplierName;
+	}
+	public Integer getQuantity() {
+		return quantity;
+	}
+	public void setQuantity(Integer quantity) {
+		this.quantity = quantity;
 	}
 	
 	

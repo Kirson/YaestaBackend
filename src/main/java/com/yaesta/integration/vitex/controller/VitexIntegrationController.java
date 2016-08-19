@@ -19,6 +19,7 @@ import com.yaesta.integration.vitex.bean.CreditNoteBean;
 import com.yaesta.integration.vitex.bean.GuideInfoBean;
 import com.yaesta.integration.vitex.bean.OrderCompleteBean;
 import com.yaesta.integration.vitex.json.bean.InvoiceResponse;
+import com.yaesta.integration.vitex.json.bean.OrderCancel;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
 import com.yaesta.integration.vitex.json.bean.OrderConversation;
 import com.yaesta.integration.vitex.json.bean.OrderSchema;
@@ -142,6 +143,13 @@ public class VitexIntegrationController {
 		return new ResponseEntity<OrderComplete>(json, HttpStatus.OK);
 	}
 	
+	@RequestMapping(value = "/cancelOrder", method = RequestMethod.POST)
+	public ResponseEntity<OrderCancel> cancelOrder(@RequestBody OrderCompleteBean orderCompleteBean) {	  		 		
+		
+		OrderCancel json = orderVitexService.cancelOrder(orderCompleteBean.getOrder());
+		return new ResponseEntity<OrderCancel>(json, HttpStatus.OK);
+	}
+	
 	@RequestMapping(value = "/generateGuide", method = RequestMethod.POST)
 	public ResponseEntity<GuideInfoBean> generateGuide(@RequestBody GuideInfoBean guideInfoBean){
 		
@@ -186,5 +194,10 @@ public class VitexIntegrationController {
 		
 		NotaCreditoRespuesta response = datilService.processCreditNote(creditNoteBean);
 		return new ResponseEntity<NotaCreditoRespuesta>(response, HttpStatus.OK);
+	}
+	@RequestMapping(value = "/loadOrderItems", method = RequestMethod.GET)
+	public ResponseEntity<String> loadOrderItems(){
+		String response = orderVitexService.loadOrderItem();
+		return new ResponseEntity<String>(response,HttpStatus.OK);
 	}
 }

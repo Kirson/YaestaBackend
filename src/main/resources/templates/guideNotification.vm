@@ -22,6 +22,7 @@
               	<td><b>Producto</b></td>
               	<td><b>Codigo</b></td>
               	<td><b>Nombre</b></td>
+              	<td><b>Cantidad</b></td>
               </tr>
               #foreach( $item in $mailInfo.itemInfoList )
     				<tr>
@@ -33,6 +34,8 @@
     					<td>$item.refCode	
     					</td>
     					<td>$item.name	
+    					</td>
+    					<td>$item.quantity	
     					</td>
     				</tr>
 				#end

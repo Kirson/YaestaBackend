@@ -28,6 +28,10 @@ public class TableSequence implements Serializable {
 	
 	@Column(name="seq_type")
 	private String type;
+	
+	public TableSequence(){
+		type = "VIRTUAL";
+	}
 
 	public String getSeqName() {
 		return seqName;

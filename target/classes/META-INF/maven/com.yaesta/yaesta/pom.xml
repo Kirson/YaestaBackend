@@ -136,13 +136,13 @@
 		</dependency>
 		
 	
-		<!--  
+		 
 	 	 <dependency>
     		<groupId>dmz.comercial.servicio.cliente</groupId>
     		<artifactId>cliente</artifactId>
     		<version>1.0</version>
 		</dependency>
-		 -->
+		 
 	</dependencies>
 	<repositories>
 		<repository>
