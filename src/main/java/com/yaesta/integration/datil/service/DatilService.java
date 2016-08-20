@@ -31,6 +31,7 @@ import com.yaesta.app.persistence.service.GuideService;
 import com.yaesta.app.persistence.service.OrderService;
 import com.yaesta.app.persistence.service.TableSequenceService;
 import com.yaesta.app.util.UtilDate;
+import com.yaesta.integration.base.util.BaseUtil;
 import com.yaesta.integration.datil.json.bean.Comprador;
 import com.yaesta.integration.datil.json.bean.Destinatario;
 import com.yaesta.integration.datil.json.bean.DetallesAdicionales;
@@ -248,14 +249,14 @@ public class DatilService implements Serializable{
 				it.setDescuento(0D);
 			}
 			
-			it.setDescuento(0D);
+			//it.setDescuento(0D);
 			
 			Impuesto_ iva = new Impuesto_();
 			if(ic.getTax().intValue()>0){
 				iva.setValor(ic.getTax());
 			}else{
 				if(hasTax){
-					iva.setValor(calculateIVA(itemPrice,new Integer(datilIvaValue)));
+					iva.setValor(BaseUtil.calculateIVA(itemPrice,new Integer(datilIvaValue),datilIvaPercentValue));
 				}
 			}
 			iva.setCodigo(datilIvaCode);
@@ -291,7 +292,7 @@ public class DatilService implements Serializable{
 				it.setDescuento(0D);
 				
 				Impuesto_ iva = new Impuesto_();
-				iva.setValor(calculateIVA(vtot.getValue(),new Integer(datilIvaValue)));
+				iva.setValor(BaseUtil.calculateIVA(vtot.getValue(),new Integer(datilIvaValue),datilIvaPercentValue));
 				iva.setCodigo(datilIvaCode);
 				iva.setCodigoPorcentaje(datilIvaCodePercent);
 				iva.setBaseImponible(vtot.getValue());
@@ -508,7 +509,7 @@ public class DatilService implements Serializable{
 				iva.setValor(ic.getTax());
 			}else{
 				if(hasTax){
-					iva.setValor(calculateIVA(itemPrice,new Integer(datilIvaValue)));
+					iva.setValor(BaseUtil.calculateIVA(itemPrice,new Integer(datilIvaValue),datilIvaPercentValue));
 				}
 			}
 			iva.setCodigo(datilIvaCode);
@@ -544,7 +545,7 @@ public class DatilService implements Serializable{
 				it.setDescuento(0D);
 				
 				Impuesto_ iva = new Impuesto_();
-				iva.setValor(calculateIVA(vtot.getValue(),new Integer(datilIvaValue)));
+				iva.setValor(BaseUtil.calculateIVA(vtot.getValue(),new Integer(datilIvaValue),datilIvaPercentValue));
 				iva.setCodigo(datilIvaCode);
 				iva.setCodigoPorcentaje(datilIvaCodePercent);
 				iva.setBaseImponible(vtot.getValue());
@@ -725,15 +726,7 @@ public class DatilService implements Serializable{
 		return myHeaders;
 	}
 	
-	private Double calculateIVA(Double price, int percent){
-		Double vpercent = new Double(datilIvaPercentValue);
-		
-		Double iva = price*vpercent;
-		
-		iva = (double) Math.round(iva * 100) / 100;
-		
-		return iva;
-	}
+	
 	
 	private String formatInvoiceNumber(String sequence){
 		String sequencePart = ""+sequence;

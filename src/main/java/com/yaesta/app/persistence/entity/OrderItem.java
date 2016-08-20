@@ -40,8 +40,17 @@ public class OrderItem implements Serializable{
 	@Column(name="price")  //precio del item
 	private Double price;
 	
+	@Column(name="unit_price")  //precio del item
+	private Double unitPrice;
+	
 	@Column(name="quantity")  //cantidad de producto
 	private Long quantity;
+	
+	@Column(name="customer_value")  //precio del item que paga el cliente
+	private Double customerValue;
+	
+	@Column(name="value_receivables")  //precio que se cobra en caso de pago contra entrega
+	private Double valueReceivables;
 	
 	@JoinColumn(name = "order_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -95,6 +104,12 @@ public class OrderItem implements Serializable{
 	@Column(name="order_date",columnDefinition="TIMESTAMP WITH TIME ZONE")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date orderDate;
+	
+	@Column(name="order_status") //estado de la orden en vitex
+	private String orderStatus;
+	
+	@Column(name="status_description") //estado de la orden en vitex
+	private String statusDescription;
 	
 
 	public Long getId() {
@@ -210,7 +225,8 @@ public class OrderItem implements Serializable{
 	}
 
 	public String getCustomerPhone() {
-		return customerPhone;
+		String strPhone = "\""+customerPhone;
+		return strPhone;
 	}
 
 	public void setCustomerPhone(String customerPhone) {
@@ -242,7 +258,8 @@ public class OrderItem implements Serializable{
 	}
 
 	public String getProductKey() {
-		return productKey;
+		String strProductKey = "\""+productKey;
+		return strProductKey;
 	}
 
 	public void setProductKey(String productKey) {
@@ -263,6 +280,46 @@ public class OrderItem implements Serializable{
 
 	public void setSupplier(Supplier supplier) {
 		this.supplier = supplier;
+	}
+
+	public Double getCustomerValue() {
+		return customerValue;
+	}
+
+	public void setCustomerValue(Double customerValue) {
+		this.customerValue = customerValue;
+	}
+
+	public Double getValueReceivables() {
+		return valueReceivables;
+	}
+
+	public void setValueReceivables(Double valueReceivables) {
+		this.valueReceivables = valueReceivables;
+	}
+
+	public Double getUnitPrice() {
+		return unitPrice;
+	}
+
+	public void setUnitPrice(Double unitPrice) {
+		this.unitPrice = unitPrice;
+	}
+
+	public String getOrderStatus() {
+		return orderStatus;
+	}
+
+	public void setOrderStatus(String orderStatus) {
+		this.orderStatus = orderStatus;
+	}
+
+	public String getStatusDescription() {
+		return statusDescription;
+	}
+
+	public void setStatusDescription(String statusDescription) {
+		this.statusDescription = statusDescription;
 	}
 	
 	

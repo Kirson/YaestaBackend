@@ -77,8 +77,12 @@ public class Order implements Serializable{
 	@Transient
 	private List<OrderItem> items;
 	
+	@Column(name="has_Items")
+	private String hasItems;
+	
 	public Order(){
 		this.status = "registered";
+		this.hasItems = "0";
 	}
 
 	public Long getId() {
@@ -188,6 +192,16 @@ public class Order implements Serializable{
 
 	public void setCreditNote(String creditNote) {
 		this.creditNote = creditNote;
+	}
+	
+	
+
+	public String getHasItems() {
+		return hasItems;
+	}
+
+	public void setHasItems(String hasItems) {
+		this.hasItems = hasItems;
 	}
 
 	@Override

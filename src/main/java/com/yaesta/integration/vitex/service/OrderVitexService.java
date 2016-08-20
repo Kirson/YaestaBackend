@@ -2,6 +2,7 @@ package com.yaesta.integration.vitex.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -46,6 +47,7 @@ import com.yaesta.app.persistence.service.SupplierService;
 import com.yaesta.app.persistence.util.HibernateProxyTypeAdapter;
 import com.yaesta.app.util.SupplierUtil;
 import com.yaesta.app.util.UtilDate;
+import com.yaesta.integration.base.util.BaseUtil;
 import com.yaesta.integration.datil.json.bean.FacturaConsulta;
 import com.yaesta.integration.datil.json.bean.FacturaRespuestaSRI;
 import com.yaesta.integration.datil.json.enums.PagoEnum;
@@ -68,6 +70,7 @@ import com.yaesta.integration.vitex.json.bean.OrderConversation;
 import com.yaesta.integration.vitex.json.bean.OrderSchema;
 import com.yaesta.integration.vitex.json.bean.Paging;
 import com.yaesta.integration.vitex.json.bean.Payment;
+import com.yaesta.integration.vitex.json.bean.PriceTag;
 import com.yaesta.integration.vitex.json.bean.Total;
 import com.yaesta.integration.vitex.json.bean.Transaction;
 import com.yaesta.integration.vitex.json.bean.enums.PaymentEnum;
@@ -144,6 +147,10 @@ public class OrderVitexService extends BaseVitexService {
 	private @Value("${mail.text.guide.7}") String mailTextGuide7;
 	private @Value("${mail.text.guide.8}") String mailTextGuide8;
 	private @Value("${mail.text.guide.token}") String mailTextGuideToken;
+	private @Value("${tramaco.contacts}") String tramacoContacts;
+	private @Value("${tramaco.contacts.names}") String tramacoContactsNames;
+	private @Value("${datil.iva.value}") String datilIvaValue;
+	private @Value("${datil.iva.percent.value}") String datilIvaPercentValue;
 
 	public OrderVitexService() throws Exception {
 		super();
@@ -463,6 +470,13 @@ public class OrderVitexService extends BaseVitexService {
 		}
 		response = persistOrder(response,null);
 
+		try {
+			generateOrderItem(response);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		// generateGuides(response);
 		return response;
 	}
@@ -756,6 +770,15 @@ public class OrderVitexService extends BaseVitexService {
 			mpCc.setName(mailCcName);
 			receiverTotal.add(mpCc);
 			
+			String[] contactsCourierNames = tramacoContactsNames.split("%");
+			String[] contactsCourierEmails = tramacoContacts.split("%");
+			
+			for(int j=0;j<contactsCourierNames.length;j++){
+				MailParticipant mpCourier = new MailParticipant();
+				mpCourier.setEmail(contactsCourierEmails[j]);
+				mpCourier.setName(contactsCourierNames[j]);
+				receiverTotal.add(mpCourier);
+			}
 			
 			List<MailParticipant> recSupplierList = new ArrayList<MailParticipant>();
 			Supplier supplier = sdi.getSupplier();
@@ -925,6 +948,7 @@ public class OrderVitexService extends BaseVitexService {
 		if(os!=null){
 			for(OrderBean ob:os.getList()){
 				OrderComplete oc = getOrderComplete(ob.getOrderId());
+				/*
 				Order order = orderService.findByVitexId(ob.getOrderId());
 				
 				String formaPago = "N/A";
@@ -967,21 +991,94 @@ public class OrderVitexService extends BaseVitexService {
 						oi.setCustomerState(oc.getShippingData().getAddress().getState());
 						oi.setCustomerCanton(oc.getShippingData().getAddress().getCity());
 						String address = oc.getShippingData().getAddress().getStreet() + " " + oc.getShippingData().getAddress().getNumber() + " " + oc.getShippingData().getAddress().getComplement(); 
+						Double deliveryPayment = 0D;
+						Boolean hasAdjunto = false;
+						if(oc.getPaymentData().getTransactions()!=null && !oc.getPaymentData().getTransactions().isEmpty()){
+							for(Transaction tr:oc.getPaymentData().getTransactions()){
+								if(tr.getPayments()!=null && !tr.getPayments().isEmpty()){
+									for(Payment py:tr.getPayments()){
+										if(py.getPaymentSystemName().trim().toLowerCase().equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName().toLowerCase())){
+											hasAdjunto = true; 
+											deliveryPayment = deliveryPayment+py.getValue();
+										}
+									}//fin for
+									
+								}//
+							}
+						}
+						
+						Double itemValue = 0D;
+						
+						itemValue = itemValue+ic.getPrice()*ic.getQuantity();
+						itemValue = (double) Math.round(itemValue * 100) / 100;
+						
+						
+						Double discount=0D;
+						Boolean hasTax = Boolean.FALSE;
+						if(ic.getPriceTags()!=null && !ic.getPriceTags().isEmpty()){
+							for(PriceTag pt:ic.getPriceTags()){
+								if(pt.getName().contains("discount@price")){
+									Double val= pt.getValue();
+									if(val.intValue()<0){
+										val = val* (-1);
+									}
+								    val = (double) Math.round(val * 100) / 100;
+								    discount=val;
+									//break;
+								}
+								if(pt.getName().contains("tax@price")){
+									hasTax=Boolean.TRUE;
+								}
+							}
+						}else{
+							discount=0D;
+						}
+						
+						if(ic.getShippingPrice()!=null){
+							System.out.println("shippingPrice "+ ic.getShippingPrice());
+						}else{
+							System.out.println("Sin costo de cobro de envio");
+							//carga.setValorCobro(0D);
+						}
+						Double iva = 0D;
+						itemValue = itemValue - discount;
+						if(ic.getTax().intValue()>0){
+							iva=ic.getTax();
+						}else{
+							if(hasTax){
+								iva=BaseUtil.calculateIVA(itemValue,new Integer(datilIvaValue),datilIvaPercentValue);
+							}
+						}
+						itemValue = itemValue + iva;
+						
+						
 						oi.setCustomerAddress(address);
 						oi.setSupplierName(sdi.getSupplier().getName());
 						oi.setSupplier(sdi.getSupplier());
 						oi.setVitexId(oc.getOrderId());
-						oi.setPrice(ic.getPrice());
+						oi.setUnitPrice(ic.getPrice());
+						oi.setPrice(ic.getPrice()*ic.getQuantity());
+						oi.setCustomerValue(itemValue);
 						oi.setQuantity(new Long(ic.getQuantity()));
 						oi.setProductDescription(ic.getName());
-						oi.setProductKey((String)ic.getRefId());
+						String[] productKey = SupplierUtil.returnSupplierCode((String)ic.getRefId());
+						oi.setProductKey(productKey[2]);
 						oi.setOrderSequence(oc.getSequence());
 						oi.setOrderDate(UtilDate.fromIsoToDate(oc.getCreationDate()));
 						oi.setWayToPay(formaPago);
+						
+						if(hasAdjunto){
+							oi.setValueReceivables(itemValue);
+						}else{
+							oi.setValueReceivables(0D);
+						}
 						orderService.saveOrderItem(oi);
 					}
+			
 				}
+				*/
 			}
+			
 		}
 		}catch(Exception e){
 			response="ERROR";
@@ -990,4 +1087,143 @@ public class OrderVitexService extends BaseVitexService {
 		}
 		return response;
 	}
+	
+	private void generateOrderItem(OrderComplete oc) throws ParseException{
+		
+        Order order = orderService.findByVitexId(oc.getOrderId());
+        
+        if(order.getHasItems().equals("0")){
+		
+		String formaPago = "N/A";
+		if(oc.getPaymentData().getTransactions()!=null && !oc.getPaymentData().getTransactions().isEmpty()){
+			for(Transaction tr:oc.getPaymentData().getTransactions()){
+				if(tr.getPayments()!=null && !tr.getPayments().isEmpty()){
+					for(Payment py:tr.getPayments()){
+						formaPago = py.getPaymentSystemName();
+						if(py.getPaymentSystemName().equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName())){
+							formaPago = formaPago + ": " + PagoEnum.EFECTIVO.getDescripcionSRI();
+						}else if(py.getPaymentSystemName().equals(PaymentEnum.SAFETYPAY.getPaymentSystemName())){
+							formaPago = formaPago + ": " + PagoEnum.TRANSFER_OTRO_BANCO.getDescripcionSRI();
+						}else if(py.getPaymentSystemName().equals(PaymentEnum.TRANSFERENCIA_BANCARIA_OTRAS_ENTIDADES.getPaymentSystemName())){
+							formaPago = formaPago + ": " + PagoEnum.TRANSFER_OTRO_BANCO.getDescripcionSRI();
+						}
+						else if(py.getPaymentSystemName().equals(PaymentEnum.PAYCLUB.getPaymentSystemName())){
+							formaPago = formaPago + ": " +PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
+						}else if(py.getPaymentSystemName().equals(PaymentEnum.TARJETA_ALIA.getPaymentSystemName())){
+							formaPago = formaPago + ": " +PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
+						}else if(py.getPaymentSystemName().equals(PaymentEnum.TARJETA_CREDITO.getPaymentSystemName())){
+							formaPago = formaPago + ": " +PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
+						}
+						else if(py.getPaymentSystemName().equals(PaymentEnum.PAYPAL.getPaymentSystemName())){
+							formaPago = formaPago + ": " +PagoEnum.TARJETA_CREDITO_INTERNACIONAL.getDescripcionSRI();
+						}
+						
+					}//fin for
+					
+				}//
+			}
+		}
+		
+		for(SupplierDeliveryInfo sdi:oc.getSupplierDeliveryInfoList()){
+			for(ItemComplete ic:sdi.getItems()){
+				OrderItem oi = new OrderItem();
+				oi.setOrder(order);
+				oi.setCustomerName(oc.getCustomerName());
+				oi.setCustomerDocument(oc.getClientProfileData().getDocument());
+				oi.setCustomerPhone(oc.getClientProfileData().getPhone());
+				oi.setCustomerState(oc.getShippingData().getAddress().getState());
+				oi.setCustomerCanton(oc.getShippingData().getAddress().getCity());
+				String address = oc.getShippingData().getAddress().getStreet() + " " + oc.getShippingData().getAddress().getNumber() + " " + oc.getShippingData().getAddress().getComplement(); 
+				Double deliveryPayment = 0D;
+				Boolean hasAdjunto = false;
+				if(oc.getPaymentData().getTransactions()!=null && !oc.getPaymentData().getTransactions().isEmpty()){
+					for(Transaction tr:oc.getPaymentData().getTransactions()){
+						if(tr.getPayments()!=null && !tr.getPayments().isEmpty()){
+							for(Payment py:tr.getPayments()){
+								if(py.getPaymentSystemName().trim().toLowerCase().equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName().toLowerCase())){
+									hasAdjunto = true; 
+									deliveryPayment = deliveryPayment+py.getValue();
+								}
+							}//fin for
+							
+						}//
+					}
+				}
+				
+				Double itemValue = 0D;
+				
+				itemValue = itemValue+ic.getPrice()*ic.getQuantity();
+				itemValue = (double) Math.round(itemValue * 100) / 100;
+				
+				
+				Double discount=0D;
+				Boolean hasTax = Boolean.FALSE;
+				if(ic.getPriceTags()!=null && !ic.getPriceTags().isEmpty()){
+					for(PriceTag pt:ic.getPriceTags()){
+						if(pt.getName().contains("discount@price")){
+							Double val= pt.getValue();
+							if(val.intValue()<0){
+								val = val* (-1);
+							}
+						    val = (double) Math.round(val * 100) / 100;
+						    discount=val;
+							//break;
+						}
+						if(pt.getName().contains("tax@price")){
+							hasTax=Boolean.TRUE;
+						}
+					}
+				}else{
+					discount=0D;
+				}
+				
+				if(ic.getShippingPrice()!=null){
+					System.out.println("shippingPrice "+ ic.getShippingPrice());
+				}else{
+					System.out.println("Sin costo de cobro de envio");
+					//carga.setValorCobro(0D);
+				}
+				Double iva = 0D;
+				itemValue = itemValue - discount;
+				if(ic.getTax().intValue()>0){
+					iva=ic.getTax();
+				}else{
+					if(hasTax){
+						iva=BaseUtil.calculateIVA(itemValue,new Integer(datilIvaValue),datilIvaPercentValue);
+					}
+				}
+				itemValue = itemValue + iva;
+				
+				
+				oi.setCustomerAddress(address);
+				oi.setSupplierName(sdi.getSupplier().getName());
+				oi.setSupplier(sdi.getSupplier());
+				oi.setVitexId(oc.getOrderId());
+				oi.setUnitPrice(ic.getPrice());
+				oi.setPrice(ic.getPrice()*ic.getQuantity());
+				oi.setCustomerValue(itemValue);
+				oi.setQuantity(new Long(ic.getQuantity()));
+				oi.setProductDescription(ic.getName());
+				String[] productKey = SupplierUtil.returnSupplierCode((String)ic.getRefId());
+				oi.setProductKey(productKey[2]);
+				oi.setOrderSequence(oc.getSequence());
+				oi.setOrderDate(UtilDate.fromIsoToDate(oc.getCreationDate()));
+				oi.setWayToPay(formaPago);
+				oi.setOrderStatus(oc.getStatus());
+				oi.setStatusDescription(oc.getStatusDescription());
+				if(hasAdjunto){
+					oi.setValueReceivables(itemValue);
+				}else{
+					oi.setValueReceivables(0D);
+				}
+				orderService.saveOrderItem(oi);
+			}
+		}
+          order.setStatus("1");
+        }
+		orderService.saveOrder(order);
+	}
+   
+
+  
 }
