@@ -43,6 +43,9 @@ public class OrderItem implements Serializable{
 	@Column(name="unit_price")  //precio del item
 	private Double unitPrice;
 	
+	@Column(name="discount")  //descuento
+	private Double discount;
+	
 	@Column(name="quantity")  //cantidad de producto
 	private Long quantity;
 	
@@ -225,7 +228,7 @@ public class OrderItem implements Serializable{
 	}
 
 	public String getCustomerPhone() {
-		String strPhone = "\""+customerPhone;
+		String strPhone =customerPhone;
 		return strPhone;
 	}
 
@@ -258,7 +261,7 @@ public class OrderItem implements Serializable{
 	}
 
 	public String getProductKey() {
-		String strProductKey = "\""+productKey;
+		String strProductKey = productKey;
 		return strProductKey;
 	}
 
@@ -320,6 +323,14 @@ public class OrderItem implements Serializable{
 
 	public void setStatusDescription(String statusDescription) {
 		this.statusDescription = statusDescription;
+	}
+
+	public Double getDiscount() {
+		return discount;
+	}
+
+	public void setDiscount(Double discount) {
+		this.discount = discount;
 	}
 	
 	

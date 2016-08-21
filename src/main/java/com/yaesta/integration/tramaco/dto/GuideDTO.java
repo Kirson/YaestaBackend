@@ -6,13 +6,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.yaesta.app.persistence.entity.Guide;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
-
-import dmz.comercial.servicio.cliente.dto.RespuestaGenerarGuiaWs;
-import dmz.comercial.servicio.cliente.dto.RespuestaGenerarPdfWs;
-import dmz.comercial.servicio.cliente.dto.RespuestaTrackGuiaWs;
-
 
 
 @XmlRootElement
@@ -23,42 +17,24 @@ public class GuideDTO implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private Guide guide;
 	
 	private OrderComplete orderComplete;
-	
 	private SupplierDTO supplierInfo;
-	
-	private RespuestaGenerarGuiaWs guideResponse;
-	
-	private RespuestaGenerarPdfWs guidePdfResponse;
-	
-	private RespuestaTrackGuiaWs guideTrackResponse;
-	
+	private List<GuideBeanDTO> guideBeanList;
 	private String response;
-	
-	private String pdfUrl;
-	
 	private List<String> errorList;
-	
 	private String customerAdditionalInfo;
+	private GuideBeanDTO guideBean;
+	private Integer packages;
 	
-	private Double deliveryCost;
-	private Double deliveryPayment;
-	private Double itemValue;
 	
 	public GuideDTO(){
+		packages = 1;
 		errorList = new ArrayList<String>();
+		guideBeanList = new ArrayList<GuideBeanDTO>();
 	}
 
-	public Guide getGuide() {
-		return guide;
-	}
-
-	public void setGuide(Guide guide) {
-		this.guide = guide;
-	}
-
+	
 	public OrderComplete getOrderComplete() {
 		return orderComplete;
 	}
@@ -69,16 +45,9 @@ public class GuideDTO implements Serializable{
 
 	
 
-	public RespuestaGenerarGuiaWs getGuideResponse() {
-		return guideResponse;
-	}
-
-	public void setGuideResponse(RespuestaGenerarGuiaWs guideResponse) {
-		this.guideResponse = guideResponse;
-	}
-
 	
 
+	
 	public String getResponse() {
 		return response;
 	}
@@ -95,29 +64,18 @@ public class GuideDTO implements Serializable{
 		this.supplierInfo = supplierInfo;
 	}
 
-	public RespuestaGenerarPdfWs getGuidePdfResponse() {
-		return guidePdfResponse;
+	
+	
+
+	public List<GuideBeanDTO> getGuideBeanList() {
+		return guideBeanList;
 	}
 
-	public void setGuidePdfResponse(RespuestaGenerarPdfWs guidePdfResponse) {
-		this.guidePdfResponse = guidePdfResponse;
+
+	public void setGuideBeanList(List<GuideBeanDTO> guideBeanList) {
+		this.guideBeanList = guideBeanList;
 	}
 
-	public String getPdfUrl() {
-		return pdfUrl;
-	}
-
-	public void setPdfUrl(String pdfUrl) {
-		this.pdfUrl = pdfUrl;
-	}
-
-	public RespuestaTrackGuiaWs getGuideTrackResponse() {
-		return guideTrackResponse;
-	}
-
-	public void setGuideTrackResponse(RespuestaTrackGuiaWs guideTrackResponse) {
-		this.guideTrackResponse = guideTrackResponse;
-	}
 
 	public List<String> getErrorList() {
 		return errorList;
@@ -135,29 +93,27 @@ public class GuideDTO implements Serializable{
 		this.customerAdditionalInfo = customerAdditionalInfo;
 	}
 
-	public Double getDeliveryCost() {
-		return deliveryCost;
+
+	public GuideBeanDTO getGuideBean() {
+		return guideBean;
 	}
 
-	public void setDeliveryCost(Double deliveryCost) {
-		this.deliveryCost = deliveryCost;
+
+	public void setGuideBean(GuideBeanDTO guideBean) {
+		this.guideBean = guideBean;
 	}
 
-	public Double getDeliveryPayment() {
-		return deliveryPayment;
+
+	public Integer getPackages() {
+		return packages;
 	}
 
-	public void setDeliveryPayment(Double deliveryPayment) {
-		this.deliveryPayment = deliveryPayment;
+
+	public void setPackages(Integer packages) {
+		this.packages = packages;
 	}
 
-	public Double getItemValue() {
-		return itemValue;
-	}
-
-	public void setItemValue(Double itemValue) {
-		this.itemValue = itemValue;
-	}
+	
 	
 	
 	

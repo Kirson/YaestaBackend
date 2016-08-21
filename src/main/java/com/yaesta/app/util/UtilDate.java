@@ -50,14 +50,14 @@ public class UtilDate {
     public static Date fromIsoToDate(final String iso8601string) throws ParseException {
         String s = iso8601string.replace("+00:00", "Z");
         try {
-        	String s1 = s.substring(0, 19);
+        	String s1 = s.substring(0, 10);
         	//String s2 = s.substring(27);
         	//s2=s2.replace(":", "");
             s = s1;  // to get rid of the ":"
         } catch (IndexOutOfBoundsException e) {
             throw new ParseException("Invalid length", 0);
         }
-        Date date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(s);
+        Date date = new SimpleDateFormat("yyyy-MM-dd").parse(s);
        
         return date;
     }

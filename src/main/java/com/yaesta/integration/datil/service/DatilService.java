@@ -195,6 +195,7 @@ public class DatilService implements Serializable{
 	}
 	
 	
+	@SuppressWarnings("unused")
 	public FacturaRespuestaSRI processInvoiceOrder(OrderComplete orderComplete){
 		
 		FacturaSRI factura = new FacturaSRI();
@@ -221,14 +222,18 @@ public class DatilService implements Serializable{
 				quantity = ic.getQuantity().doubleValue();
 			}
 			it.setCantidad(quantity);
+			Double discount = 0D;
+			Double unitPrice = 0D;
+			Double taxValue = 0D;
+			unitPrice = ic.getPrice();
+			
 			Double itemPrice = ic.getPrice() * quantity;
 			itemPrice = (double) Math.round(itemPrice * 100) / 100;
 			it.setPrecioTotalSinImpuestos(itemPrice);
-			it.setPrecioUnitario(ic.getPrice());
 			it.setDescripcion(ic.getName());
 			it.setCodigoPrincipal(ic.getProductId());
 			Boolean hasTax = Boolean.FALSE;
-			//Double vTax = 0D;
+			
 			if(ic.getPriceTags()!=null && !ic.getPriceTags().isEmpty()){
 				for(PriceTag pt:ic.getPriceTags()){
 					if(pt.getName().contains("discount@price")){
@@ -237,19 +242,23 @@ public class DatilService implements Serializable{
 							val = val* (-1);
 						}
 					    val = (double) Math.round(val * 100) / 100;
-						it.setDescuento(val);
+					    discount = val;
+					    it.setDescuento(discount);
 						//break;
 					}
 					if(pt.getName().contains("tax@price")){
 						hasTax=Boolean.TRUE;
-						//vTax = pt.getValue();
+						taxValue = pt.getValue();
 					}
 				}
 			}else{
-				it.setDescuento(0D);
+				it.setDescuento(discount);
 			}
 			
-			//it.setDescuento(0D);
+			it.setDescuento(discount);
+			unitPrice = unitPrice - discount;
+			
+			it.setPrecioUnitario(unitPrice);
 			
 			Impuesto_ iva = new Impuesto_();
 			if(ic.getTax().intValue()>0){
@@ -474,11 +483,13 @@ public class DatilService implements Serializable{
 				quantity = ic.getQuantity().doubleValue();
 			}
 			it.setCantidad(quantity);
+			Double unitPrice = 0D;
+			Double discount = 0D;
+			
 			Double itemPrice = ic.getPrice() * quantity;
 			itemPrice = (double) Math.round(itemPrice * 100) / 100;
-			
+			unitPrice = ic.getPrice();
 			it.setPrecioTotalSinImpuestos(itemPrice);
-			it.setPrecioUnitario(ic.getPrice());
 			it.setDescripcion(ic.getName());
 			it.setCodigoPrincipal(ic.getProductId());
 			Boolean hasTax = Boolean.FALSE;
@@ -490,7 +501,8 @@ public class DatilService implements Serializable{
 							val = val* (-1);
 						}
 					    val = (double) Math.round(val * 100) / 100;
-						it.setDescuento(val);
+						discount=val;
+					    it.setDescuento(discount);
 						//break;
 					}
 					if(pt.getName().contains("tax@price")){
@@ -499,10 +511,13 @@ public class DatilService implements Serializable{
 					}
 				}
 			}else{
-				it.setDescuento(0D);
+				it.setDescuento(discount);
 			}
 			
-			it.setDescuento(0D);
+			unitPrice = unitPrice -discount;
+			it.setDescuento(discount);
+			
+			it.setPrecioUnitario(unitPrice);
 			
 			Impuesto_ iva = new Impuesto_();
 			if(ic.getTax().intValue()>0){
