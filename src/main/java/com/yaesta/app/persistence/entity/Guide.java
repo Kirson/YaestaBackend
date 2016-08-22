@@ -18,6 +18,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "guide",schema="yaesta")
 public class Guide implements Serializable{
@@ -96,6 +98,7 @@ public class Guide implements Serializable{
 	@Column(name="delivery_status")
 	private String deliveryStatus;
 	
+	@JsonManagedReference
 	@JoinColumn(name = "supplier_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
 	private Supplier supplier;

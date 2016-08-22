@@ -55,6 +55,7 @@ import com.yaesta.integration.datil.service.DatilService;
 import com.yaesta.integration.tramaco.dto.GuideBeanDTO;
 import com.yaesta.integration.tramaco.dto.GuideDTO;
 import com.yaesta.integration.tramaco.service.TramacoService;
+import com.yaesta.integration.vitex.bean.GuideContainerBean;
 import com.yaesta.integration.vitex.bean.GuideInfoBean;
 import com.yaesta.integration.vitex.bean.InvoiceSchemaBean;
 import com.yaesta.integration.vitex.bean.SupplierDeliveryInfo;
@@ -592,7 +593,8 @@ public class OrderVitexService extends BaseVitexService {
 		return deliveryInfoList;
 	}
 	
-	public GuideInfoBean generateGuides(GuideInfoBean guideInfoBean){
+	public GuideContainerBean generateGuides(GuideInfoBean guideInfoBean){
+		GuideContainerBean result = new GuideContainerBean(); 
 		GuideInfoBean response = guideInfoBean;
 		List<GuideDTO> responseList = new ArrayList<GuideDTO>();
 		
@@ -618,7 +620,7 @@ public class OrderVitexService extends BaseVitexService {
 				guide.setCreateDate(new Date());
 				guide.setOrderVitexId(orderComplete.getOrderId());
 				guide.setVitexDispatcherId(gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getId()+"%"+gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getGuia());
-				guide.setGuideInfo(new Gson().toJson(guideDTO));
+				guide.setGuideInfo(new Gson().toJson(gbd));
 				guide.setOrder(order);
 				guide.setDeliveryCost(gbd.getDeliveryCost());
 				guide.setDeliveryPayment(gbd.getDeliveryPayment());
@@ -648,9 +650,9 @@ public class OrderVitexService extends BaseVitexService {
 			guideDTO=resultGuideInfo;
 		}
 		
+		result.setGuideInfoBean(response);
 		
-		
-		response.setGuides(responseList);
+		result.setGuides(responseList);
 		
 		List<MailInfo> mailInfoList= prepareMailOrder(orderComplete,supplierDeliveryInfoList);
 		
@@ -663,7 +665,7 @@ public class OrderVitexService extends BaseVitexService {
 			mailService.sendMailTemplate(mailInfo, "guideNotification.vm");	
 		}
 		
-		return response;
+		return result;
 	}
 
 	

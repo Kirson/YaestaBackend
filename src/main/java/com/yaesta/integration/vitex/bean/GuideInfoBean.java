@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.yaesta.integration.tramaco.dto.GuideDTO;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
 
 /**
@@ -22,7 +21,7 @@ public class GuideInfoBean implements Serializable {
 	private static final long serialVersionUID = 4355287434095411083L;
 	private OrderComplete orderComplete;
 	private List<SupplierDeliveryInfo> supplierDeliveryInfoList;
-	private List<GuideDTO> guides;
+	
 	private String error;
 	private List<String> guideIdList;
 	private List<String> errorList;
@@ -49,12 +48,7 @@ public class GuideInfoBean implements Serializable {
 	public void setSupplierDeliveryInfoList(List<SupplierDeliveryInfo> supplierDeliveryInfoList) {
 		this.supplierDeliveryInfoList = supplierDeliveryInfoList;
 	}
-	public List<GuideDTO> getGuides() {
-		return guides;
-	}
-	public void setGuides(List<GuideDTO> guides) {
-		this.guides = guides;
-	}
+	
 
 	public String getError() {
 		return error;

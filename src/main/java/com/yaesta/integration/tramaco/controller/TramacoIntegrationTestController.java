@@ -23,10 +23,10 @@ public class TramacoIntegrationTestController {
 	public ResponseEntity<GuideDTO> testPDF() {
 		GuideDTO guideInfo = new GuideDTO();
 		Guide guide = new Guide();
-		guide.setGuideDispatcherId("69%031002000386296");
-		guide.setVitexDispatcherId("69%031002000386296");
-		//guide.setGuideDispatcherId("70%031002000386297");
-		//guide.setVitexDispatcherId("70%031002000386297");
+		guide.setGuideDispatcherId("77%031002000386304");
+		guide.setVitexDispatcherId("77%031002000386304");
+		//guide.setGuideDispatcherId("72%031002000386299");
+		//guide.setVitexDispatcherId("72%031002000386299");
 		guide.setOrderVitexId("655503371336-01");
 		GuideBeanDTO gbd = new GuideBeanDTO();
 		gbd.setGuide(guide);

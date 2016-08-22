@@ -13,6 +13,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table(name = "guide_detail",schema="yaesta")
 public class GuideDetail implements Serializable {
@@ -47,6 +49,7 @@ public class GuideDetail implements Serializable {
 	@Column(name="item_info")
 	private String itemInfo;
 	
+	@JsonBackReference
 	@JoinColumn(name = "guide_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
 	private Guide guide;

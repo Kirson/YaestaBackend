@@ -238,11 +238,11 @@ public class DatilService implements Serializable{
 				for(PriceTag pt:ic.getPriceTags()){
 					if(pt.getName().contains("discount@price")){
 						Double val= pt.getValue();
-						if(val.intValue()<0){
+						if(val<0){
 							val = val* (-1);
 						}
 					    val = (double) Math.round(val * 100) / 100;
-					    discount = val;
+					    discount = Math.abs(val);
 					    it.setDescuento(discount);
 						//break;
 					}
@@ -256,12 +256,12 @@ public class DatilService implements Serializable{
 			}
 			
 			it.setDescuento(discount);
-			unitPrice = unitPrice - discount;
-			
+			//unitPrice = unitPrice - discount;
+			unitPrice = (double) Math.round(unitPrice * 100) / 100;
 			it.setPrecioUnitario(unitPrice);
 			
 			Impuesto_ iva = new Impuesto_();
-			if(ic.getTax().intValue()>0){
+			if(ic.getTax()>0){
 				iva.setValor(ic.getTax());
 			}else{
 				if(hasTax){
@@ -291,7 +291,7 @@ public class DatilService implements Serializable{
 			}
 			if(vtot.getId().equals("Shipping")){
 				subTotalShipping = subTotalShipping + vtot.getValue();
-				if(vtot.getValue().intValue()>0){
+				if(vtot.getValue()>0){
 				Item it = new Item();
 				it.setCantidad(1D);
 				it.setPrecioTotalSinImpuestos(vtot.getValue());
@@ -331,8 +331,8 @@ public class DatilService implements Serializable{
 				if(val<0){
 					val = val * (-1);
 				}
-				totales.setDescuento(val);
-				totales.setDescuentoAdicional(val);
+				totales.setDescuento(Math.abs(val));
+				totales.setDescuentoAdicional(Math.abs(val));
 				
 			}else if(tot.getId().equals("Shipping")){
 			  //NOTHING TODO
@@ -497,11 +497,11 @@ public class DatilService implements Serializable{
 				for(PriceTag pt:ic.getPriceTags()){
 					if(pt.getName().contains("discount@price")){
 						Double val= pt.getValue();
-						if(val.intValue()<0){
+						if(val<0){
 							val = val* (-1);
 						}
 					    val = (double) Math.round(val * 100) / 100;
-						discount=val;
+						discount=Math.abs(val);
 					    it.setDescuento(discount);
 						//break;
 					}
@@ -514,13 +514,14 @@ public class DatilService implements Serializable{
 				it.setDescuento(discount);
 			}
 			
-			unitPrice = unitPrice -discount;
+			//unitPrice = unitPrice -discount;
+			unitPrice = (double) Math.round(unitPrice * 100) / 100;
 			it.setDescuento(discount);
 			
 			it.setPrecioUnitario(unitPrice);
 			
 			Impuesto_ iva = new Impuesto_();
-			if(ic.getTax().intValue()>0){
+			if(ic.getTax()>0){
 				iva.setValor(ic.getTax());
 			}else{
 				if(hasTax){
@@ -550,27 +551,27 @@ public class DatilService implements Serializable{
 			}
 			if(vtot.getId().equals("Shipping")){
 				subTotalShipping = subTotalShipping + vtot.getValue();
-				if(vtot.getValue().intValue()>0){
-				Item it = new Item();
-				it.setCantidad(1D);
-				it.setPrecioTotalSinImpuestos(vtot.getValue());
-				it.setPrecioUnitario(vtot.getValue());
-				it.setDescripcion(vtot.getSpanishName());
-				it.setCodigoPrincipal(datilTransportCode);
-				it.setDescuento(0D);
+				if(vtot.getValue()>0){
+					Item it = new Item();
+					it.setCantidad(1D);
+					it.setPrecioTotalSinImpuestos(vtot.getValue());
+					it.setPrecioUnitario(vtot.getValue());
+					it.setDescripcion(vtot.getSpanishName());
+					it.setCodigoPrincipal(datilTransportCode);
+					it.setDescuento(0D);
 				
-				Impuesto_ iva = new Impuesto_();
-				iva.setValor(BaseUtil.calculateIVA(vtot.getValue(),new Integer(datilIvaValue),datilIvaPercentValue));
-				iva.setCodigo(datilIvaCode);
-				iva.setCodigoPorcentaje(datilIvaCodePercent);
-				iva.setBaseImponible(vtot.getValue());
-				iva.setTarifa(new Double(datilIvaValue));
-				subTotalIVAShipping=subTotalIVAShipping+iva.getValor();
-				List<Impuesto_> impuestos = new ArrayList<Impuesto_>();
-				impuestos.add(iva);
+					Impuesto_ iva = new Impuesto_();
+					iva.setValor(BaseUtil.calculateIVA(vtot.getValue(),new Integer(datilIvaValue),datilIvaPercentValue));
+					iva.setCodigo(datilIvaCode);
+					iva.setCodigoPorcentaje(datilIvaCodePercent);
+					iva.setBaseImponible(vtot.getValue());
+					iva.setTarifa(new Double(datilIvaValue));
+					subTotalIVAShipping=subTotalIVAShipping+iva.getValor();
+					List<Impuesto_> impuestos = new ArrayList<Impuesto_>();
+					impuestos.add(iva);
 				
-				it.setImpuestos(impuestos);
-				items.add(it);
+					it.setImpuestos(impuestos);
+					items.add(it);
 				}
 			}
 		}

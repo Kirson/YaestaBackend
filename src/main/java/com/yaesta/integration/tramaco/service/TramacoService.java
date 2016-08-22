@@ -19,6 +19,7 @@ import com.yaesta.app.persistence.entity.Supplier;
 import com.yaesta.app.persistence.entity.TramacoZone;
 import com.yaesta.app.persistence.repository.TramacoZoneRepository;
 import com.yaesta.app.persistence.service.TableSequenceService;
+import com.yaesta.app.util.SupplierUtil;
 import com.yaesta.integration.base.util.BaseUtil;
 import com.yaesta.integration.datil.json.enums.PagoEnum;
 import com.yaesta.integration.tramaco.dto.GuideBeanDTO;
@@ -326,17 +327,28 @@ public class TramacoService implements Serializable{
 						//*******//
 						EntityCarga carga = new EntityCarga();
 						carga.setBultos(sdi.getPackages().intValue());
+						Integer contrato = 0;
+						for(EntityContrato entityContrato:tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs().getLstContrato()){
+							contrato = entityContrato.getId();
+							if(contrato==2977){
+								break;
+							}
+						}
+						carga.setContrato(contrato);
 						
 						String desc = "";
 						Long ite = new Long(1);
 						Double itemValue =0D;
 						Double deliveryCost=0D;
+						Double totalValue = 0D;
+						Double totalAsegurado = 0D;
 						for(ItemComplete ic:sdi.getItems())
 						{
+							itemValue =0D;
 							System.out.println("Ite==>> "+ite);
 							ite++;
 							Dimension dim = (Dimension) ic.getAdditionalProperties().get("dimension");
-							
+						     	
 							if(dim!=null){
 								carga.setAlto(dim.getHeight());
 								carga.setAncho(dim.getWidth());
@@ -349,32 +361,26 @@ public class TramacoService implements Serializable{
 								carga.setLargo(0D);
 								carga.setPeso(0D);
 							}
-							Integer contrato = 0;
-							for(EntityContrato entityContrato:tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs().getLstContrato()){
-								contrato = entityContrato.getId();
-								if(contrato==2977){
-									break;
-								}
-							}
-							carga.setContrato(contrato);
-							desc = desc + " " + ic.getName();
+							String[] supplierCodes = SupplierUtil.returnSupplierCode((String)ic.getRefId());
+							desc = desc + "#Can. " + ic.getQuantity()+ " COD:"+ supplierCodes[2]+" _ ";
 							carga.setDescripcion(desc);
 							carga.setObservacion(observacionText);
 							
 							
 							itemValue = itemValue+ic.getPrice()*ic.getQuantity();
 							itemValue = (double) Math.round(itemValue * 100) / 100;
+							//System.out.println("1> "+itemValue+ " "+totalValue);
 							Double discount=0D;
 							Boolean hasTax = Boolean.FALSE;
 							if(ic.getPriceTags()!=null && !ic.getPriceTags().isEmpty()){
 								for(PriceTag pt:ic.getPriceTags()){
 									if(pt.getName().contains("discount@price")){
 										Double val= pt.getValue();
-										if(val.intValue()<0){
+										if(val<0){
 											val = val* (-1);
 										}
 									    val = (double) Math.round(val * 100) / 100;
-									    discount=val;
+									    discount=Math.abs(val);
 										//break;
 									}
 									if(pt.getName().contains("tax@price")){
@@ -394,8 +400,14 @@ public class TramacoService implements Serializable{
 								//carga.setValorCobro(0D);
 							}
 							Double iva = 0D;
+							totalAsegurado = totalAsegurado + itemValue;
+							totalAsegurado = (double) Math.round(totalAsegurado * 100) / 100;
 							itemValue = itemValue - discount;
-							if(ic.getTax().intValue()>0){
+							itemValue = (double) Math.round(itemValue * 100) / 100;
+							
+							//System.out.println("2> "+itemValue+ " "+totalValue);
+							
+							if(ic.getTax()>0){
 								iva=ic.getTax();
 							}else{
 								if(hasTax){
@@ -403,13 +415,17 @@ public class TramacoService implements Serializable{
 								}
 							}
 							itemValue = itemValue + iva;
+							itemValue = (double) Math.round(itemValue * 100) / 100;
 							
+							//System.out.println("3> "+itemValue+ " "+totalValue);
+							totalValue = totalValue+itemValue;
+							totalValue = (double) Math.round(totalValue * 100) / 100;
 							if(hasAdjunto){
 								carga.setAdjuntos(Boolean.TRUE);
 								String codigoAdjunto =  getTramacoAdjCode();
 								System.out.println("Codigo Adjunto "+codigoAdjunto);
 								carga.setCodigoAdjunto(codigoAdjunto);
-								carga.setValorCobro(itemValue);
+								carga.setValorCobro(totalValue);
 							}else{
 								carga.setAdjuntos(Boolean.FALSE);
 								System.out.println("No hay adjunto");
@@ -419,7 +435,7 @@ public class TramacoService implements Serializable{
 							
 							
 							carga.setProducto(1);
-							carga.setValorAsegurado(itemValue);
+							carga.setValorAsegurado(totalAsegurado);
 							carga.setLocalidad(0);
 							carga.setGuia(guideInfo.getOrderComplete().getOrderId());
 						

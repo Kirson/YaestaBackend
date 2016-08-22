@@ -16,6 +16,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table(name = "order_item",schema="yaesta")
 public class OrderItem implements Serializable{
@@ -55,6 +57,7 @@ public class OrderItem implements Serializable{
 	@Column(name="value_receivables")  //precio que se cobra en caso de pago contra entrega
 	private Double valueReceivables;
 	
+	@JsonBackReference
 	@JoinColumn(name = "order_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
 	private Order order;

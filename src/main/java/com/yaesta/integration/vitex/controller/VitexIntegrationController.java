@@ -16,6 +16,7 @@ import com.yaesta.integration.datil.json.bean.FacturaRespuestaSRI;
 import com.yaesta.integration.datil.json.bean.NotaCreditoRespuesta;
 import com.yaesta.integration.datil.service.DatilService;
 import com.yaesta.integration.vitex.bean.CreditNoteBean;
+import com.yaesta.integration.vitex.bean.GuideContainerBean;
 import com.yaesta.integration.vitex.bean.GuideInfoBean;
 import com.yaesta.integration.vitex.bean.OrderCompleteBean;
 import com.yaesta.integration.vitex.json.bean.InvoiceResponse;
@@ -151,9 +152,9 @@ public class VitexIntegrationController {
 	}
 	
 	@RequestMapping(value = "/generateGuide", method = RequestMethod.POST)
-	public ResponseEntity<GuideInfoBean> generateGuide(@RequestBody GuideInfoBean guideInfoBean){
+	public ResponseEntity<GuideContainerBean> generateGuide(@RequestBody GuideInfoBean guideInfoBean){
 		
-		GuideInfoBean response = new GuideInfoBean();
+		GuideContainerBean response = new GuideContainerBean();
 		response = orderVitexService.generateGuides(guideInfoBean);
 		
 		/*
@@ -165,7 +166,7 @@ public class VitexIntegrationController {
 		}*/
 		
 		
-		return new ResponseEntity<GuideInfoBean>(response, HttpStatus.OK);
+		return new ResponseEntity<GuideContainerBean>(response, HttpStatus.OK);
 	}
 	
 	
