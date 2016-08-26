@@ -14,6 +14,9 @@ import com.yaesta.app.persistence.entity.ClienteBodega;
 import com.yaesta.app.persistence.entity.TramacoZone;
 import com.yaesta.app.persistence.repository.ClientRepository;
 import com.yaesta.app.persistence.repository.ClienteBodegaRepository;
+import com.yaesta.app.persistence.vo.ClientVO;
+import com.yaesta.app.persistence.vo.ClientWarehouseVO;
+import com.yaesta.app.util.ClientUtil;
 import com.yaesta.integration.vitex.json.bean.OrderBean;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
 import com.yaesta.integration.vitex.json.bean.OrderSchema;
@@ -145,7 +148,7 @@ public class ClientService {
 				nCb.setRazonSocial(cl.getClientName());
 				nCb.setDireccionEntrega(cl.getAddress());
 				nCb.setNombreVia(cl.getAddress());
-				nCb.setUbicacionGeografia(cl.getGeoZone());
+				//nCb.setUbicacionGeografica(cl.getGeoZone());
 				nCb.setNuevo("S");
 				nCb.setFechaCreacion(new Date());
 				clienteBodegaRepository.save(nCb);
@@ -158,4 +161,37 @@ public class ClientService {
 		return response;
 	}
 	
+	
+	public List<ClienteBodega> getNewToWarehouse(){
+		List<ClienteBodega> newList = new ArrayList<ClienteBodega>();
+		
+		newList=clienteBodegaRepository.findByNuevo("S");
+		
+		return newList;
+	}
+	
+	public List<ClientWarehouseVO> getNewClient(){
+		List<ClientWarehouseVO> result = new ArrayList<ClientWarehouseVO>();
+		List<ClienteBodega> query = getNewToWarehouse();
+		if(query!=null && !query.isEmpty()){
+			for(ClienteBodega cb:query){
+				ClientWarehouseVO cw = ClientUtil.fromClienteBodegaToClientWarehouse(cb);
+				result.add(cw);
+			}
+		}
+		return result;
+	}
+	
+	public List<ClientVO> getAllVO(){
+		List<ClientVO> result = new ArrayList<ClientVO>();
+		List<Client> query = this.getClients();
+		if(query!=null && !query.isEmpty()){
+			for(Client c:query){
+				ClientVO cvo = ClientUtil.fromClientToClientVO(c);
+				result.add(cvo);
+			}
+		}
+		
+		return result;
+	}
 }

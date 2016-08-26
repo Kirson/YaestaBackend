@@ -20,6 +20,7 @@ import com.yaesta.app.persistence.entity.TramacoZone;
 import com.yaesta.app.persistence.repository.TramacoZoneRepository;
 import com.yaesta.app.persistence.service.TableSequenceService;
 import com.yaesta.app.util.SupplierUtil;
+import com.yaesta.integration.base.enums.DeliveryEnum;
 import com.yaesta.integration.base.util.BaseUtil;
 import com.yaesta.integration.datil.json.enums.PagoEnum;
 import com.yaesta.integration.tramaco.dto.GuideBeanDTO;
@@ -178,16 +179,21 @@ public class TramacoService implements Serializable{
 				//Obtener informacion para la guia
 				ServicioGenerarGuias cliente = new ServicioGenerarGuias(url);
 
-				
 				//***Cargar el destinatario al inicio***//
 				EntityActor destinatario = new EntityActor();
 				destinatario.setApellidos(guideInfo.getOrderComplete().getClientProfileData().getLastName());
 				destinatario.setCallePrimaria(guideInfo.getOrderComplete().getShippingData().getAddress().getStreet());
-				if(guideInfo.getOrderComplete().getShippingData().getAddress().getComplement()!=null){
-					destinatario.setCalleSecundaria(guideInfo.getOrderComplete().getShippingData().getAddress().getComplement());
+				String complemento=guideInfo.getOrderComplete().getShippingData().getAddress().getComplement();
+				
+				if(complemento!=null){
+					if(complemento.length()>150){
+						complemento=complemento.substring(0,149);
+					}
+					destinatario.setCalleSecundaria(complemento);
 				}else{
 					destinatario.setCalleSecundaria("");
 				}
+				
 				if(guideInfo.getOrderComplete().getClientProfileData().getDocument()!=null){
 					destinatario.setCiRuc(guideInfo.getOrderComplete().getClientProfileData().getDocument());
 				}else{
@@ -280,7 +286,7 @@ public class TramacoService implements Serializable{
 					
 					List<String> errorInfo = this.validateSupplierInfo(sdi.getSupplier());
 					
-					if(errorInfo.isEmpty()){
+					if(errorInfo.isEmpty() && sdi.getSelected() && sdi.getDelivery()!=null && sdi.getDelivery().getNemonic().equals(DeliveryEnum.TRAMACO.getNemonic())){
 											
 					   /**
 						* Datos de entrada
@@ -380,8 +386,17 @@ public class TramacoService implements Serializable{
 											val = val* (-1);
 										}
 									    val = (double) Math.round(val * 100) / 100;
-									    discount=Math.abs(val);
+									    discount=discount+Math.abs(val);
 										//break;
+									}
+									if(pt.getName().contains("DISCOUNT@MARKETPLACE"))
+									{
+										Double val= pt.getValue();
+										if(val<0){
+											val = val* (-1);
+										}
+									    val = (double) Math.round(val * 100) / 100;
+									    discount=discount+Math.abs(val);
 									}
 									if(pt.getName().contains("tax@price")){
 										hasTax=Boolean.TRUE;
@@ -414,13 +429,15 @@ public class TramacoService implements Serializable{
 									iva=BaseUtil.calculateIVA(itemValue,new Integer(datilIvaValue),datilIvaPercentValue);
 								}
 							}
-							itemValue = itemValue + iva;
+							if(itemValue.intValue()>0){
+								itemValue = itemValue + iva;
+							}
 							itemValue = (double) Math.round(itemValue * 100) / 100;
 							
 							//System.out.println("3> "+itemValue+ " "+totalValue);
 							totalValue = totalValue+itemValue;
 							totalValue = (double) Math.round(totalValue * 100) / 100;
-							if(hasAdjunto){
+							if(hasAdjunto && itemValue.intValue()>0){
 								carga.setAdjuntos(Boolean.TRUE);
 								String codigoAdjunto =  getTramacoAdjCode();
 								System.out.println("Codigo Adjunto "+codigoAdjunto);
@@ -496,7 +513,7 @@ public class TramacoService implements Serializable{
 					
 					}//no hay error en informacion de proveedor
 					else{
-						System.out.println("Erorr en informacion de proveedor "+sdi.getSupplier().getName());
+						System.out.println("Error en informacion de proveedor "+sdi.getSupplier().getName());
 						response = "Error";
 						guideInfo.setErrorList(errorInfo);
 						for(String e:errorInfo){
@@ -507,7 +524,7 @@ public class TramacoService implements Serializable{
 					//Por cada proveedor llamar al servicio de guias
 					
 					
-				}//for de supplir delivery info
+				}//for de supplier delivery info
 			
 			}//response de servicio auth
 			else{
@@ -669,10 +686,11 @@ public class TramacoService implements Serializable{
 					System.out.println("CODIGO:"+ respuestaTrackGuiaWs.getCuerpoRespuesta().getCodigo());
 					System.out.println("MENSAJE:" +	respuestaTrackGuiaWs.getCuerpoRespuesta().getMensaje());
 					System.out.println("EXCEPCION:" +respuestaTrackGuiaWs.getCuerpoRespuesta().getExcepcion());
+					
 				}
 				if (respuestaTrackGuiaWs.getLstSalidaTrackGuiaWs() != null) {
 					for (SalidaTrackGuiaWs trackGuia : respuestaTrackGuiaWs.getLstSalidaTrackGuiaWs()) {
-						System.out.println("FECHA_HORA:" + trackGuia.getFechaHora() + " DESCRIPCION:" +trackGuia.getDescripcion());
+						System.out.println("FECHA_HORA:" + trackGuia.getFechaHora() + " DESCRIPCION:" +trackGuia.getDescripcion() );
 					}
 				}
 				guideInfo.getGuideBean().setGuideTrackResponse(respuestaTrackGuiaWs);

@@ -3,6 +3,8 @@ package com.yaesta.app.persistence.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +45,35 @@ public class CatalogService {
 		}
 		
 		return result;
+	}
+	/**
+	 * 
+	 * @param catalog
+	 * @param details
+	 * @param removeList
+	 * @return
+	 */
+	@Transactional
+	public Catalog save(Catalog catalog, List<Catalog>details, List<Catalog> removeList){
+		
+		
+		if(removeList!=null && !removeList.isEmpty()){
+			for(Catalog cm:removeList){
+				catalogRepository.delete(cm);
+			}
+		}
+		
+		catalog = catalogRepository.save(catalog);
+		
+		
+		if(details!=null && !details.isEmpty()){
+			for(Catalog c:details){
+				c.setMainCatalog(catalog);
+				catalogRepository.save(c);
+			}
+		}
+		
+		return catalog;
 	}
 	
 	

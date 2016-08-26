@@ -10,10 +10,12 @@ import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.yaesta.app.auth.JwtFilter;
 import com.yaesta.app.controller.AppErrorController;
 
+@EnableScheduling
 @SpringBootApplication
 @EnableAutoConfiguration
 @ComponentScan(basePackages = {"com.yaesta","it.ozimov.springboot"})

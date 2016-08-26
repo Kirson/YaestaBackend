@@ -46,9 +46,6 @@ public class Guide implements Serializable{
 	@Column(name = "order_vitex_id")
 	private String orderVitexId;
 	
-	@Column(name = "guide_dispatcher_id")
-	private String guideDispatcherId;
-	
 	@Column(name = "vitex_dispatcher_id")
 	private String vitexDispatcherId;
 	
@@ -204,13 +201,7 @@ public class Guide implements Serializable{
 		this.orderVitexId = orderVitexId;
 	}
 
-	public String getGuideDispatcherId() {
-		return guideDispatcherId;
-	}
-
-	public void setGuideDispatcherId(String guideDispatcherId) {
-		this.guideDispatcherId = guideDispatcherId;
-	}
+	
 
 	public String getVitexDispatcherId() {
 		return vitexDispatcherId;

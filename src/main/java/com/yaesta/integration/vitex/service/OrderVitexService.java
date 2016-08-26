@@ -6,11 +6,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-/*
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-*/
+
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -35,6 +31,7 @@ import com.yaesta.app.mail.ItemInfo;
 import com.yaesta.app.mail.MailInfo;
 import com.yaesta.app.mail.MailParticipant;
 import com.yaesta.app.mail.MailService;
+import com.yaesta.app.persistence.entity.Catalog;
 import com.yaesta.app.persistence.entity.Guide;
 import com.yaesta.app.persistence.entity.Order;
 import com.yaesta.app.persistence.entity.OrderItem;
@@ -44,9 +41,10 @@ import com.yaesta.app.persistence.repository.SupplierContactRepository;
 import com.yaesta.app.persistence.service.GuideService;
 import com.yaesta.app.persistence.service.OrderService;
 import com.yaesta.app.persistence.service.SupplierService;
-import com.yaesta.app.persistence.util.HibernateProxyTypeAdapter;
+import com.yaesta.app.persistence.util.YaestaTypeAdapter;
 import com.yaesta.app.util.SupplierUtil;
 import com.yaesta.app.util.UtilDate;
+import com.yaesta.integration.base.enums.DeliveryEnum;
 import com.yaesta.integration.base.util.BaseUtil;
 import com.yaesta.integration.datil.json.bean.FacturaConsulta;
 import com.yaesta.integration.datil.json.bean.FacturaRespuestaSRI;
@@ -453,6 +451,14 @@ public class OrderVitexService extends BaseVitexService {
 			
 			for(ItemComplete ic:response.getItems()){
 				ItemComplete itc = ic;
+				try{
+					String refId = (String)ic.getRefId();
+					String[] supplierCode = SupplierUtil.returnSupplierCode(refId);
+					Supplier sp = supplierService.findById(new Long(supplierCode[0]));
+					itc.setSupplierName(sp.getName());
+				}catch(Exception e){
+					//Nothing TODO.
+				}
 				itc.setDiscount(partialDiscount.doubleValue());
 				itc.setSellingPrice(partialSellerPrice.doubleValue());
 				icList.add(itc);
@@ -541,7 +547,9 @@ public class OrderVitexService extends BaseVitexService {
 		
 		GsonBuilder gBuilder = new GsonBuilder();
 
-		gBuilder.registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
+		gBuilder.registerTypeAdapter(OrderComplete.class, new YaestaTypeAdapter<OrderComplete>());
+		
+		System.out.println("Order Complete " + orderComplete.getOrderId());
 
 		Gson gson = gBuilder.create();
 
@@ -752,7 +760,8 @@ public class OrderVitexService extends BaseVitexService {
 		List<MailInfo> mailInfoList= new ArrayList<MailInfo>();
 		
 		for(SupplierDeliveryInfo sdi:supplierDeliveryInfoList){
-			
+		
+			if(sdi.getSelected()){
 			MailInfo mailInfo = new MailInfo();
 			
 			MailParticipant sender = new MailParticipant();
@@ -771,15 +780,16 @@ public class OrderVitexService extends BaseVitexService {
 			mpCc.setEmail(mailCc);
 			mpCc.setName(mailCcName);
 			receiverTotal.add(mpCc);
+			if( sdi.getDelivery()!=null && sdi.getDelivery().getNemonic().equals(DeliveryEnum.TRAMACO.getNemonic())){
+				String[] contactsCourierNames = tramacoContactsNames.split("%");
+				String[] contactsCourierEmails = tramacoContacts.split("%");
 			
-			String[] contactsCourierNames = tramacoContactsNames.split("%");
-			String[] contactsCourierEmails = tramacoContacts.split("%");
-			
-			for(int j=0;j<contactsCourierNames.length;j++){
-				MailParticipant mpCourier = new MailParticipant();
-				mpCourier.setEmail(contactsCourierEmails[j]);
-				mpCourier.setName(contactsCourierNames[j]);
-				receiverTotal.add(mpCourier);
+				for(int j=0;j<contactsCourierNames.length;j++){
+					MailParticipant mpCourier = new MailParticipant();
+					mpCourier.setEmail(contactsCourierEmails[j]);
+					mpCourier.setName(contactsCourierNames[j]);
+					receiverTotal.add(mpCourier);
+				}
 			}
 			
 			List<MailParticipant> recSupplierList = new ArrayList<MailParticipant>();
@@ -821,13 +831,15 @@ public class OrderVitexService extends BaseVitexService {
 				}
 			}
 			
-		
+		    String subject = "Notificación de pedido " + " - Orden: "+orderComplete.getOrderId() + " - Proveedor: "+supplier.getName();
 			receiverTotal.addAll(recSupplierList);	
 			mailInfo.setReceivers(receiverTotal);
-			mailInfo.setGeneralText(mailTextGuide);
+			String strMailTextGuide = mailTextGuide;
+			strMailTextGuide = strMailTextGuide.replace(mailTextGuideToken, determineDeliveryName(sdi.getDelivery()));
+			mailInfo.setGeneralText(strMailTextGuide);
 			mailInfo.setRefId(supplier.getId());
 			mailInfo.setRefVtexId(orderComplete.getOrderId());
-			mailInfo.setSubject("Notificacion de pedido");
+			mailInfo.setSubject(subject);
 			
 			//Agregar textos de guia
 			mailInfo.getTextList().add(mailTextGuide2);
@@ -841,7 +853,9 @@ public class OrderVitexService extends BaseVitexService {
 			mailInfo.getTextList().add(mailTextGuide8);
 			
 			mailInfoList.add(mailInfo);
-		}
+		
+			}
+		}//fin del for
 		
 		
 		
@@ -1102,11 +1116,23 @@ public class OrderVitexService extends BaseVitexService {
 				orderService.saveOrderItem(oi);
 			}
 		}
-          order.setStatus("1");
+          order.setHasItems("1");
         }
 		orderService.saveOrder(order);
 	}
    
 
+	private String determineDeliveryName(Catalog delivery){
+		String result = "";
+		if(delivery!=null){
+			for(DeliveryEnum de:DeliveryEnum.values()){
+				if(de.getNemonic().equals(delivery.getNemonic())){
+					result=delivery.getName();
+					break;
+				}
+			}
+		}
+		return result;
+	}
   
 }

@@ -1,7 +1,10 @@
 package com.yaesta.app.persistence.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -10,8 +13,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "catalog",schema="yaesta")
@@ -39,9 +46,19 @@ public class Catalog implements Serializable{
 	@Column(name = "vitex_id")
 	private String vitexId;
 	
+	@JsonBackReference
 	@JoinColumn(name = "catalog_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
 	private Catalog mainCatalog;
+	
+	@OneToMany(mappedBy = "mainCatalog", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Column(nullable = true)
+	@JsonManagedReference
+	private List<Catalog> details;
+	
+	public Catalog(){
+		details = new ArrayList<Catalog>();
+	}
 
 	public Long getId() {
 		return id;
@@ -91,6 +108,16 @@ public class Catalog implements Serializable{
 
 	public void setNemonic(String nemonic) {
 		this.nemonic = nemonic;
+	}
+	
+	
+
+	public List<Catalog> getDetails() {
+		return details;
+	}
+
+	public void setDetails(List<Catalog> details) {
+		this.details = details;
 	}
 
 	@Override

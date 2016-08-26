@@ -49,7 +49,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "unitMultiplier",
     "sellingPrice",
     "isGift",
-    "shippingPrice"
+    "shippingPrice",
+    "supplierName"
 })
 public class ItemComplete implements Serializable{
 
@@ -119,6 +120,8 @@ public class ItemComplete implements Serializable{
     private Double shippingPrice;
     @JsonProperty("discount")
     private Double discount;
+    @JsonProperty("supplierName")
+    private String supplierName;
     
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -772,6 +775,17 @@ public class ItemComplete implements Serializable{
     @JsonProperty("discount")
 	public void setDiscount(Double discount) {
 		this.discount = discount;
+	}
+    
+    
+    @JsonProperty("supplierName")
+	public String getSupplierName() {
+		return supplierName;
+	}
+
+    @JsonProperty("supplierName")
+	public void setSupplierName(String supplierName) {
+		this.supplierName = supplierName;
 	}
 
 	@JsonAnyGetter

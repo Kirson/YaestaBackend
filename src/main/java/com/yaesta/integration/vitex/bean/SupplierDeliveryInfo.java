@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.yaesta.app.persistence.entity.Catalog;
 import com.yaesta.app.persistence.entity.Supplier;
 import com.yaesta.integration.vitex.json.bean.ItemComplete;
 
@@ -24,6 +25,9 @@ public class SupplierDeliveryInfo implements Serializable{
 	private String strDeliveryDate;
 	private Long packages;
 	private List<ItemComplete> items;
+	private Boolean selected;
+	private Catalog delivery;
+	private String deliveryId;
 	
 	
 	public SupplierDeliveryInfo(){
@@ -32,6 +36,7 @@ public class SupplierDeliveryInfo implements Serializable{
 		deliveryDate = new Date();
 		DateFormat f = new SimpleDateFormat("yyyy-MM-dd");
 		strDeliveryDate = f.format(deliveryDate);
+		selected = Boolean.TRUE;
 	}
 	
 	public String getSupplierId() {
@@ -71,6 +76,30 @@ public class SupplierDeliveryInfo implements Serializable{
 
 	public void setStrDeliveryDate(String strDeliveryDate) {
 		this.strDeliveryDate = strDeliveryDate;
+	}
+
+	public Boolean getSelected() {
+		return selected;
+	}
+
+	public void setSelected(Boolean selected) {
+		this.selected = selected;
+	}
+
+	public Catalog getDelivery() {
+		return delivery;
+	}
+
+	public void setDelivery(Catalog delivery) {
+		this.delivery = delivery;
+	}
+
+	public String getDeliveryId() {
+		return deliveryId;
+	}
+
+	public void setDeliveryId(String deliveryId) {
+		this.deliveryId = deliveryId;
 	}
 	
 	

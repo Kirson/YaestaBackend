@@ -7,12 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yaesta.app.persistence.entity.Catalog;
 import com.yaesta.app.persistence.service.CatalogService;
+import com.yaesta.app.persistence.vo.CatalogVO;
 
 @RestController
 @RequestMapping(value = "/catalog")
@@ -55,5 +57,13 @@ public class CatalogController {
 	    }else{
 	    	return new ResponseEntity<List<Catalog>>(new ArrayList<Catalog>(),HttpStatus.OK);
 	    }
+	}
+	
+	@RequestMapping(value = "/save", method = RequestMethod.POST)
+	public ResponseEntity<Catalog> s(@RequestBody CatalogVO catalogVO){
+		
+		Catalog response = catalogService.save(catalogVO.getCatalog(), catalogVO.getDetailList(), catalogVO.getRemoveList());
+		
+		return new ResponseEntity<Catalog>(response,HttpStatus.OK);
 	}
 }

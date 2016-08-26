@@ -36,7 +36,7 @@ public class ClienteBodega implements Serializable {
 	private String direccionEntrega;
 	
 	@Column(name="ubicacion_geografica")
-	private String ubicacionGeografia;
+	private String ubicacionGeografica;
 	
 	@Column(name="fecha_creacion")
 	@Temporal(TemporalType.TIMESTAMP)
@@ -44,6 +44,10 @@ public class ClienteBodega implements Serializable {
 	
 	@Column(name="nuevo")
 	private String nuevo;
+	
+	public ClienteBodega(){
+		ubicacionGeografica="170150";
+	}
 
 	public String getCodigo() {
 		return codigo;
@@ -77,12 +81,12 @@ public class ClienteBodega implements Serializable {
 		this.direccionEntrega = direccionEntrega;
 	}
 
-	public String getUbicacionGeografia() {
-		return ubicacionGeografia;
+	public String getUbicacionGeografica() {
+		return ubicacionGeografica;
 	}
 
-	public void setUbicacionGeografia(String ubicacionGeografia) {
-		this.ubicacionGeografia = ubicacionGeografia;
+	public void setUbicacionGeografica(String ubicacionGeografica) {
+		this.ubicacionGeografica = ubicacionGeografica;
 	}
 
 	public Date getFechaCreacion() {
