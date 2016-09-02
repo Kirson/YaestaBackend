@@ -1,11 +1,13 @@
 package com.yaesta.app.persistence.controller;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.yaesta.app.persistence.entity.Order;
 import com.yaesta.app.persistence.entity.OrderItem;
 import com.yaesta.app.persistence.service.OrderService;
+import com.yaesta.app.persistence.vo.DateRangeVO;
 import com.yaesta.app.persistence.vo.OrderItemBeanVO;
 
 @RestController
@@ -43,6 +46,23 @@ public class OrderController {
 			return new ResponseEntity<List<OrderItem>>(new ArrayList<OrderItem>(),HttpStatus.OK);
 		}
 	}
+	
+	@RequestMapping(value = "/getItemsByRange/{startDate}/{finishDate}", method = RequestMethod.GET)
+	public ResponseEntity<List<OrderItem>> getItemsByRange(@PathVariable("startDate") Date startDate,@PathVariable("finishDate") Date finishDate){
+		
+		DateRangeVO dateRange = new DateRangeVO();
+		
+		dateRange.setStartDate(startDate);
+		dateRange.setFinishDate(finishDate);
+		List<OrderItem> found = orderService.findByDateRange(dateRange);
+		
+		if(found!=null && !found.isEmpty()){
+			return new ResponseEntity<List<OrderItem>>(found,HttpStatus.OK);
+		}else{
+			return new ResponseEntity<List<OrderItem>>(new ArrayList<OrderItem>(),HttpStatus.OK);
+		}
+	}
+	
 	
 	@RequestMapping(value = "/getAllItemsVO", method = RequestMethod.GET)
 	public ResponseEntity<List<OrderItemBeanVO>> getAllItemsVO(){

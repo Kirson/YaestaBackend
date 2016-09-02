@@ -35,6 +35,10 @@ public class CatalogService {
 	}
 	
 	
+	public Catalog findById(Long id){
+		return catalogRepository.findOne(id);
+	}
+	
 	public List<Catalog> findByParentNemonic(String nemonic){
 		List<Catalog> result = new ArrayList<Catalog>();
 		List<Catalog> parentList = catalogRepository.findByNemonic(nemonic);

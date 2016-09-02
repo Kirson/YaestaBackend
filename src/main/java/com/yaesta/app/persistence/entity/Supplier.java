@@ -6,12 +6,9 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -30,8 +27,6 @@ public class Supplier implements Serializable{
 	private static final long serialVersionUID = 4505763694357162649L;
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "supplier_id_seq")
-	@SequenceGenerator(name = "supplier_id_seq", sequenceName = "yaesta.supplier_id_seq",allocationSize=1)
 	private Long id;
 	
 	@Column(name = "name")
@@ -125,9 +120,44 @@ public class Supplier implements Serializable{
 	@Column(name="found")
 	private Boolean found;
 	
+	@JoinColumn(name = "category_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+	private Catalog category;
+	
+	@JoinColumn(name = "bank_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+	private Catalog bank;
+	
+	@JoinColumn(name = "account_type_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+	private Catalog accountType;
+	
+	@Column(name="account_name")
+	private String accountName;
+	
+	@Column(name="account_number")
+	private String accountNumber;
+	
+	@Column(name="account_email")
+	private String accountEmail;
+	
+	@Column(name="is_new")
+	private Boolean isNew;
+	
+	@JoinColumn(name = "product_list_status_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+	private Catalog productListStatus;
+	
+	@JoinColumn(name = "supplier_status_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+	private Catalog supplierStatus;
 	
 	@Transient
 	private String shippingAddress;
+	
+	public Supplier(){
+		isNew = Boolean.TRUE;
+	}
 
 	public Long getId() {
 		return id;
@@ -369,6 +399,58 @@ public class Supplier implements Serializable{
 	public void setFound(Boolean found) {
 		this.found = found;
 	}
+	
+	
+
+	public Catalog getCategory() {
+		return category;
+	}
+
+	public void setCategory(Catalog category) {
+		this.category = category;
+	}
+
+	public Catalog getBank() {
+		return bank;
+	}
+
+	public void setBank(Catalog bank) {
+		this.bank = bank;
+	}
+
+	public Catalog getAccountType() {
+		return accountType;
+	}
+
+	public void setAccountType(Catalog accountType) {
+		this.accountType = accountType;
+	}
+
+	public String getAccountName() {
+		return accountName;
+	}
+
+	public void setAccountName(String accountName) {
+		this.accountName = accountName;
+	}
+
+	public String getAccountNumber() {
+		return accountNumber;
+	}
+
+	public void setAccountNumber(String accountNumber) {
+		this.accountNumber = accountNumber;
+	}
+	
+	
+
+	public String getAccountEmail() {
+		return accountEmail;
+	}
+
+	public void setAccountEmail(String accountEmail) {
+		this.accountEmail = accountEmail;
+	}
 
 	public String getShippingAddress() {
 		
@@ -394,6 +476,34 @@ public class Supplier implements Serializable{
 
 	public void setShippingAddress(String shippingAddress) {
 		this.shippingAddress = shippingAddress;
+	}
+	
+	
+
+	public Boolean getIsNew() {
+		return isNew;
+	}
+
+	public void setIsNew(Boolean isNew) {
+		this.isNew = isNew;
+	}
+	
+	
+
+	public Catalog getProductListStatus() {
+		return productListStatus;
+	}
+
+	public void setProductListStatus(Catalog productListStatus) {
+		this.productListStatus = productListStatus;
+	}
+
+	public Catalog getSupplierStatus() {
+		return supplierStatus;
+	}
+
+	public void setSupplierStatus(Catalog supplierStatus) {
+		this.supplierStatus = supplierStatus;
 	}
 
 	@Override

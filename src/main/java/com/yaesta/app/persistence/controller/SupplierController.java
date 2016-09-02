@@ -14,9 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yaesta.app.persistence.entity.Supplier;
 import com.yaesta.app.persistence.entity.SupplierContact;
+import com.yaesta.app.persistence.entity.TramacoZone;
 import com.yaesta.app.persistence.service.AddressService;
 import com.yaesta.app.persistence.service.SupplierService;
+import com.yaesta.app.persistence.service.TramacoZoneService;
 import com.yaesta.app.persistence.vo.SupplierVO;
+import com.yaesta.app.persistence.vo.ProvinciaVO;
 
 @RestController
 @RequestMapping(value = "/supplier")
@@ -27,6 +30,9 @@ public class SupplierController {
 	
 	@Autowired
 	AddressService addressService;
+	
+	@Autowired
+	TramacoZoneService tramacoZoneService;
 	
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET)
 	public  ResponseEntity<List<Supplier>> getAll(){
@@ -107,6 +113,30 @@ public class SupplierController {
 		Supplier response = supplierService.save(supplierVO.getSupplier(), null, supplierVO.getContactList(),supplierVO.getRemoveContactList());
 		
 		return new ResponseEntity<Supplier>(response,HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/getZones", method = RequestMethod.GET)
+	public  ResponseEntity<List<ProvinciaVO>> getZones(){
+		
+		List<ProvinciaVO> found = tramacoZoneService.findZones();
+	
+	    if(found!=null && !found.isEmpty()){
+	    	return new ResponseEntity<List<ProvinciaVO>>(found, HttpStatus.OK);
+	    }else{
+	    	return new ResponseEntity<List<ProvinciaVO>>(new ArrayList<ProvinciaVO>(),HttpStatus.OK);
+	    }
+	}
+	
+	@RequestMapping(value = "/getTramacoZones", method = RequestMethod.GET)
+	public  ResponseEntity<List<TramacoZone>> getTramacoZones(){
+		
+		List<TramacoZone> found = tramacoZoneService.getAll();
+	
+	    if(found!=null && !found.isEmpty()){
+	    	return new ResponseEntity<List<TramacoZone>>(found, HttpStatus.OK);
+	    }else{
+	    	return new ResponseEntity<List<TramacoZone>>(new ArrayList<TramacoZone>(),HttpStatus.OK);
+	    }
 	}
 
 }

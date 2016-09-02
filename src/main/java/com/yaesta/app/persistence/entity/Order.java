@@ -86,6 +86,17 @@ public class Order implements Serializable{
 	@Column(name="has_Items")
 	private String hasItems;
 	
+	@JoinColumn(name = "motive_cancel_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+	private Catalog motiveCancel;
+	
+	@Column(name="motive_cancel_text")
+	private String motiveCancelText;
+	
+	@Column(name="cancel_date",columnDefinition="TIMESTAMP WITH TIME ZONE")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date cancelDate;
+	
 	public Order(){
 		this.status = "registered";
 		this.hasItems = "0";
@@ -208,6 +219,32 @@ public class Order implements Serializable{
 
 	public void setHasItems(String hasItems) {
 		this.hasItems = hasItems;
+	}
+	
+	
+
+	public Catalog getMotiveCancel() {
+		return motiveCancel;
+	}
+
+	public void setMotiveCancel(Catalog motiveCancel) {
+		this.motiveCancel = motiveCancel;
+	}
+
+	public String getMotiveCancelText() {
+		return motiveCancelText;
+	}
+
+	public void setMotiveCancelText(String motiveCancelText) {
+		this.motiveCancelText = motiveCancelText;
+	}
+
+	public Date getCancelDate() {
+		return cancelDate;
+	}
+
+	public void setCancelDate(Date cancelDate) {
+		this.cancelDate = cancelDate;
 	}
 
 	@Override

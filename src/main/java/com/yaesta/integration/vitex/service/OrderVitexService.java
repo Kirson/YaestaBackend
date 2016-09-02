@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-
+import javax.transaction.Transactional;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -15,6 +15,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.MultivaluedHashMap;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +39,7 @@ import com.yaesta.app.persistence.entity.OrderItem;
 import com.yaesta.app.persistence.entity.Supplier;
 import com.yaesta.app.persistence.entity.SupplierContact;
 import com.yaesta.app.persistence.repository.SupplierContactRepository;
+import com.yaesta.app.persistence.service.CatalogService;
 import com.yaesta.app.persistence.service.GuideService;
 import com.yaesta.app.persistence.service.OrderService;
 import com.yaesta.app.persistence.service.SupplierService;
@@ -127,6 +129,9 @@ public class OrderVitexService extends BaseVitexService {
 	
 	@Autowired
 	private DatilService datilService;
+	
+	@Autowired
+	private CatalogService catalogService;
 
 	private Client client;
 	private WebTarget target;
@@ -498,18 +503,21 @@ public class OrderVitexService extends BaseVitexService {
 		myHeaders.add(vitexRestTokenName, vitexRestToken);
 		String json = target.request(MediaType.TEXT_PLAIN).headers(myHeaders).get(String.class);
 		String email = "";
-		if(json!=null){
-			json = json.substring(1,json.length());
-			json = json.substring(0,json.length()-1);
-			System.out.println("json "+ json);
-			String [] partZero = json.split("\"to\":");
-			String [] partOne = partZero[1].split("\"email\":");
-			String [] emailData = partOne[1].split(",");
-			email = emailData[0];
-			email = email.replace("\"", "");
-			email = email.trim();
+		try{
+			if(json!=null){
+				json = json.substring(1,json.length());
+				json = json.substring(0,json.length()-1);
+				System.out.println("json "+ json);
+				String [] partZero = json.split("\"to\":");
+				String [] partOne = partZero[1].split("\"email\":");
+				String [] emailData = partOne[1].split(",");
+				email = emailData[0];
+				email = email.replace("\"", "");
+				email = email.trim();
+			}
+		}catch(Exception e){
+			System.out.println("Error obteniendo email enmascarado de cliente "+json);
 		}
-		
 		OrderConversation ocon = new OrderConversation();
 		
 		ocon.setCustomerEmail(email);
@@ -649,6 +657,8 @@ public class OrderVitexService extends BaseVitexService {
 			for(GuideBeanDTO gbd:guideInfoBeanList){
 				Guide guide = gbd.getGuide();
 				guide.setStatus("GENERATED-PDF");
+				guide.setDocumentUrl(gbd.getPdfUrl());
+				guide.setDeliveryName("TRAMACO");
 				guideService.saveGuide(guide);
 				guides.add(guide);
 				response.getPdfPathList().add(gbd.getPdfUrl());
@@ -691,6 +701,16 @@ public class OrderVitexService extends BaseVitexService {
 
 
 		OrderCancel response = new Gson().fromJson(json, OrderCancel.class);
+		
+		Order order = orderService.findByVitexId(orderComplete.getOrderId());
+		order.setMotiveCancelText(orderComplete.getMotiveCancelText());
+		
+		Catalog motiveCancel = catalogService.findById(orderComplete.getMotiveCancelId());
+		order.setMotiveCancel(motiveCancel);
+		order.setStatus("canceled");
+		order.setCancelDate(new Date());
+		
+		orderService.saveOrder(order);
 		
 		return response;
 	}
@@ -956,7 +976,9 @@ public class OrderVitexService extends BaseVitexService {
 		return this.getOrderComplete(orderId);
 	}
 	
-	public String loadOrderItem(){
+	
+	@Transactional
+	public synchronized  String loadOrderItem(){
 		String response = "OK";
 		try{
 		OrderSchema os = getOrdersRest(null);

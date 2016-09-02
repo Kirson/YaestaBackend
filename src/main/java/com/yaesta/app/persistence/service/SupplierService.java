@@ -1,11 +1,13 @@
 package com.yaesta.app.persistence.service;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.yaesta.app.util.Constants;
@@ -13,6 +15,9 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import com.yaesta.app.mail.MailInfo;
+import com.yaesta.app.mail.MailParticipant;
+import com.yaesta.app.mail.MailService;
 import com.yaesta.app.persistence.entity.Address;
 import com.yaesta.app.persistence.entity.Proveedor;
 import com.yaesta.app.persistence.entity.Supplier;
@@ -48,7 +53,8 @@ public class SupplierService implements Serializable {
 	@Autowired
 	private SupplierRepository supplierRepository;
 	
-	
+	@Autowired
+	private MailService mailService;
 	
 	@Autowired
 	private SupplierContactRepository supplierContactRepository;
@@ -68,16 +74,38 @@ public class SupplierService implements Serializable {
 	@Autowired
 	private ProveedorRepository proveedorRepository;
 	
+	@Autowired
+	TableSequenceService tableSequenceService;
+	
+	private @Value("${mail.smtp.from}") String mailFrom;
+	private @Value("${mail.smtp.supplier.to}") String mailTo;
+	private @Value("${mail.smtp.supplier.to.name}") String mailToName;
+	private @Value("${mail.smtp.supplier.contacts}") String mailSmtpSupplierContacts;
+	private @Value("${mail.smtp.supplier.contacts.names}") String mailSmtpSupplierContactsNames;
+	
 	@Transactional
 	public Supplier save(Supplier entity, List<SupplierDeliveryCalendar> deliveryCalendar, List<SupplierContact> contactList, List<SupplierContact> removeContactList){
 		
+		if(entity.getId()==null){
+			entity.setId(tableSequenceService.getNextValue("SEQ_SUPPLIER"));
+		}
 		
 		String postalCode = entity.getPostalCode();
 		if(postalCode!=null){
 			TramacoZone zone = tramacoZoneRepository.findOne(new Long(postalCode));
 			entity.setZone(zone);
 		}
+		
+		if(entity.getStreetMain()==null){
+			entity.setStreetMain(entity.getAddress());
+		}
+		
+		if(entity.getStreetSecundary()==null){
+			entity.setStreetSecundary("");
+		}
+		
 		supplierRepository.save(entity);
+		supplierRepository.flush();
 		
 		if(deliveryCalendar!=null && !deliveryCalendar.isEmpty()){
 			for(SupplierDeliveryCalendar sdc:deliveryCalendar){
@@ -99,6 +127,8 @@ public class SupplierService implements Serializable {
 				removeContact(sc);
 			}
 		}
+		
+		sendNewSupplierMail(entity);
 		
 		return entity;
 	}
@@ -450,4 +480,43 @@ public class SupplierService implements Serializable {
 		}
 		return response;
 	}
+	
+   private void sendNewSupplierMail(Supplier supplier){
+	   if(supplier.getIsNew()){
+		   System.out.println("Inicio notificacion");
+		   MailInfo mailInfo = new MailInfo();
+		   MailParticipant sender = new MailParticipant();
+		   sender.setName("YaEsta.com");
+		   sender.setEmail(mailFrom);
+		   mailInfo.setMailSender(sender);
+		   MailParticipant receiver = new MailParticipant();
+		   receiver.setName(mailToName);
+		   receiver.setEmail(mailTo);
+		   mailInfo.setMailReceiver(receiver);
+		   List<MailParticipant> ccList = new ArrayList<MailParticipant>();
+		   String[] contactsNames = mailSmtpSupplierContactsNames.split("%");
+		   String[] contactsEmails = mailSmtpSupplierContacts.split("%");
+		
+			for(int j=0;j<contactsNames.length;j++){
+				MailParticipant cc = new MailParticipant();
+				cc.setEmail(contactsEmails[j]);
+				cc.setName(contactsNames[j]);
+				ccList.add(cc);
+			}
+			
+			mailInfo.setReceivers(ccList);
+			
+			String subject="Notificación de nuevo proveedor " + supplier.getName();
+			
+			mailInfo.setSubject(subject);
+			
+			String generalText = "Se informa de la creación en el sistema del proveedor " + supplier.getName() 
+								 + " identificado en el sistema con el ID " + supplier.getId();
+			
+			mailInfo.setGeneralText(generalText);
+			
+			mailService.sendMailTemplate(mailInfo, "newSellerNotification.vm");	
+			System.out.println("Fin notificacion");
+	   }
+   }
 }

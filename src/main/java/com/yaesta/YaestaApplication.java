@@ -20,7 +20,7 @@ import com.yaesta.app.controller.AppErrorController;
 @EnableAutoConfiguration
 @ComponentScan(basePackages = {"com.yaesta","it.ozimov.springboot"})
 @Configuration
-public class YaestaApplication extends VitexSoapClient {
+public class YaestaApplication extends YaestaSoapClient {
 
 	
 	@Autowired

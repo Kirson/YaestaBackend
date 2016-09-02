@@ -78,7 +78,7 @@ public class MailService {
 		
 		MimeMessagePreparator preparator = new MimeMessagePreparator() {
           public void prepare(javax.mail.internet.MimeMessage mimeMessage) throws Exception {
-                
+                System.out.println("==>> inicio mail Template" );
             	File logo= new File (mailPathLogoImage);
             	FileSystemResource resLogo = new FileSystemResource(mailPathLogoImage);
             	mailInfo.setFile(logo);
@@ -113,7 +113,7 @@ public class MailService {
         };
         JavaMailSender javaMailSender = getJavaMailSender();
         javaMailSender.send(preparator);
-		
+        System.out.println("==>> fin mail Template" );
 	}
 	
 	public void sendMail(MailInfo mailInfo){

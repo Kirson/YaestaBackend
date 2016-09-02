@@ -95,6 +95,12 @@ public class Guide implements Serializable{
 	@Column(name="delivery_status")
 	private String deliveryStatus;
 	
+	@Column(name="document_url")
+	private String documentUrl;
+	
+	@Column(name="delivery_name")
+	private String deliveryName;
+	
 	@JsonManagedReference
 	@JoinColumn(name = "supplier_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -279,6 +285,26 @@ public class Guide implements Serializable{
 
 	public void setSupplier(Supplier supplier) {
 		this.supplier = supplier;
+	}
+	
+	
+
+	public String getDocumentUrl() {
+		return documentUrl;
+	}
+
+	public void setDocumentUrl(String documentUrl) {
+		this.documentUrl = documentUrl;
+	}
+	
+	
+
+	public String getDeliveryName() {
+		return deliveryName;
+	}
+
+	public void setDeliveryName(String deliveryName) {
+		this.deliveryName = deliveryName;
 	}
 
 	@Override

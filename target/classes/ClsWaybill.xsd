@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+   <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+         <!-- XML Schema Generated from XML Document on Fri Sep 02 2016 09:56:18 GMT-0500 (ECT) -->
+         <!-- with XmlGrid.net Free Online Service http://xmlgrid.net -->
+         <xs:element name="wsdl:definitions">
+               <xs:complexType>
+                     <xs:sequence>
+                           <xs:element name="wsdl:types">
+                                 <xs:complexType>
+                                       <xs:sequence>
+                                             <xs:element name="xsd:schema">
+                                                   <xs:complexType>
+                                                         <xs:sequence>
+                                                               <xs:element name="xsd:import" maxOccurs="unbounded">
+                                                                     <xs:complexType>
+                                                                           <xs:attribute name="schemaLocation" type="xs:string"></xs:attribute>
+                                                                           <xs:attribute name="namespace" type="xs:string"></xs:attribute>
+                                                                     </xs:complexType>
+                                                               </xs:element>
+                                                         </xs:sequence>
+                                                         <xs:attribute name="targetNamespace" type="xs:string"></xs:attribute>
+                                                   </xs:complexType>
+                                             </xs:element>
+                                       </xs:sequence>
+                                 </xs:complexType>
+                           </xs:element>
+                           <xs:element name="wsdl:message" maxOccurs="unbounded">
+                                 <xs:complexType>
+                                       <xs:sequence>
+                                             <xs:element name="wsdl:part">
+                                                   <xs:complexType>
+                                                         <xs:attribute name="name" type="xs:string"></xs:attribute>
+                                                         <xs:attribute name="element" type="xs:string"></xs:attribute>
+                                                   </xs:complexType>
+                                             </xs:element>
+                                       </xs:sequence>
+                                       <xs:attribute name="name" type="xs:string"></xs:attribute>
+                                 </xs:complexType>
+                           </xs:element>
+                           <xs:element name="wsdl:portType">
+                                 <xs:complexType>
+                                       <xs:sequence>
+                                             <xs:element name="wsdl:operation">
+                                                   <xs:complexType>
+                                                         <xs:sequence>
+                                                               <xs:element name="wsdl:input">
+                                                                     <xs:complexType>
+                                                                           <xs:attribute name="wsaw:Action" type="xs:string"></xs:attribute>
+                                                                           <xs:attribute name="message" type="xs:string"></xs:attribute>
+                                                                     </xs:complexType>
+                                                               </xs:element>
+                                                               <xs:element name="wsdl:output">
+                                                                     <xs:complexType>
+                                                                           <xs:attribute name="wsaw:Action" type="xs:string"></xs:attribute>
+                                                                           <xs:attribute name="message" type="xs:string"></xs:attribute>
+                                                                     </xs:complexType>
+                                                               </xs:element>
+                                                         </xs:sequence>
+                                                         <xs:attribute name="name" type="xs:string"></xs:attribute>
+                                                   </xs:complexType>
+                                             </xs:element>
+                                       </xs:sequence>
+                                       <xs:attribute name="name" type="xs:string"></xs:attribute>
+                                 </xs:complexType>
+                           </xs:element>
+                           <xs:element name="wsdl:binding">
+                                 <xs:complexType>
+                                       <xs:sequence>
+                                             <xs:element name="soap:binding">
+                                                   <xs:complexType>
+                                                         <xs:attribute name="transport" type="xs:string"></xs:attribute>
+                                                   </xs:complexType>
+                                             </xs:element>
+                                             <xs:element name="wsdl:operation">
+                                                   <xs:complexType>
+                                                         <xs:sequence>
+                                                               <xs:element name="soap:operation">
+                                                                     <xs:complexType>
+                                                                           <xs:attribute name="soapAction" type="xs:string"></xs:attribute>
+                                                                           <xs:attribute name="style" type="xs:string"></xs:attribute>
+                                                                     </xs:complexType>
+                                                               </xs:element>
+                                                               <xs:element name="wsdl:input">
+                                                                     <xs:complexType>
+                                                                           <xs:sequence>
+                                                                                 <xs:element name="soap:body">
+                                                                                       <xs:complexType>
+                                                                                             <xs:attribute name="use" type="xs:string"></xs:attribute>
+                                                                                       </xs:complexType>
+                                                                                 </xs:element>
+                                                                           </xs:sequence>
+                                                                     </xs:complexType>
+                                                               </xs:element>
+                                                               <xs:element name="wsdl:output">
+                                                                     <xs:complexType>
+                                                                           <xs:sequence>
+                                                                                 <xs:element name="soap:body">
+                                                                                       <xs:complexType>
+                                                                                             <xs:attribute name="use" type="xs:string"></xs:attribute>
+                                                                                       </xs:complexType>
+                                                                                 </xs:element>
+                                                                           </xs:sequence>
+                                                                     </xs:complexType>
+                                                               </xs:element>
+                                                         </xs:sequence>
+                                                         <xs:attribute name="name" type="xs:string"></xs:attribute>
+                                                   </xs:complexType>
+                                             </xs:element>
+                                       </xs:sequence>
+                                       <xs:attribute name="name" type="xs:string"></xs:attribute>
+                                       <xs:attribute name="type" type="xs:string"></xs:attribute>
+                                 </xs:complexType>
+                           </xs:element>
+                           <xs:element name="wsdl:service">
+                                 <xs:complexType>
+                                       <xs:sequence>
+                                             <xs:element name="wsdl:port">
+                                                   <xs:complexType>
+                                                         <xs:sequence>
+                                                               <xs:element name="soap:address">
+                                                                     <xs:complexType>
+                                                                           <xs:attribute name="location" type="xs:string"></xs:attribute>
+                                                                     </xs:complexType>
+                                                               </xs:element>
+                                                         </xs:sequence>
+                                                         <xs:attribute name="name" type="xs:string"></xs:attribute>
+                                                         <xs:attribute name="binding" type="xs:string"></xs:attribute>
+                                                   </xs:complexType>
+                                             </xs:element>
+                                       </xs:sequence>
+                                       <xs:attribute name="name" type="xs:string"></xs:attribute>
+                                 </xs:complexType>
+                           </xs:element>
+                     </xs:sequence>
+                     <xs:attribute name="xmlns:wsdl" type="xs:string"></xs:attribute>
+                     <xs:attribute name="xmlns:wsx" type="xs:string"></xs:attribute>
+                     <xs:attribute name="xmlns:wsu" type="xs:string"></xs:attribute>
+                     <xs:attribute name="xmlns:wsa10" type="xs:string"></xs:attribute>
+                     <xs:attribute name="xmlns:wsp" type="xs:string"></xs:attribute>
+                     <xs:attribute name="xmlns:wsap" type="xs:string"></xs:attribute>
+                     <xs:attribute name="xmlns:msc" type="xs:string"></xs:attribute>
+                     <xs:attribute name="xmlns:soap12" type="xs:string"></xs:attribute>
+                     <xs:attribute name="xmlns:wsa" type="xs:string"></xs:attribute>
+                     <xs:attribute name="xmlns:wsam" type="xs:string"></xs:attribute>
+                     <xs:attribute name="xmlns:xsd" type="xs:string"></xs:attribute>
+                     <xs:attribute name="xmlns:tns" type="xs:string"></xs:attribute>
+                     <xs:attribute name="xmlns:soap" type="xs:string"></xs:attribute>
+                     <xs:attribute name="xmlns:wsaw" type="xs:string"></xs:attribute>
+                     <xs:attribute name="xmlns:soapenc" type="xs:string"></xs:attribute>
+                     <xs:attribute name="name" type="xs:string"></xs:attribute>
+                     <xs:attribute name="targetNamespace" type="xs:string"></xs:attribute>
+               </xs:complexType>
+         </xs:element>
+   </xs:schema>
+ 

@@ -14,18 +14,32 @@ import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 import com.yaesta.app.util.ws.WebServiceMessageSenderWithAuth;
 
 @Configuration
-public class VitexSoapClient extends BaseConfig{
+public class YaestaSoapClient extends BaseConfig{
 
 	private @Value("${vitex.user}") String vitexUser;
 	private @Value("${vitex.password}") String vitexPassword;
 	private @Value("${vitex.default.uri}") String vitexDefaultUri;
 	private @Value("${vitex.context.path}") String vitexContextPath;
 	
+	protected @Value("${laarcourier.service.url}") String laarCourierServiceUrl;
+	protected @Value("${laarcourier.service.user}") String laarCourierServiceUser;
+	protected @Value("${laarcourier.service.password}") String laarCourierServicePassword;
+	protected @Value("${laarcourier.service.context.path}") String laarCourierServiceContextPath;
+	
+	
 
     @Bean
-    public Jaxb2Marshaller getMarshaller() throws Exception{
+    public Jaxb2Marshaller getMarshallerVtex() throws Exception{
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
         marshaller.setContextPath(vitexContextPath);
+        marshaller.afterPropertiesSet();
+        return marshaller;
+     }
+    
+    @Bean
+    public Jaxb2Marshaller getMarshallerLaarCourier() throws Exception{
+        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
+        marshaller.setContextPath(laarCourierServiceContextPath);
         marshaller.afterPropertiesSet();
         return marshaller;
      }
@@ -46,9 +60,20 @@ public class VitexSoapClient extends BaseConfig{
 
         WebServiceTemplate webServiceTemplate = new WebServiceTemplate(messageFactory());
         webServiceTemplate.setDefaultUri(vitexDefaultUri);
-        webServiceTemplate.setMarshaller(getMarshaller());
-        webServiceTemplate.setUnmarshaller(getMarshaller());
+        webServiceTemplate.setMarshaller(getMarshallerVtex());
+        webServiceTemplate.setUnmarshaller(getMarshallerVtex());
         webServiceTemplate.setMessageSender(new WebServiceMessageSenderWithAuth(vitexUser,vitexPassword));
+        webServiceTemplate.afterPropertiesSet();
+        return webServiceTemplate;
+    }
+    
+    @Bean
+    public WebServiceTemplate webServiceTemplateLaarCourier() throws Exception {
+
+        WebServiceTemplate webServiceTemplate = new WebServiceTemplate(messageFactory());
+        webServiceTemplate.setDefaultUri(laarCourierServiceUrl);
+        webServiceTemplate.setMarshaller(getMarshallerVtex());
+        webServiceTemplate.setUnmarshaller(getMarshallerVtex());
         webServiceTemplate.afterPropertiesSet();
         return webServiceTemplate;
     }

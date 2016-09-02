@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.yaesta.app.persistence.entity.Guide;
 import com.yaesta.app.persistence.entity.Supplier;
+import com.yaesta.integration.vitex.json.bean.ItemComplete;
 
 import dmz.comercial.servicio.cliente.dto.RespuestaGenerarGuiaWs;
 import dmz.comercial.servicio.cliente.dto.RespuestaGenerarPdfWs;
@@ -28,9 +29,11 @@ public class GuideBeanDTO implements Serializable{
 	private List<String> errorList;
 	private String guideDeliveryId;
 	private Supplier supplier;
+	private List<ItemComplete> itemList;
 	
 	public GuideBeanDTO(){
 		errorList = new ArrayList<String>();
+		itemList = new ArrayList<ItemComplete>();
 	}
 	
 	public Guide getGuide() {
@@ -100,6 +103,14 @@ public class GuideBeanDTO implements Serializable{
 
 	public void setSupplier(Supplier supplier) {
 		this.supplier = supplier;
+	}
+
+	public List<ItemComplete> getItemList() {
+		return itemList;
+	}
+
+	public void setItemList(List<ItemComplete> itemList) {
+		this.itemList = itemList;
 	}
 	
 	

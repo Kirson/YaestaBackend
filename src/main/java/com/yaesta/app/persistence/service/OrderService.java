@@ -11,6 +11,7 @@ import com.yaesta.app.persistence.entity.Order;
 import com.yaesta.app.persistence.entity.OrderItem;
 import com.yaesta.app.persistence.repository.OrderItemRepository;
 import com.yaesta.app.persistence.repository.OrderRepository;
+import com.yaesta.app.persistence.vo.DateRangeVO;
 import com.yaesta.app.persistence.vo.OrderItemBeanVO;
 import com.yaesta.app.util.OrderItemUtil;
 
@@ -92,6 +93,11 @@ public class OrderService {
 	
 	public List<OrderItem> getAllItems(){
 		List<OrderItem> found =orderItemRepository.findAll();
+		return found;
+	}
+	
+	public List<OrderItem> findByDateRange(DateRangeVO dateRange){
+		List<OrderItem> found =orderItemRepository.findByOrderDateBetween(dateRange.getStartDate(), dateRange.getFinishDate());
 		return found;
 	}
 	

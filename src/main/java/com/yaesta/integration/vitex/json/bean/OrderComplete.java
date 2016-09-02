@@ -58,7 +58,9 @@ import com.yaesta.integration.vitex.bean.SupplierDeliveryInfo;
     "appStatus",
     "totalPrice",
     "supplierDeliveryInfoList",
-    "error"
+    "error",
+    "motiveCancelId",
+    "motiveCancelText"
 })
 public class OrderComplete implements Serializable {
 
@@ -140,6 +142,12 @@ public class OrderComplete implements Serializable {
     private List<SupplierDeliveryInfo> supplierDeliveryInfoList;
     @JsonProperty("error")
     private String error;
+    @JsonProperty("motiveCancelId")
+    private Long motiveCancelId;
+    @JsonProperty("motiveCancelText")
+    private String motiveCancelText;
+    
+    
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -885,6 +893,26 @@ public class OrderComplete implements Serializable {
 	@JsonProperty("error")
 	public void setError(String error) {
 		this.error = error;
+	}
+
+	@JsonProperty("motiveCancelId")
+	public Long getMotiveCancelId() {
+		return motiveCancelId;
+	}
+
+	@JsonProperty("motiveCancelId")
+	public void setMotiveCancelId(Long motiveCancelId) {
+		this.motiveCancelId = motiveCancelId;
+	}
+
+	@JsonProperty("motiveCancelText")
+	public String getMotiveCancelText() {
+		return motiveCancelText;
+	}
+
+	@JsonProperty("motiveCancelText")
+	public void setMotiveCancelText(String motiveCancelText) {
+		this.motiveCancelText = motiveCancelText;
 	}
     
     

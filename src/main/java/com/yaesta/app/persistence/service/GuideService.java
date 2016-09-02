@@ -3,6 +3,8 @@ package com.yaesta.app.persistence.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +46,23 @@ public class GuideService {
 	
 	public List<Guide> getAll(){
 		return guideRepository.findAll();
+	}
+	
+	public List<Guide> findByDeliveryName(String deliveryName){
+		return guideRepository.findByDeliveryName(deliveryName);
+	}
+	
+	@Transactional
+	public Guide saveGuideDetail(Guide guide, List<GuideDetail> details){
+		
+		if(details!=null && !details.isEmpty()){
+			for(GuideDetail gd:details){
+				gd.setGuide(guide);
+				guideDetailRepository.save(gd);
+			}
+		}
+		
+		return guide;
 	}
 
 }
