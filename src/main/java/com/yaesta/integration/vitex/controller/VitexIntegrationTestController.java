@@ -15,6 +15,7 @@ import com.yaesta.app.persistence.entity.Brand;
 import com.yaesta.app.persistence.entity.Category;
 import com.yaesta.app.persistence.entity.Product;
 import com.yaesta.app.persistence.entity.Supplier;
+import com.yaesta.integration.vitex.json.bean.CategoryVtex;
 import com.yaesta.integration.vitex.json.bean.OrderCancel;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
 import com.yaesta.integration.vitex.service.CategoryVitexService;
@@ -130,6 +131,14 @@ public class VitexIntegrationTestController {
 		OrderComplete response = orderVitexService.changeStatus(orderId, action);
 		
 		return new ResponseEntity<OrderComplete>(response, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/getCategoryFromPath/", method = RequestMethod.GET)
+	public ResponseEntity<CategoryVtex> getCategoryFromPath(){
+		String path = "/10/255/19/";
+		CategoryVtex response = categoryVitexService.getCategoryFromPath(path);
+		
+		return new ResponseEntity<CategoryVtex>(response, HttpStatus.OK);
 	}
 	
 }

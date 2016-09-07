@@ -19,6 +19,7 @@ import com.yaesta.integration.vitex.bean.CreditNoteBean;
 import com.yaesta.integration.vitex.bean.GuideContainerBean;
 import com.yaesta.integration.vitex.bean.GuideInfoBean;
 import com.yaesta.integration.vitex.bean.OrderCompleteBean;
+import com.yaesta.integration.vitex.json.bean.CategoryVtex;
 import com.yaesta.integration.vitex.json.bean.InvoiceResponse;
 import com.yaesta.integration.vitex.json.bean.OrderCancel;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
@@ -200,5 +201,12 @@ public class VitexIntegrationController {
 	public ResponseEntity<String> loadOrderItems(){
 		String response = orderVitexService.loadOrderItem();
 		return new ResponseEntity<String>(response,HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/getVtexCategories", method = RequestMethod.GET)
+	public ResponseEntity<List<CategoryVtex>> getVtexCategories() {	  		 		
+		
+		List<CategoryVtex> json = categoryVitexService.getCategories();
+		return new ResponseEntity<List<CategoryVtex>>(json, HttpStatus.OK);
 	}
 }

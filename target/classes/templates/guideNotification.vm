@@ -35,7 +35,7 @@
     					</td>
     					<td>$item.name	
     					</td>
-    					<td>$item.quantity	
+    					<td align="right"><b>$item.quantity</b>
     					</td>
     				</tr>
 				#end

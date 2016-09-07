@@ -101,6 +101,9 @@ public class Guide implements Serializable{
 	@Column(name="delivery_name")
 	private String deliveryName;
 	
+	@Column(name="customer_name")
+	private String customerName;
+	
 	@JsonManagedReference
 	@JoinColumn(name = "supplier_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -298,6 +301,14 @@ public class Guide implements Serializable{
 	}
 	
 	
+
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
+	}
 
 	public String getDeliveryName() {
 		return deliveryName;

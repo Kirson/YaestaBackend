@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import com.yaesta.app.persistence.service.ClientService;
 import com.yaesta.integration.vitex.service.OrderVitexService;
 
 
@@ -29,11 +30,20 @@ public class ScheduledTasks implements Serializable {
 	@Autowired
 	OrderVitexService orderVitexService;
 	
+	@Autowired
+	ClientService clientService;
 	
-	 @Scheduled(initialDelay = 30000, fixedDelay=1800000)
+	
+	 @Scheduled(cron="0 0 7-18 * * MON-FRI")
 	 public void launchTask() {
 	    System.out.println("Antes de actualizar items-orders " + dateFormat.format(new Date()));
 	    orderVitexService.loadOrderItem();
+	 }
+	 
+	 @Scheduled(cron="0 30 10 * * MON-FRI")
+	 public void launchUpdNewCustomer(){
+		 System.out.println("Antes de actualizar clientes nuevos " + dateFormat.format(new Date()));
+		 clientService.updateNewCustomerList();
 	 }
 	 
 }

@@ -7,7 +7,7 @@ import java.util.List;
 import com.yaesta.app.persistence.entity.Supplier;
 import com.yaesta.integration.vitex.json.bean.ItemComplete;
 
-public class GuideVO implements Serializable {
+public class GuideVtexVO implements Serializable {
 
 	/**
 	 * Serial Version
@@ -17,7 +17,7 @@ public class GuideVO implements Serializable {
 	private Supplier supplier;
 	private List<ItemComplete> items;
 	
-	public GuideVO(){
+	public GuideVtexVO(){
 		items = new ArrayList<ItemComplete>();
 	}
 

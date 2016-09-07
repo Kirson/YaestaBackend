@@ -30,6 +30,7 @@ import com.yaesta.app.persistence.entity.Order;
 import com.yaesta.app.persistence.service.GuideService;
 import com.yaesta.app.persistence.service.OrderService;
 import com.yaesta.app.persistence.service.TableSequenceService;
+import com.yaesta.app.util.SupplierUtil;
 import com.yaesta.app.util.UtilDate;
 import com.yaesta.integration.base.util.BaseUtil;
 import com.yaesta.integration.datil.json.bean.Comprador;
@@ -233,7 +234,13 @@ public class DatilService implements Serializable{
 			
 			it.setDescripcion(ic.getName());
 			//it.setCodigoPrincipal(ic.getProductId());
-			it.setCodigoPrincipal((String)ic.getRefId());
+			String refId = (String)ic.getRefId();
+			String productCode[] = SupplierUtil.returnSupplierCode(refId);
+			String principalCode = productCode[0]; 
+			if(principalCode.length()>25){
+				principalCode = principalCode.substring(0,24);
+			}
+			it.setCodigoPrincipal(principalCode);
 			Boolean hasTax = Boolean.FALSE;
 			
 			if(ic.getPriceTags()!=null && !ic.getPriceTags().isEmpty()){
@@ -523,7 +530,13 @@ public class DatilService implements Serializable{
 			it.setPrecioTotalSinImpuestos(itemPrice);
 			it.setDescripcion(ic.getName());
 			//it.setCodigoPrincipal(ic.getProductId());
-			it.setCodigoPrincipal((String)ic.getRefId());
+			String refId = (String)ic.getRefId();
+			String productCode[] = SupplierUtil.returnSupplierCode(refId);
+			String principalCode = productCode[0]; 
+			if(principalCode.length()>25){
+				principalCode = principalCode.substring(0,24);
+			}
+			it.setCodigoPrincipal(principalCode);
 			Boolean hasTax = Boolean.FALSE;
 			if(ic.getPriceTags()!=null && !ic.getPriceTags().isEmpty()){
 				for(PriceTag pt:ic.getPriceTags()){
@@ -727,6 +740,11 @@ public class DatilService implements Serializable{
 			direccion = direccion+ " - " + orderComplete.getShippingData().getAddress().getNumber();
 			direccion = direccion+ " - " + orderComplete.getShippingData().getAddress().getComplement();
 		}
+		
+		if(direccion.length()>250){
+			direccion = direccion.substring(0, 250);
+		}
+		
 		comprador.setDireccion(direccion);
 		
 		return comprador;

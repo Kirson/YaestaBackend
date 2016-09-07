@@ -2,7 +2,7 @@ package com.yaesta.app.util;
 
 import java.io.Serializable;
 
-import com.yaesta.app.persistence.entity.Client;
+import com.yaesta.app.persistence.entity.Customer;
 import com.yaesta.app.persistence.entity.ClienteBodega;
 import com.yaesta.app.persistence.vo.ClientVO;
 import com.yaesta.app.persistence.vo.ClientWarehouseVO;
@@ -41,7 +41,7 @@ public class ClientUtil implements Serializable {
 		return cw;
 	}
 	
-	public static ClientVO fromClientToClientVO(Client client){
+	public static ClientVO fromClientToClientVO(Customer client){
 		ClientVO cvo = new ClientVO();
 		String strTempDir = client.getAddress();
 		try{

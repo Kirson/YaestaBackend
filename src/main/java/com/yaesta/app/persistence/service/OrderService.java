@@ -6,13 +6,14 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.yaesta.app.persistence.entity.Client;
+import com.yaesta.app.persistence.entity.Customer;
 import com.yaesta.app.persistence.entity.Order;
 import com.yaesta.app.persistence.entity.OrderItem;
 import com.yaesta.app.persistence.repository.OrderItemRepository;
 import com.yaesta.app.persistence.repository.OrderRepository;
 import com.yaesta.app.persistence.vo.DateRangeVO;
 import com.yaesta.app.persistence.vo.OrderItemBeanVO;
+import com.yaesta.app.persistence.vo.WarehouseVO;
 import com.yaesta.app.util.OrderItemUtil;
 
 @Service
@@ -24,7 +25,7 @@ public class OrderService {
 	@Autowired
 	private OrderItemRepository orderItemRepository;
 	
-	public List<Order> findByClient(Client client){
+	public List<Order> findByClient(Customer client){
 		List<Order> result = new ArrayList<Order>();
 		List<Order> founds = orderRepository.findByClient(client);
 		
@@ -101,6 +102,18 @@ public class OrderService {
 		return found;
 	}
 	
+	public List<OrderItemBeanVO> findByDateRangeVO(DateRangeVO dateRange){
+		List<OrderItem> found =orderItemRepository.findByOrderDateBetween(dateRange.getStartDate(), dateRange.getFinishDate());
+		List<OrderItemBeanVO> resultList = new ArrayList<OrderItemBeanVO>();
+		if(found!=null && !found.isEmpty()){
+			for(OrderItem oi:found){
+				OrderItemBeanVO oiv = OrderItemUtil.fromOrderItemToOrderItemVO(oi);
+				resultList.add(oiv);
+			}
+		}
+		return resultList;
+	}
+	
 	public List<OrderItemBeanVO> getAllItemsBean(){
 		List<OrderItem> found =orderItemRepository.findAll();
 		List<OrderItemBeanVO> resultList = new ArrayList<OrderItemBeanVO>();
@@ -117,5 +130,30 @@ public class OrderService {
 	public List<Order> getAll(){
 		List<Order> found = orderRepository.findAll();
 		return found;
+	}
+	
+	public List<WarehouseVO> getAllWarehouse(){
+		List<OrderItem> found = orderItemRepository.findByIsWarehouse(Boolean.TRUE);
+		List<WarehouseVO> result = new ArrayList<WarehouseVO>();
+		if(found!=null && !found.isEmpty()){
+			for(OrderItem oi:found){
+				WarehouseVO wvo = OrderItemUtil.fromOrderItemToWarehouseVO(oi);
+				result.add(wvo);
+			}
+		}
+		
+		return result;
+	}
+	
+	public List<WarehouseVO> findByDateRangeVOWarehouse(DateRangeVO dateRange){
+		List<OrderItem> found =orderItemRepository.findByOrderDateBetweenAndByIsWarehouse(dateRange.getStartDate(), dateRange.getFinishDate(), Boolean.TRUE);
+		List<WarehouseVO> resultList = new ArrayList<WarehouseVO>();
+		if(found!=null && !found.isEmpty()){
+			for(OrderItem oi:found){
+				WarehouseVO oiv = OrderItemUtil.fromOrderItemToWarehouseVO(oi);
+				resultList.add(oiv);
+			}
+		}
+		return resultList;
 	}
 }

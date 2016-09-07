@@ -33,6 +33,7 @@ import com.yaesta.app.mail.MailInfo;
 import com.yaesta.app.mail.MailParticipant;
 import com.yaesta.app.mail.MailService;
 import com.yaesta.app.persistence.entity.Catalog;
+import com.yaesta.app.persistence.entity.Customer;
 import com.yaesta.app.persistence.entity.Guide;
 import com.yaesta.app.persistence.entity.Order;
 import com.yaesta.app.persistence.entity.OrderItem;
@@ -40,9 +41,11 @@ import com.yaesta.app.persistence.entity.Supplier;
 import com.yaesta.app.persistence.entity.SupplierContact;
 import com.yaesta.app.persistence.repository.SupplierContactRepository;
 import com.yaesta.app.persistence.service.CatalogService;
+import com.yaesta.app.persistence.service.ClientService;
 import com.yaesta.app.persistence.service.GuideService;
 import com.yaesta.app.persistence.service.OrderService;
 import com.yaesta.app.persistence.service.SupplierService;
+//import com.yaesta.app.persistence.util.HibernateProxyTypeAdapter;
 import com.yaesta.app.persistence.util.YaestaTypeAdapter;
 import com.yaesta.app.util.SupplierUtil;
 import com.yaesta.app.util.UtilDate;
@@ -59,6 +62,7 @@ import com.yaesta.integration.vitex.bean.GuideContainerBean;
 import com.yaesta.integration.vitex.bean.GuideInfoBean;
 import com.yaesta.integration.vitex.bean.InvoiceSchemaBean;
 import com.yaesta.integration.vitex.bean.SupplierDeliveryInfo;
+import com.yaesta.integration.vitex.json.bean.CategoryVtex;
 import com.yaesta.integration.vitex.json.bean.InvoiceResponse;
 import com.yaesta.integration.vitex.json.bean.InvoiceSchema;
 import com.yaesta.integration.vitex.json.bean.ItemComplete;
@@ -108,6 +112,9 @@ public class OrderVitexService extends BaseVitexService {
 
 	@Autowired
 	private ProductVitexService productVitexService;
+	
+	@Autowired
+	private CategoryVitexService categoryVitexService; 
 
 	@Autowired
 	private OrderService orderService;
@@ -132,6 +139,9 @@ public class OrderVitexService extends BaseVitexService {
 	
 	@Autowired
 	private CatalogService catalogService;
+	
+	@Autowired
+	private ClientService clientService;
 
 	private Client client;
 	private WebTarget target;
@@ -483,6 +493,7 @@ public class OrderVitexService extends BaseVitexService {
 
 		try {
 			generateOrderItem(response);
+			
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -553,8 +564,11 @@ public class OrderVitexService extends BaseVitexService {
 		order.setVitexId(orderComplete.getOrderId());
 		order.setTotalPrice(orderComplete.getValue());
 		
+		String dateParts[] = UtilDate.dateParts(order.getCreateDate());
+		order.setPeriode(dateParts[0]+"-"+dateParts[1]);
+		
 		GsonBuilder gBuilder = new GsonBuilder();
-
+		//gBuilder.registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
 		gBuilder.registerTypeAdapter(OrderComplete.class, new YaestaTypeAdapter<OrderComplete>());
 		
 		System.out.println("Order Complete " + orderComplete.getOrderId());
@@ -566,7 +580,14 @@ public class OrderVitexService extends BaseVitexService {
 		order.setOrderInfo(orderInfo);
 
 		orderService.saveOrder(order);
+		
+		Customer customer=clientService.updateCustomerInfo(orderComplete); //capturar informacion del cliente
 
+		if(order.getClient()==null){
+			order.setClient(customer);
+			orderService.saveOrder(order);
+		}
+		
 		return orderComplete;
 
 	}
@@ -1130,11 +1151,22 @@ public class OrderVitexService extends BaseVitexService {
 				oi.setWayToPay(formaPago);
 				oi.setOrderStatus(oc.getStatus());
 				oi.setStatusDescription(oc.getStatusDescription());
+				oi.setCustomerName(oc.getCustomerName());
+				oi.setSkuId(ic.getSellerSku());
 				if(hasAdjunto){
 					oi.setValueReceivables(itemValue);
 				}else{
 					oi.setValueReceivables(0D);
 				}
+				
+				if(ic.getAdditionalInfo()!=null){
+					oi.setBrandName(ic.getAdditionalInfo().getBrandName());
+					CategoryVtex cvt = categoryVitexService.getCategoryFromPath(ic.getAdditionalInfo().getCategoriesIds());
+					if(cvt!=null){
+						oi.setCategoryName(cvt.getName());
+					}
+				}
+				oi.setIsWarehouse(sdi.getSupplier().getIsWarehouse());
 				orderService.saveOrderItem(oi);
 			}
 		}

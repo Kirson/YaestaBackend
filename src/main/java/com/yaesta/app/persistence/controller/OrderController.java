@@ -1,5 +1,6 @@
 package com.yaesta.app.persistence.controller;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -17,6 +18,8 @@ import com.yaesta.app.persistence.entity.OrderItem;
 import com.yaesta.app.persistence.service.OrderService;
 import com.yaesta.app.persistence.vo.DateRangeVO;
 import com.yaesta.app.persistence.vo.OrderItemBeanVO;
+import com.yaesta.app.persistence.vo.WarehouseVO;
+import com.yaesta.app.util.UtilDate;
 
 @RestController
 @RequestMapping(value = "/order")
@@ -48,7 +51,26 @@ public class OrderController {
 	}
 	
 	@RequestMapping(value = "/getItemsByRange/{startDate}/{finishDate}", method = RequestMethod.GET)
-	public ResponseEntity<List<OrderItem>> getItemsByRange(@PathVariable("startDate") Date startDate,@PathVariable("finishDate") Date finishDate){
+	public ResponseEntity<List<OrderItem>> getItemsByRange(@PathVariable("startDate") String startDate,@PathVariable("finishDate") String finishDate) throws ParseException{
+		
+		DateRangeVO dateRange = new DateRangeVO();
+		
+		Date dStart = UtilDate.fromStringToDate(startDate);
+		Date dFinish = UtilDate.fromStringToDate(finishDate);
+		
+		dateRange.setStartDate(dStart);
+		dateRange.setFinishDate(dFinish);
+		List<OrderItem> found = orderService.findByDateRange(dateRange);
+		
+		if(found!=null && !found.isEmpty()){
+			return new ResponseEntity<List<OrderItem>>(found,HttpStatus.OK);
+		}else{
+			return new ResponseEntity<List<OrderItem>>(new ArrayList<OrderItem>(),HttpStatus.OK);
+		}
+	}
+	
+	@RequestMapping(value = "/getItemsByRangeDate/{startDate}/{finishDate}", method = RequestMethod.GET)
+	public ResponseEntity<List<OrderItem>> getItemsByRangeDate(@PathVariable("startDate") Date startDate,@PathVariable("finishDate") Date finishDate) throws ParseException{
 		
 		DateRangeVO dateRange = new DateRangeVO();
 		
@@ -63,6 +85,22 @@ public class OrderController {
 		}
 	}
 	
+	@RequestMapping(value = "/getItemsByRangeDateVO/{startDate}/{finishDate}", method = RequestMethod.GET)
+	public ResponseEntity<List<OrderItemBeanVO>> getItemsByRangeDateVO(@PathVariable("startDate") Date startDate,@PathVariable("finishDate") Date finishDate) throws ParseException{
+		
+		DateRangeVO dateRange = new DateRangeVO();
+		
+		dateRange.setStartDate(startDate);
+		dateRange.setFinishDate(finishDate);
+		List<OrderItemBeanVO> found = orderService.findByDateRangeVO(dateRange);
+		
+		if(found!=null && !found.isEmpty()){
+			return new ResponseEntity<List<OrderItemBeanVO>>(found,HttpStatus.OK);
+		}else{
+			return new ResponseEntity<List<OrderItemBeanVO>>(new ArrayList<OrderItemBeanVO>(),HttpStatus.OK);
+		}
+	}
+	
 	
 	@RequestMapping(value = "/getAllItemsVO", method = RequestMethod.GET)
 	public ResponseEntity<List<OrderItemBeanVO>> getAllItemsVO(){
@@ -72,6 +110,33 @@ public class OrderController {
 			return new ResponseEntity<List<OrderItemBeanVO>>(found,HttpStatus.OK);
 		}else{
 			return new ResponseEntity<List<OrderItemBeanVO>>(new ArrayList<OrderItemBeanVO>(),HttpStatus.OK);
+		}
+	}
+	
+	@RequestMapping(value = "/getAllWarehouseVO", method = RequestMethod.GET)
+	public ResponseEntity<List<WarehouseVO>> getAllItemsWarehouseVO(){
+		List<WarehouseVO> found = orderService.getAllWarehouse();
+		
+		if(found!=null && !found.isEmpty()){
+			return new ResponseEntity<List<WarehouseVO>>(found,HttpStatus.OK);
+		}else{
+			return new ResponseEntity<List<WarehouseVO>>(new ArrayList<WarehouseVO>(),HttpStatus.OK);
+		}
+	}
+	
+	@RequestMapping(value = "/getItemsWarehouseByRangeDateVO/{startDate}/{finishDate}", method = RequestMethod.GET)
+	public ResponseEntity<List<WarehouseVO>> getItemsWarehouseByRangeDateVO(@PathVariable("startDate") Date startDate,@PathVariable("finishDate") Date finishDate) throws ParseException{
+		
+		DateRangeVO dateRange = new DateRangeVO();
+		
+		dateRange.setStartDate(startDate);
+		dateRange.setFinishDate(finishDate);
+		List<WarehouseVO> found = orderService.findByDateRangeVOWarehouse(dateRange);
+		
+		if(found!=null && !found.isEmpty()){
+			return new ResponseEntity<List<WarehouseVO>>(found,HttpStatus.OK);
+		}else{
+			return new ResponseEntity<List<WarehouseVO>>(new ArrayList<WarehouseVO>(),HttpStatus.OK);
 		}
 	}
 

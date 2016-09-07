@@ -54,7 +54,7 @@ public class Order implements Serializable{
 	
 	@JoinColumn(name = "client_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
-	private Client client;
+	private Customer client;
 	
 	@Column(name = "status")
 	private String status;
@@ -96,6 +96,9 @@ public class Order implements Serializable{
 	@Column(name="cancel_date",columnDefinition="TIMESTAMP WITH TIME ZONE")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date cancelDate;
+	
+	@Column(name="periode")
+	private String periode;
 	
 	public Order(){
 		this.status = "registered";
@@ -142,11 +145,11 @@ public class Order implements Serializable{
 		this.orderInfo = orderInfo;
 	}
 
-	public Client getClient() {
+	public Customer getClient() {
 		return client;
 	}
 
-	public void setClient(Client client) {
+	public void setClient(Customer client) {
 		this.client = client;
 	}
 
@@ -245,6 +248,16 @@ public class Order implements Serializable{
 
 	public void setCancelDate(Date cancelDate) {
 		this.cancelDate = cancelDate;
+	}
+	
+	
+
+	public String getPeriode() {
+		return periode;
+	}
+
+	public void setPeriode(String periode) {
+		this.periode = periode;
 	}
 
 	@Override

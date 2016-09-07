@@ -68,7 +68,7 @@ public class OrderItem implements Serializable{
 	
 	@JoinColumn(name = "client_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
-	private Client client;
+	private Customer client;
 	
 	@JoinColumn(name = "supplier_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -117,6 +117,17 @@ public class OrderItem implements Serializable{
 	@Column(name="status_description") //estado de la orden en vitex
 	private String statusDescription;
 	
+	@Column(name="brand_name")
+	private String brandName;
+	
+	@Column(name="category_name")
+	private String categoryName;
+	
+	@Column(name="sku_id")
+	private String skuId;
+	
+	@Column(name="is_warehouse")
+	private Boolean isWarehouse;
 
 	public Long getId() {
 		return id;
@@ -174,11 +185,11 @@ public class OrderItem implements Serializable{
 		this.product = product;
 	}
 
-	public Client getClient() {
+	public Customer getClient() {
 		return client;
 	}
 
-	public void setClient(Client client) {
+	public void setClient(Customer client) {
 		this.client = client;
 	}
 
@@ -334,6 +345,38 @@ public class OrderItem implements Serializable{
 
 	public void setDiscount(Double discount) {
 		this.discount = discount;
+	}
+
+	public String getBrandName() {
+		return brandName;
+	}
+
+	public void setBrandName(String brandName) {
+		this.brandName = brandName;
+	}
+
+	public String getCategoryName() {
+		return categoryName;
+	}
+
+	public void setCategoryName(String categoryName) {
+		this.categoryName = categoryName;
+	}
+
+	public String getSkuId() {
+		return skuId;
+	}
+
+	public void setSkuId(String skuId) {
+		this.skuId = skuId;
+	}
+
+	public Boolean getIsWarehouse() {
+		return isWarehouse;
+	}
+
+	public void setIsWarehouse(Boolean isWarehouse) {
+		this.isWarehouse = isWarehouse;
 	}
 	
 	

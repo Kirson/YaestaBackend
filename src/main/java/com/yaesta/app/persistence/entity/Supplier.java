@@ -152,11 +152,19 @@ public class Supplier implements Serializable{
     @ManyToOne(fetch = FetchType.LAZY)
 	private Catalog supplierStatus;
 	
+	@JoinColumn(name = "priority_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+	private Catalog priority;
+	
+	@Column(name="is_warehouse")
+	private Boolean isWarehouse;
+	
 	@Transient
 	private String shippingAddress;
 	
 	public Supplier(){
 		isNew = Boolean.TRUE;
+		isWarehouse = Boolean.FALSE;
 	}
 
 	public Long getId() {
@@ -504,6 +512,24 @@ public class Supplier implements Serializable{
 
 	public void setSupplierStatus(Catalog supplierStatus) {
 		this.supplierStatus = supplierStatus;
+	}
+	
+	
+
+	public Catalog getPriority() {
+		return priority;
+	}
+
+	public void setPriority(Catalog priority) {
+		this.priority = priority;
+	}
+
+	public Boolean getIsWarehouse() {
+		return isWarehouse;
+	}
+
+	public void setIsWarehouse(Boolean isWarehouse) {
+		this.isWarehouse = isWarehouse;
 	}
 
 	@Override

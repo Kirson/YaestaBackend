@@ -13,6 +13,9 @@ import com.yaesta.app.persistence.entity.GuideDetail;
 import com.yaesta.app.persistence.entity.Order;
 import com.yaesta.app.persistence.repository.GuideDetailRepository;
 import com.yaesta.app.persistence.repository.GuideRepository;
+import com.yaesta.app.persistence.vo.DateRangeVO;
+import com.yaesta.app.persistence.vo.GuideVO;
+import com.yaesta.app.util.GuideUtil;
 
 @Service
 public class GuideService {
@@ -46,6 +49,32 @@ public class GuideService {
 	
 	public List<Guide> getAll(){
 		return guideRepository.findAll();
+	}
+	
+	public List<GuideVO> getAllVO(){
+		List<GuideVO> resultList = new ArrayList<GuideVO>();
+		List<Guide> found = guideRepository.findAll();
+		
+		if(found!=null && !found.isEmpty()){
+			for(Guide g:found){
+				GuideVO gvo = GuideUtil.fromGuideToGuideVO(g);
+				resultList.add(gvo);
+			}
+		}
+		
+		return resultList;
+	}
+	
+	public List<GuideVO> findByDateRangeVO(DateRangeVO dateRange){
+		List<Guide> found =guideRepository.findByCreateDateBetween(dateRange.getStartDate(), dateRange.getFinishDate());
+		List<GuideVO> resultList = new ArrayList<GuideVO>();
+		if(found!=null && !found.isEmpty()){
+			for(Guide g:found){
+				GuideVO gvo = GuideUtil.fromGuideToGuideVO(g);
+				resultList.add(gvo);
+			}
+		}
+		return resultList;
 	}
 	
 	public List<Guide> findByDeliveryName(String deliveryName){

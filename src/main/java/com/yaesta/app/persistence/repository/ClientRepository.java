@@ -2,11 +2,11 @@ package com.yaesta.app.persistence.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.yaesta.app.persistence.entity.Client;
+import com.yaesta.app.persistence.entity.Customer;
 
-public interface ClientRepository extends JpaRepository<Client, Long> {
+public interface ClientRepository extends JpaRepository<Customer, Long> {
 	
-	public Client findByVitexId(String vitexId);
-	public Client findByDocument(String document);
+	public Customer findByVitexId(String vitexId);
+	public Customer findByDocument(String document);
 
 }

@@ -20,6 +20,7 @@ import com.yaesta.app.persistence.service.SupplierService;
 import com.yaesta.app.persistence.service.TramacoZoneService;
 import com.yaesta.app.persistence.vo.SupplierVO;
 import com.yaesta.app.persistence.vo.ProvinciaVO;
+import com.yaesta.app.persistence.vo.SupplierBeanVO;
 
 @RestController
 @RequestMapping(value = "/supplier")
@@ -43,6 +44,18 @@ public class SupplierController {
 	    	return new ResponseEntity<List<Supplier>>(found, HttpStatus.OK);
 	    }else{
 	    	return new ResponseEntity<List<Supplier>>(new ArrayList<Supplier>(),HttpStatus.OK);
+	    }
+	}
+	
+	@RequestMapping(value = "/getAllVO", method = RequestMethod.GET)
+	public  ResponseEntity<List<SupplierBeanVO>> getAllVO(){
+		
+		List<SupplierBeanVO> found = supplierService.getSuppliersVO();
+	
+	    if(found!=null && !found.isEmpty()){
+	    	return new ResponseEntity<List<SupplierBeanVO>>(found, HttpStatus.OK);
+	    }else{
+	    	return new ResponseEntity<List<SupplierBeanVO>>(new ArrayList<SupplierBeanVO>(),HttpStatus.OK);
 	    }
 	}
 	

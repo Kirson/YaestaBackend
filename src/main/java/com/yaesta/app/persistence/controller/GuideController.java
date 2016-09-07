@@ -1,6 +1,8 @@
 package com.yaesta.app.persistence.controller;
 
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yaesta.app.persistence.entity.Guide;
 import com.yaesta.app.persistence.service.GuideService;
+import com.yaesta.app.persistence.vo.DateRangeVO;
+import com.yaesta.app.persistence.vo.GuideVO;
 
 @RestController
 @RequestMapping(value = "/guide")
@@ -40,6 +44,33 @@ public class GuideController {
 			return new ResponseEntity<List<Guide>>(found,HttpStatus.OK);
 		}else{
 			return new ResponseEntity<List<Guide>>(new ArrayList<Guide>(),HttpStatus.OK);
+		}
+	}
+	
+	@RequestMapping(value = "/getAllVO", method = RequestMethod.GET)
+	public ResponseEntity<List<GuideVO>> getAllVO(){
+		List<GuideVO> found = guideService.getAllVO();
+		
+		if(found!=null && !found.isEmpty()){
+			return new ResponseEntity<List<GuideVO>>(found,HttpStatus.OK);
+		}else{
+			return new ResponseEntity<List<GuideVO>>(new ArrayList<GuideVO>(),HttpStatus.OK);
+		}
+	}
+	
+	@RequestMapping(value = "/getGuidesByRangeDateVO/{startDate}/{finishDate}", method = RequestMethod.GET)
+	public ResponseEntity<List<GuideVO>> getGuidesByRangeDateVO(@PathVariable("startDate") Date startDate,@PathVariable("finishDate") Date finishDate) throws ParseException{
+		
+		DateRangeVO dateRange = new DateRangeVO();
+		
+		dateRange.setStartDate(startDate);
+		dateRange.setFinishDate(finishDate);
+		List<GuideVO> found = guideService.findByDateRangeVO(dateRange);
+		
+		if(found!=null && !found.isEmpty()){
+			return new ResponseEntity<List<GuideVO>>(found,HttpStatus.OK);
+		}else{
+			return new ResponseEntity<List<GuideVO>>(new ArrayList<GuideVO>(),HttpStatus.OK);
 		}
 	}
 }

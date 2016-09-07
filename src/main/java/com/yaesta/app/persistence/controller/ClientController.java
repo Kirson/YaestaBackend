@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yaesta.app.persistence.entity.Client;
+import com.yaesta.app.persistence.entity.Customer;
 import com.yaesta.app.persistence.service.ClientService;
 import com.yaesta.app.persistence.vo.ClientVO;
 import com.yaesta.app.persistence.vo.ClientWarehouseVO;
@@ -29,17 +29,18 @@ public class ClientController implements Serializable {
 	@RequestMapping(value = "/updateInfo", method = RequestMethod.GET)
 	public ResponseEntity<String> updateInfo(){
 		
+		@SuppressWarnings("deprecation")
 		String response= clientService.updateInfo();
 		
 		return new ResponseEntity<String>(response, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET)
-	public ResponseEntity<List<Client>> getAll(){
+	public ResponseEntity<List<Customer>> getAll(){
 		
-		List<Client> list = clientService.getClients();
+		List<Customer> list = clientService.getClients();
 		
-		return new ResponseEntity<List<Client>>(list, HttpStatus.OK);
+		return new ResponseEntity<List<Customer>>(list, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/getNewClient", method = RequestMethod.GET)

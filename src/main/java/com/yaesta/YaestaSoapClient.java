@@ -26,6 +26,10 @@ public class YaestaSoapClient extends BaseConfig{
 	protected @Value("${laarcourier.service.password}") String laarCourierServicePassword;
 	protected @Value("${laarcourier.service.context.path}") String laarCourierServiceContextPath;
 	
+	protected @Value("${tcc.service.url}") String tccServiceUrl;
+	protected @Value("${tcc.service.user}") String tccServiceUser;
+	protected @Value("${tcc.service.password}") String tccServicePassword;
+	protected @Value("${tcc.service.context.path}") String tccServiceContextPath;
 	
 
     @Bean
@@ -40,6 +44,14 @@ public class YaestaSoapClient extends BaseConfig{
     public Jaxb2Marshaller getMarshallerLaarCourier() throws Exception{
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
         marshaller.setContextPath(laarCourierServiceContextPath);
+        marshaller.afterPropertiesSet();
+        return marshaller;
+     }
+
+    @Bean
+    public Jaxb2Marshaller getMarshallerTCC() throws Exception{
+        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
+        marshaller.setContextPath(tccServiceContextPath);
         marshaller.afterPropertiesSet();
         return marshaller;
      }
@@ -77,5 +89,17 @@ public class YaestaSoapClient extends BaseConfig{
         webServiceTemplate.afterPropertiesSet();
         return webServiceTemplate;
     }
+    
+    @Bean
+    public WebServiceTemplate webServiceTemplateTCC() throws Exception {
+
+        WebServiceTemplate webServiceTemplate = new WebServiceTemplate(messageFactory());
+        webServiceTemplate.setDefaultUri(tccServiceUrl);
+        webServiceTemplate.setMarshaller(getMarshallerVtex());
+        webServiceTemplate.setUnmarshaller(getMarshallerVtex());
+        webServiceTemplate.afterPropertiesSet();
+        return webServiceTemplate;
+    }
+
 
 }

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.yaesta.app.util.Constants;
+import com.yaesta.app.util.SupplierUtil;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -40,6 +41,7 @@ import com.yaesta.app.persistence.vo.EmailContainerVO;
 import com.yaesta.app.persistence.vo.EmailVO;
 import com.yaesta.app.persistence.vo.PhoneContainerVO;
 import com.yaesta.app.persistence.vo.PhoneVO;
+import com.yaesta.app.persistence.vo.SupplierBeanVO;
 
 
 @Service
@@ -96,9 +98,9 @@ public class SupplierService implements Serializable {
 			entity.setZone(zone);
 		}
 		
-		if(entity.getStreetMain()==null){
+		//if(entity.getStreetMain()==null){
 			entity.setStreetMain(entity.getAddress());
-		}
+		//}
 		
 		if(entity.getStreetSecundary()==null){
 			entity.setStreetSecundary("");
@@ -171,6 +173,19 @@ public class SupplierService implements Serializable {
 	
 	public List<Supplier> getSuppliers(){
 		return supplierRepository.findAll();
+	}
+	
+	public List<SupplierBeanVO> getSuppliersVO(){
+		List<SupplierBeanVO> result = new ArrayList<SupplierBeanVO>();
+		List<Supplier> found = getSuppliers();
+		if(found!=null && !found.isEmpty()){
+			for(Supplier s:found){
+				SupplierBeanVO sb = SupplierUtil.fromSupplierToSupplierBean(s);
+				result.add(sb);
+			}
+		}
+		
+		return result;
 	}
 	
 	public Supplier findOne(Long id){

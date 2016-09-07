@@ -15,7 +15,7 @@ import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "client",schema="yaesta")
-public class Client implements Serializable {
+public class Customer implements Serializable {
 
 	/**
 	 * serial version
@@ -391,7 +391,7 @@ public class Client implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Client other = (Client) obj;
+		Customer other = (Customer) obj;
 		if (address == null) {
 			if (other.address != null)
 				return false;
