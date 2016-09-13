@@ -17,9 +17,10 @@ import org.springframework.stereotype.Service;
 
 import com.yaesta.app.persistence.entity.Supplier;
 import com.yaesta.app.persistence.entity.TramacoZone;
+import com.yaesta.app.persistence.entity.YaEstaLog;
 import com.yaesta.app.persistence.repository.TramacoZoneRepository;
 import com.yaesta.app.persistence.service.TableSequenceService;
-import com.yaesta.app.util.SupplierUtil;
+import com.yaesta.app.persistence.service.YaEstaLogService;
 import com.yaesta.integration.base.enums.DeliveryEnum;
 import com.yaesta.integration.base.util.BaseUtil;
 import com.yaesta.integration.datil.json.enums.PagoEnum;
@@ -76,6 +77,9 @@ public class TramacoService implements Serializable{
 	
 	@Autowired
 	TramacoZoneRepository tramacoZoneRepository;
+	
+	@Autowired
+	YaEstaLogService logService;
 
 	private @Value("${tramaco.url}") String tramacoUrl;
 	private @Value("${tramaco.port}") String tramacoPort;
@@ -367,8 +371,13 @@ public class TramacoService implements Serializable{
 								carga.setLargo(0D);
 								carga.setPeso(0D);
 							}
-							String[] supplierCodes = SupplierUtil.returnSupplierCode((String)ic.getRefId());
-							desc = desc + "#Can. " + ic.getQuantity()+ " COD:"+ supplierCodes[2]+" _ ";
+							//String[] supplierCodes = SupplierUtil.returnSupplierCode((String)ic.getRefId());
+							//desc = desc + "#Can. " + ic.getQuantity()+ " COD:"+ supplierCodes[2]+" _ ";
+							desc = desc + "#Can. " + ic.getQuantity()+ " PRO:"+ ic.getName()+" _ ";
+							
+							if(desc.length()>250){
+								desc=desc.substring(0, 250);
+							}
 							carga.setDescripcion(desc);
 							carga.setObservacion(observacionText);
 							
@@ -484,10 +493,22 @@ public class TramacoService implements Serializable{
 						*/
 						if (respuestaGenerarGuiaWs != null) {
 							if (respuestaGenerarGuiaWs.getCuerpoRespuesta() != null) {
-								System.out.println("CODIGO:"	+ respuestaGenerarGuiaWs.getCuerpoRespuesta().getCodigo());
-								System.out.println("MENSAJE:"   + respuestaGenerarGuiaWs.getCuerpoRespuesta().getMensaje());
-								System.out.println("EXCEPCION:" + respuestaGenerarGuiaWs.getCuerpoRespuesta().getExcepcion());
-							   
+								String codigo    = "CODIGO:"	+ respuestaGenerarGuiaWs.getCuerpoRespuesta().getCodigo();
+								String mensaje   = "MENSAJE:"   + respuestaGenerarGuiaWs.getCuerpoRespuesta().getMensaje();
+								String excepcion = "EXCEPCION:" + respuestaGenerarGuiaWs.getCuerpoRespuesta().getExcepcion();
+								System.out.println(codigo);
+								System.out.println(mensaje);
+								System.out.println(excepcion);
+								
+								String textInfo = codigo + " " + mensaje + " " + excepcion;
+				
+								YaEstaLog yaestalog = new YaEstaLog();
+								yaestalog.setLogDate(new Date());
+								yaestalog.setProcessName("WAYBILL-TRAMACO");
+								yaestalog.setTextinfo(guideInfo.getOrderComplete().getOrderId());
+								yaestalog.setTextinfo(textInfo);
+								logService.save(yaestalog);
+								
 								if(respuestaGenerarGuiaWs.getCuerpoRespuesta().getCodigo()!="1"){
 									response = respuestaGenerarGuiaWs.getCuerpoRespuesta().getMensaje();
 									errorInfo.add(response);
@@ -593,9 +614,23 @@ public class TramacoService implements Serializable{
 				 */
 				if (respuestaGenerarPdfWs != null) {
 					if (respuestaGenerarPdfWs.getCuerpoRespuesta() != null) {
-						System.out.println("CODIGO:" + respuestaGenerarPdfWs.getCuerpoRespuesta().getCodigo());
-						System.out.println("MENSAJE:" + respuestaGenerarPdfWs.getCuerpoRespuesta().getMensaje());
-						System.out.println("EXCEPCION:" + respuestaGenerarPdfWs.getCuerpoRespuesta().getExcepcion());
+						
+						String codigo    = "CODIGO:"	+ respuestaGenerarPdfWs.getCuerpoRespuesta().getCodigo();
+						String mensaje   = "MENSAJE:"   + respuestaGenerarPdfWs.getCuerpoRespuesta().getMensaje();
+						String excepcion = "EXCEPCION:" + respuestaGenerarPdfWs.getCuerpoRespuesta().getExcepcion();
+						System.out.println(codigo);
+						System.out.println(mensaje);
+						System.out.println(excepcion);
+						
+						String textInfo = codigo + " " + mensaje + " " + excepcion;
+		
+						YaEstaLog yaestalog = new YaEstaLog();
+						yaestalog.setLogDate(new Date());
+						yaestalog.setProcessName("WAYBILL-TRAMACO");
+						yaestalog.setTextinfo(guideInfo.getOrderComplete().getOrderId());
+						yaestalog.setTextinfo(textInfo);
+						logService.save(yaestalog);
+					
 					}
 					if (respuestaGenerarPdfWs.getSalidaGenerarPdfWs() != null) {
 						System.out.println("Esta Tiene salida PDF");
@@ -684,9 +719,22 @@ public class TramacoService implements Serializable{
 			*/
 			if (respuestaTrackGuiaWs != null) {
 				if (respuestaTrackGuiaWs.getCuerpoRespuesta() != null) {
-					System.out.println("CODIGO:"+ respuestaTrackGuiaWs.getCuerpoRespuesta().getCodigo());
-					System.out.println("MENSAJE:" +	respuestaTrackGuiaWs.getCuerpoRespuesta().getMensaje());
-					System.out.println("EXCEPCION:" +respuestaTrackGuiaWs.getCuerpoRespuesta().getExcepcion());
+					String codigo    = "CODIGO:"	+ respuestaTrackGuiaWs.getCuerpoRespuesta().getCodigo();
+					String mensaje   = "MENSAJE:"   + respuestaTrackGuiaWs.getCuerpoRespuesta().getMensaje();
+					String excepcion = "EXCEPCION:" + respuestaTrackGuiaWs.getCuerpoRespuesta().getExcepcion();
+					System.out.println(codigo);
+					System.out.println(mensaje);
+					System.out.println(excepcion);
+					
+					String textInfo = codigo + " " + mensaje + " " + excepcion;
+	
+					YaEstaLog yaestalog = new YaEstaLog();
+					yaestalog.setLogDate(new Date());
+					yaestalog.setProcessName("WAYBILL-TRAMACO");
+					yaestalog.setTextinfo(guideInfo.getOrderComplete().getOrderId());
+					yaestalog.setTextinfo(textInfo);
+					logService.save(yaestalog);
+	
 					
 				}
 				if (respuestaTrackGuiaWs.getLstSalidaTrackGuiaWs() != null) {

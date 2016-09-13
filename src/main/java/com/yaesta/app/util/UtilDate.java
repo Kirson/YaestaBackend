@@ -68,6 +68,21 @@ public class UtilDate implements Serializable {
         return date;
     }
     
+    public static Date fromIsoToDateTime(final String iso8601string) throws ParseException {
+        String s = iso8601string.replace("+00:00", "Z");
+        try {
+        	String s1 = s.substring(0, 16);
+        	//String s2 = s.substring(27);
+        	s1=s1.replace("T", " ");
+            s = s1;  // to get rid of the ":"
+        } catch (IndexOutOfBoundsException e) {
+            throw new ParseException("Invalid length", 0);
+        }
+        Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(s);
+       
+        return date;
+    }
+    
     
     public static Date fromStringToDate(String strDate) throws ParseException{
     	Date date = new SimpleDateFormat("yyyy-MM-dd").parse(strDate);

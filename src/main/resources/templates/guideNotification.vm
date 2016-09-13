@@ -16,13 +16,13 @@
 			 ${mailInfo.generalText}
 		</p>
 		<div id="Product">
-            <table>
+            <table border="1">
               <tr>
-                <td><b>Proveedor</b></td>
-              	<td><b>Producto</b></td>
-              	<td><b>Codigo</b></td>
-              	<td><b>Nombre</b></td>
-              	<td><b>Cantidad</b></td>
+                <th><b>Proveedor</b></th>
+              	<th><b>Producto</b></th>
+              	<th><b>Codigo</b></th>
+              	<th><b>Nombre</b></th>
+              	<th><b>Cantidad</b></th>
               </tr>
               #foreach( $item in $mailInfo.itemInfoList )
     				<tr>

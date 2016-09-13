@@ -1,6 +1,7 @@
 package com.yaesta.app.persistence.controller;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -101,6 +102,27 @@ public class OrderController {
 		}
 	}
 	
+	@RequestMapping(value = "/getItemsByRangeDateStrVO/{startDate}/{finishDate}", method = RequestMethod.GET)
+	public ResponseEntity<List<OrderItemBeanVO>> getItemsByRangeDateStrVO(@PathVariable("startDate") String startDate,@PathVariable("finishDate") String finishDate) throws ParseException{
+		
+		DateRangeVO dateRange = new DateRangeVO();
+		
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		
+		Date dStartDate = format.parse(startDate);
+		Date dFinishDate = format.parse(finishDate);
+		
+		dateRange.setStartDate(dStartDate);
+		dateRange.setFinishDate(dFinishDate);
+		List<OrderItemBeanVO> found = orderService.findByDateRangeVO(dateRange);
+		
+		if(found!=null && !found.isEmpty()){
+			return new ResponseEntity<List<OrderItemBeanVO>>(found,HttpStatus.OK);
+		}else{
+			return new ResponseEntity<List<OrderItemBeanVO>>(new ArrayList<OrderItemBeanVO>(),HttpStatus.OK);
+		}
+	}
+	
 	
 	@RequestMapping(value = "/getAllItemsVO", method = RequestMethod.GET)
 	public ResponseEntity<List<OrderItemBeanVO>> getAllItemsVO(){
@@ -131,6 +153,28 @@ public class OrderController {
 		
 		dateRange.setStartDate(startDate);
 		dateRange.setFinishDate(finishDate);
+		List<WarehouseVO> found = orderService.findByDateRangeVOWarehouse(dateRange);
+		
+		if(found!=null && !found.isEmpty()){
+			return new ResponseEntity<List<WarehouseVO>>(found,HttpStatus.OK);
+		}else{
+			return new ResponseEntity<List<WarehouseVO>>(new ArrayList<WarehouseVO>(),HttpStatus.OK);
+		}
+	}
+	
+	@RequestMapping(value = "/getItemsWarehouseByRangeDateStrVO/{startDate}/{finishDate}", method = RequestMethod.GET)
+	public ResponseEntity<List<WarehouseVO>> getItemsWarehouseByRangeDateStrVO(@PathVariable("startDate") String startDate,@PathVariable("finishDate") String finishDate) throws ParseException{
+		
+		DateRangeVO dateRange = new DateRangeVO();
+		
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		
+		Date dStartDate = format.parse(startDate);
+		Date dFinishDate = format.parse(finishDate);
+		
+		dateRange.setStartDate(dStartDate);
+		dateRange.setFinishDate(dFinishDate);
+		
 		List<WarehouseVO> found = orderService.findByDateRangeVOWarehouse(dateRange);
 		
 		if(found!=null && !found.isEmpty()){

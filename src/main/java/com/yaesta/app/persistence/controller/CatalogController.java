@@ -60,7 +60,7 @@ public class CatalogController {
 	}
 	
 	@RequestMapping(value = "/save", method = RequestMethod.POST)
-	public ResponseEntity<Catalog> s(@RequestBody CatalogVO catalogVO){
+	public ResponseEntity<Catalog> save(@RequestBody CatalogVO catalogVO){
 		
 		Catalog response = catalogService.save(catalogVO.getCatalog(), catalogVO.getDetailList(), catalogVO.getRemoveList());
 		

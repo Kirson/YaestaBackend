@@ -1147,7 +1147,7 @@ public class OrderVitexService extends BaseVitexService {
 				String[] productKey = SupplierUtil.returnSupplierCode((String)ic.getRefId());
 				oi.setProductKey(productKey[2]);
 				oi.setOrderSequence(oc.getSequence());
-				oi.setOrderDate(UtilDate.fromIsoToDate(oc.getCreationDate()));
+				oi.setOrderDate(UtilDate.fromIsoToDateTime(oc.getCreationDate()));
 				oi.setWayToPay(formaPago);
 				oi.setOrderStatus(oc.getStatus());
 				oi.setStatusDescription(oc.getStatusDescription());

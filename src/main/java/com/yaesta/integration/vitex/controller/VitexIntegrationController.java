@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -138,21 +139,21 @@ public class VitexIntegrationController {
 		return new ResponseEntity<OrderConversation>(json, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/changeStatus", method = RequestMethod.POST)
+	@RequestMapping(value = "/changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<OrderComplete> changeStatus(@RequestBody OrderCompleteBean orderCompleteBean) {	  		 		
 		
 		OrderComplete json = orderVitexService.changeStatus(orderCompleteBean.getOrder(),orderCompleteBean.getAction());
 		return new ResponseEntity<OrderComplete>(json, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/cancelOrder", method = RequestMethod.POST)
+	@RequestMapping(value = "/cancelOrder", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<OrderCancel> cancelOrder(@RequestBody OrderCompleteBean orderCompleteBean) {	  		 		
 		
 		OrderCancel json = orderVitexService.cancelOrder(orderCompleteBean.getOrder());
 		return new ResponseEntity<OrderCancel>(json, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/generateGuide", method = RequestMethod.POST)
+	@RequestMapping(value = "/generateGuide", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<GuideContainerBean> generateGuide(@RequestBody GuideInfoBean guideInfoBean){
 		
 		GuideContainerBean response = new GuideContainerBean();
@@ -171,7 +172,7 @@ public class VitexIntegrationController {
 	}
 	
 	
-	@RequestMapping(value = "/invoiceOrder", method = RequestMethod.POST)
+	@RequestMapping(value = "/invoiceOrder", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<FacturaRespuestaSRI> invoiceOrder(@RequestBody OrderCompleteBean orderCompleteBean) {	  		 		
 		
 		OrderComplete oc = orderCompleteBean.getOrder();
@@ -181,7 +182,7 @@ public class VitexIntegrationController {
 		return new ResponseEntity<FacturaRespuestaSRI>(response, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/invoiceOrderVtex", method = RequestMethod.POST)
+	@RequestMapping(value = "/invoiceOrderVtex", method = RequestMethod.POST , consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<InvoiceResponse> invoiceOrderVTex(@RequestBody OrderCompleteBean orderCompleteBean) {	  		 		
 		
 		OrderComplete oc = orderCompleteBean.getOrder();
@@ -191,7 +192,7 @@ public class VitexIntegrationController {
 		return new ResponseEntity<InvoiceResponse>(response, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/creditNoteOrder", method = RequestMethod.POST)
+	@RequestMapping(value = "/creditNoteOrder", method = RequestMethod.POST , consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<NotaCreditoRespuesta> creditNoteOrder(@RequestBody CreditNoteBean creditNoteBean) {	  		 		
 		
 		NotaCreditoRespuesta response = datilService.processCreditNote(creditNoteBean);
