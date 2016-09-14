@@ -78,4 +78,8 @@ public class TramacoZoneService {
 		return result;
 	}
 	
+	public TramacoZone save(TramacoZone tramacoZone){
+		return tramacoZoneRepository.save(tramacoZone);
+	}
+	
 }

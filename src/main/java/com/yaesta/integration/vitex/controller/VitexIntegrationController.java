@@ -149,7 +149,12 @@ public class VitexIntegrationController {
 	@RequestMapping(value = "/cancelOrder", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<OrderCancel> cancelOrder(@RequestBody OrderCompleteBean orderCompleteBean) {	  		 		
 		
-		OrderCancel json = orderVitexService.cancelOrder(orderCompleteBean.getOrder());
+		OrderComplete oc = orderCompleteBean.getOrder();
+		if(oc.getMotiveCancelId()==null){
+			oc.setMotiveCancelId(orderCompleteBean.getMotiveCancelId());
+			oc.setMotiveCancelText(orderCompleteBean.getMotiveCancelText());
+		}
+		OrderCancel json = orderVitexService.cancelOrder(oc);
 		return new ResponseEntity<OrderCancel>(json, HttpStatus.OK);
 	}
 	

@@ -26,6 +26,8 @@ public class GuideDTO implements Serializable{
 	private String customerAdditionalInfo;
 	private GuideBeanDTO guideBean;
 	private Integer packages;
+	private String latitude;
+	private String longitude;
 	
 	
 	public GuideDTO(){
@@ -111,6 +113,26 @@ public class GuideDTO implements Serializable{
 
 	public void setPackages(Integer packages) {
 		this.packages = packages;
+	}
+
+
+	public String getLatitude() {
+		return latitude;
+	}
+
+
+	public void setLatitude(String latitude) {
+		this.latitude = latitude;
+	}
+
+
+	public String getLongitude() {
+		return longitude;
+	}
+
+
+	public void setLongitude(String longitude) {
+		this.longitude = longitude;
 	}
 
 	

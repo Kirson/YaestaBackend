@@ -13,4 +13,5 @@ public interface CatalogRepository extends JpaRepository<Catalog, Long> {
 	public List<Catalog> findByMainCatalog(Catalog mainCatalog);
 	public List<Catalog> findByMainCatalogIsNull();
 	public List<Catalog> findByNemonic(String nemonic);
+	
 }

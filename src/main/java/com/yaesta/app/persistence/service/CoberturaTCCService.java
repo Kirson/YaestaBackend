@@ -42,4 +42,12 @@ public class CoberturaTCCService {
 		
 		return found;
 	}
+	
+	public List<CoberturaTCC> getAll(){
+		return coberturaTCCRepository.findAll();
+	}
+	
+	public CoberturaTCC save(CoberturaTCC coberturaTCC){
+		return coberturaTCCRepository.save(coberturaTCC);
+	}
 }

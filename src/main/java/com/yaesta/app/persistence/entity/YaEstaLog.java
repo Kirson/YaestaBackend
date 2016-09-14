@@ -41,6 +41,9 @@ public class YaEstaLog {
 	@Column(name="log_date",columnDefinition="TIMESTAMP WITH TIME ZONE")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date logDate;
+	
+	@Column(name="order_id")
+	private String orderId;
 
 	public Long getId() {
 		return id;
@@ -96,6 +99,14 @@ public class YaEstaLog {
 
 	public void setLogDate(Date logDate) {
 		this.logDate = logDate;
+	}
+
+	public String getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
 	}
 	
 	

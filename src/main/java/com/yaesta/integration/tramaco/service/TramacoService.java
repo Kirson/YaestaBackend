@@ -19,8 +19,10 @@ import com.yaesta.app.persistence.entity.Supplier;
 import com.yaesta.app.persistence.entity.TramacoZone;
 import com.yaesta.app.persistence.entity.YaEstaLog;
 import com.yaesta.app.persistence.repository.TramacoZoneRepository;
+import com.yaesta.app.persistence.service.GuideService;
 import com.yaesta.app.persistence.service.TableSequenceService;
 import com.yaesta.app.persistence.service.YaEstaLogService;
+import com.yaesta.app.util.SupplierUtil;
 import com.yaesta.integration.base.enums.DeliveryEnum;
 import com.yaesta.integration.base.util.BaseUtil;
 import com.yaesta.integration.datil.json.enums.PagoEnum;
@@ -80,6 +82,9 @@ public class TramacoService implements Serializable{
 	
 	@Autowired
 	YaEstaLogService logService;
+	
+	@Autowired
+	GuideService guideService;
 
 	private @Value("${tramaco.url}") String tramacoUrl;
 	private @Value("${tramaco.port}") String tramacoPort;
@@ -371,13 +376,14 @@ public class TramacoService implements Serializable{
 								carga.setLargo(0D);
 								carga.setPeso(0D);
 							}
-							//String[] supplierCodes = SupplierUtil.returnSupplierCode((String)ic.getRefId());
-							//desc = desc + "#Can. " + ic.getQuantity()+ " COD:"+ supplierCodes[2]+" _ ";
-							desc = desc + "#Can. " + ic.getQuantity()+ " PRO:"+ ic.getName()+" _ ";
+							String[] supplierCodes = SupplierUtil.returnSupplierCode((String)ic.getRefId());
+							desc = desc + "#Can. " + ic.getQuantity()+ " COD:"+ supplierCodes[2]+" _ ";
 							
+							//desc = desc + "#Can. " + ic.getQuantity()+ " PRO:"+ ic.getName()+" _ ";
+							/*
 							if(desc.length()>250){
 								desc=desc.substring(0, 250);
-							}
+							}*/
 							carga.setDescripcion(desc);
 							carga.setObservacion(observacionText);
 							
@@ -507,6 +513,7 @@ public class TramacoService implements Serializable{
 								yaestalog.setProcessName("WAYBILL-TRAMACO");
 								yaestalog.setTextinfo(guideInfo.getOrderComplete().getOrderId());
 								yaestalog.setTextinfo(textInfo);
+								yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
 								logService.save(yaestalog);
 								
 								if(respuestaGenerarGuiaWs.getCuerpoRespuesta().getCodigo()!="1"){
@@ -626,9 +633,10 @@ public class TramacoService implements Serializable{
 		
 						YaEstaLog yaestalog = new YaEstaLog();
 						yaestalog.setLogDate(new Date());
-						yaestalog.setProcessName("WAYBILL-TRAMACO");
+						yaestalog.setProcessName("WAYBILL-PDF-TRAMACO");
 						yaestalog.setTextinfo(guideInfo.getOrderComplete().getOrderId());
 						yaestalog.setTextinfo(textInfo);
+						yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
 						logService.save(yaestalog);
 					
 					}
@@ -712,6 +720,8 @@ public class TramacoService implements Serializable{
 			EntradaTrackGuiaWs entTraGui = new EntradaTrackGuiaWs();
 			entTraGui.setUsuario(tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs().getUsuario());
 			entTraGui.setGuia(guideInfo.getGuideBean().getGuideDeliveryId());
+			
+	
 			/**/
 			RespuestaTrackGuiaWs respuestaTrackGuiaWs = cliente.obtenerTracking(entTraGui);
 			/**
@@ -730,9 +740,10 @@ public class TramacoService implements Serializable{
 	
 					YaEstaLog yaestalog = new YaEstaLog();
 					yaestalog.setLogDate(new Date());
-					yaestalog.setProcessName("WAYBILL-TRAMACO");
+					yaestalog.setProcessName("WAYWILL-TRACKING-TRAMACO");
 					yaestalog.setTextinfo(guideInfo.getOrderComplete().getOrderId());
 					yaestalog.setTextinfo(textInfo);
+					yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
 					logService.save(yaestalog);
 	
 					
@@ -744,6 +755,9 @@ public class TramacoService implements Serializable{
 					}
 					
 					System.out.println("COORDENADAS:" + respuestaTrackGuiaWs.getTransaccion().getLatitud() + ":" + respuestaTrackGuiaWs.getTransaccion().getLongitud());
+					guideInfo.setLatitude(respuestaTrackGuiaWs.getTransaccion().getLatitud().toString());
+					guideInfo.setLongitude(respuestaTrackGuiaWs.getTransaccion().getLongitud().toString());
+				
 				}
 				guideInfo.getGuideBean().setGuideTrackResponse(respuestaTrackGuiaWs);
 			}

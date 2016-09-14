@@ -10,8 +10,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.PostLoad;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "user",schema="yaesta")
@@ -39,19 +43,33 @@ public class User implements Serializable{
 	@Column(name = "login")
 	private String login;
 	
-	@Column(name = "passowrd")
+	@Column(name = "password")
 	private String password;
 	
 	@Column(name = "document")
 	private String document;
 	
+	@JsonBackReference(value="user-role")
 	@JoinColumn(name = "role_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
 	private Catalog role;
 	
 	@Column(name = "vitex_id")
 	private String vitexId;
+	
+	@Transient
+	private boolean isNew;
+	
+	@Transient
+	private Long roleId;
+	
+	@Transient
+	private Catalog userRole;
 
+	public User(){
+		isNew = Boolean.FALSE;
+	}
+	
 	public Long getId() {
 		return id;
 	}
@@ -123,7 +141,37 @@ public class User implements Serializable{
 	public void setDocument(String document) {
 		this.document = document;
 	}
+
+	public boolean isNew() {
+		return isNew;
+	}
+
+	public void setNew(boolean isNew) {
+		this.isNew = isNew;
+	}
+
+	public Long getRoleId() {
+		return roleId;
+	}
+
+	public void setRoleId(Long roleId) {
+		this.roleId = roleId;
+	}
 	
 	
+	
+	public Catalog getUserRole() {
+		return userRole;
+	}
+
+	public void setUserRole(Catalog userRole) {
+		this.userRole = userRole;
+	}
+
+	@PostLoad
+	public void postLoad(){
+		roleId = role.getId();
+		userRole = role;
+	}
 	
 }

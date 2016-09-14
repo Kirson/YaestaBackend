@@ -112,20 +112,33 @@ public class GuideService {
 		return guideRepository.findOne(id);
 	}
 	
+	@Transactional
 	public List<TrackingVO> getTrackingInfo(String guideId, String deliveryId){
 		List<TrackingVO> trackingList = new ArrayList<TrackingVO>();
 		
-		if(deliveryId.equals("TRAMACO")){
-			GuideDTO guideInfo = new GuideDTO();
-			GuideBeanDTO gbd = new GuideBeanDTO();
-			gbd.setGuideDeliveryId(guideId);
-			guideInfo.setGuideBean(gbd);
-			GuideDTO response=tramacoService.trackingService(guideInfo);
-			
-			if(response.getGuideBean().getGuideTrackResponse().getLstSalidaTrackGuiaWs()!=null && !response.getGuideBean().getGuideTrackResponse().getLstSalidaTrackGuiaWs().isEmpty()){
-				for(SalidaTrackGuiaWs st:response.getGuideBean().getGuideTrackResponse().getLstSalidaTrackGuiaWs()){
-					TrackingVO tvo = TrackingUtil.fromSalidaTrackGuiaWsToTrackingVO(st);
-					trackingList.add(tvo);
+		Long idGuide = new Long(guideId);
+		
+		Guide guide = guideRepository.getOne(idGuide);
+		if(guide!=null){
+			System.out.println("Guide "+guide.getId());
+		
+			if(deliveryId.equals("TRAMACO")){
+				GuideDTO guideInfo = new GuideDTO();
+				GuideBeanDTO gbd = new GuideBeanDTO();
+				gbd.setGuideDeliveryId(guide.getGuideId());
+				guideInfo.setGuideBean(gbd);
+				GuideDTO response=tramacoService.trackingService(guideInfo);
+				
+				if(response.getGuideBean().getGuideTrackResponse().getLstSalidaTrackGuiaWs()!=null && !response.getGuideBean().getGuideTrackResponse().getLstSalidaTrackGuiaWs().isEmpty()){
+					for(SalidaTrackGuiaWs st:response.getGuideBean().getGuideTrackResponse().getLstSalidaTrackGuiaWs()){
+						TrackingVO tvo = TrackingUtil.fromSalidaTrackGuiaWsToTrackingVO(st);
+						trackingList.add(tvo);
+					}
+					
+					guide.setLatitude(response.getLatitude());
+					guide.setLongitude(response.getLongitude());
+					
+					guideRepository.save(guide);
 				}
 			}
 		}
@@ -133,4 +146,15 @@ public class GuideService {
 		return trackingList;
 	}
 
+	
+	public Guide findByVitexDispatcherId(String vitexDispatcherId){
+		Guide found = null;
+		
+		List<Guide> list = guideRepository.findByVitexDispatcherId(vitexDispatcherId);
+		
+		if(list!=null && !list.isEmpty()){
+			found=list.get(0);
+		}
+		return found;
+	}
 }

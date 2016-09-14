@@ -66,4 +66,12 @@ public class CatalogController {
 		
 		return new ResponseEntity<Catalog>(response,HttpStatus.OK);
 	}
+	
+	@RequestMapping(value = "/getCatalogByNemonic{nemonic}", method = RequestMethod.GET)
+	public ResponseEntity<Catalog> getCatalogByNemonic(@PathVariable("nemonic")String nemonic){
+		
+		Catalog response = catalogService.findByNemonic(nemonic);
+		
+		return new ResponseEntity<Catalog>(response,HttpStatus.OK);
+	}
 }

@@ -2,6 +2,8 @@ package com.yaesta.app.persistence.service;
 
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,4 +25,15 @@ public class UserService {
 		return userRepository.findByVitexId(vitexId);
 	}
 	
+	@Transactional
+	public User save(User user){
+		if(user.getUserRole()!=null){
+			user.setRole(user.getUserRole());
+		}
+		return userRepository.save(user);
+	}
+	
+	public User findByLoginAndPassword(String login, String password){
+		return userRepository.findByLoginAndPassword(login, password);
+	}
 }

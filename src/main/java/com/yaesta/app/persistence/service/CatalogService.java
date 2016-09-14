@@ -80,5 +80,15 @@ public class CatalogService {
 		return catalog;
 	}
 	
+	public Catalog findByNemonic(String nemonic){
+		Catalog found = null;
+		List<Catalog> list = catalogRepository.findByNemonic(nemonic);
+		
+		if(list!=null && !list.isEmpty()){
+			found = list.get(0);
+		}
+		
+		return found;
+	}
 	
 }
