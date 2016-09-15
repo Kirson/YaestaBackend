@@ -124,7 +124,9 @@ public class GuideService {
 		
 			if(deliveryId.equals("TRAMACO")){
 				GuideDTO guideInfo = new GuideDTO();
+				
 				GuideBeanDTO gbd = new GuideBeanDTO();
+				gbd.setGuide(guide);
 				gbd.setGuideDeliveryId(guide.getGuideId());
 				guideInfo.setGuideBean(gbd);
 				GuideDTO response=tramacoService.trackingService(guideInfo);

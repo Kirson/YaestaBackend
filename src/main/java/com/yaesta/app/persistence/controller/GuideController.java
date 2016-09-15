@@ -121,7 +121,7 @@ public class GuideController implements Serializable {
 	public ResponseEntity<List<TrackingVO>> getTrackingInfo(@PathVariable("guideId") String guideId,@PathVariable("deliveryId") String deliveryId){
 		List<TrackingVO> found = guideService.getTrackingInfo(guideId, deliveryId);
 		
-		if(found!=null && found.isEmpty()){
+		if(found!=null && !found.isEmpty()){
 			return new ResponseEntity<List<TrackingVO>>(found,HttpStatus.OK);
 		}else{
 			return new ResponseEntity<List<TrackingVO>>(new ArrayList<TrackingVO>(),HttpStatus.OK);

@@ -35,6 +35,7 @@ import com.yaesta.integration.vitex.json.bean.Payment;
 import com.yaesta.integration.vitex.json.bean.PriceTag;
 import com.yaesta.integration.vitex.json.bean.Transaction;
 import com.yaesta.integration.vitex.json.bean.enums.PaymentEnum;
+import com.yaesta.integration.vitex.service.OrderVitexService;
 import com.yaesta.integration.vitex.bean.SupplierDeliveryInfo;
 
 
@@ -85,6 +86,9 @@ public class TramacoService implements Serializable{
 	
 	@Autowired
 	GuideService guideService;
+	
+	@Autowired
+	OrderVitexService orderVitexService;
 
 	private @Value("${tramaco.url}") String tramacoUrl;
 	private @Value("${tramaco.port}") String tramacoPort;
@@ -720,8 +724,7 @@ public class TramacoService implements Serializable{
 			EntradaTrackGuiaWs entTraGui = new EntradaTrackGuiaWs();
 			entTraGui.setUsuario(tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs().getUsuario());
 			entTraGui.setGuia(guideInfo.getGuideBean().getGuideDeliveryId());
-			
-	
+		
 			/**/
 			RespuestaTrackGuiaWs respuestaTrackGuiaWs = cliente.obtenerTracking(entTraGui);
 			/**
@@ -741,9 +744,9 @@ public class TramacoService implements Serializable{
 					YaEstaLog yaestalog = new YaEstaLog();
 					yaestalog.setLogDate(new Date());
 					yaestalog.setProcessName("WAYWILL-TRACKING-TRAMACO");
-					yaestalog.setTextinfo(guideInfo.getOrderComplete().getOrderId());
+					yaestalog.setTextinfo(guideInfo.getGuideBean().getGuide().getOrderVitexId());
 					yaestalog.setTextinfo(textInfo);
-					yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
+					yaestalog.setOrderId(guideInfo.getGuideBean().getGuide().getOrderVitexId());
 					logService.save(yaestalog);
 	
 					
@@ -755,8 +758,12 @@ public class TramacoService implements Serializable{
 					}
 					
 					System.out.println("COORDENADAS:" + respuestaTrackGuiaWs.getTransaccion().getLatitud() + ":" + respuestaTrackGuiaWs.getTransaccion().getLongitud());
-					guideInfo.setLatitude(respuestaTrackGuiaWs.getTransaccion().getLatitud().toString());
-					guideInfo.setLongitude(respuestaTrackGuiaWs.getTransaccion().getLongitud().toString());
+					if(respuestaTrackGuiaWs.getTransaccion().getLatitud()!=null){
+						guideInfo.setLatitude(respuestaTrackGuiaWs.getTransaccion().getLatitud().toString());
+					}
+					if(respuestaTrackGuiaWs.getTransaccion().getLongitud()!=null){
+						guideInfo.setLongitude(respuestaTrackGuiaWs.getTransaccion().getLongitud().toString());
+					}
 				
 				}
 				guideInfo.getGuideBean().setGuideTrackResponse(respuestaTrackGuiaWs);
