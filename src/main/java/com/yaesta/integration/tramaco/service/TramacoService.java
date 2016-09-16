@@ -141,12 +141,22 @@ public class TramacoService implements Serializable{
 					System.out.println("CONTRATOS:");
 					for (EntityContrato contrato : salida.getLstContrato()) {
 						System.out.println("ID:" + contrato.getId() + " NUMERO:" + contrato.getNumero());
+						System.out.println(" PRODUCTOS:");
+						for (EntityProducto producto : contrato.getLstProducto()) {
+							System.out.println("ID:" + producto.getId() + " NOMBRE:" + producto.getNombre() + " TIPO:" + producto.getTipo());
+						}
+						System.out.println(" SERVICIOS:");
+						for (EntityServicio servicio : contrato.getLstServicio()) {
+							System.out.println("ID:" + servicio.getId() + " NOMBRE:" +servicio.getNombre() + " TIPO:" + servicio.getTipo());
+						}
+
 					}
 					System.out.println("LOCALIDADES:");
 					for (EntityLocalidad localidad : salida.getLstLocalidad()) {
 						System.out.println("ID:" + localidad.getId() + " NOMBRE:" +
 								localidad.getNombre());
 					}
+					/*
 					System.out.println("PRODUCTOS:");
 					for (EntityProducto producto : salida.getLstProducto()) {
 						System.out.println("ID:" + producto.getId() + " NOMBRE:" + producto.getNombre()
@@ -157,6 +167,7 @@ public class TramacoService implements Serializable{
 						System.out.println("ID:" + servicio.getId() + " NOMBRE:" + servicio.getNombre() +
 								" TIPO:" + servicio.getTipo());
 					}
+					*/
 				}
 				tramacoAuth.setRespuestaAutenticarWs(respuestaAutenticarWs);
 			}
@@ -219,13 +230,16 @@ public class TramacoService implements Serializable{
 					String canton = guideInfo.getOrderComplete().getShippingData().getAddress().getCity().toUpperCase();
 					List<TramacoZone> zones = tramacoZoneRepository.findByProvinciaAndCantonAndParroquia(province, canton, canton);
 					if(zones!=null && !zones.isEmpty()){
-						destinatario.setCodigoPostal(zones.get(0).getCodigo().intValue());
+						//destinatario.setCodigoPostal(zones.get(0).getCodigo()+"");
+						destinatario.setCodigoParroquia(zones.get(0).getCodigo().intValue());
 					}
 					
 				}else if(guideInfo.getOrderComplete().getShippingData().getAddress().getPostalCode()!=null){
-					destinatario.setCodigoPostal(new Integer(guideInfo.getOrderComplete().getShippingData().getAddress().getPostalCode()));
+					//destinatario.setCodigoPostal(guideInfo.getOrderComplete().getShippingData().getAddress().getPostalCode());
+					destinatario.setCodigoParroquia(new Integer(guideInfo.getOrderComplete().getShippingData().getAddress().getPostalCode()));
 				}else{
-					destinatario.setCodigoPostal(0);
+					//destinatario.setCodigoPostal("0");
+					destinatario.setCodigoParroquia(0);
 				}
 				
 				destinatario.setEmail(guideInfo.getOrderComplete().getClientProfileData().getEmail());
@@ -314,7 +328,8 @@ public class TramacoService implements Serializable{
 						remitente.setCalleSecundaria(sdi.getSupplier().getStreetSecundary());
 						remitente.setCiRuc(yaestaRuc);
 						if(sdi.getSupplier().getPostalCode()!=null){
-							remitente.setCodigoPostal(new Integer(sdi.getSupplier().getPostalCode()));
+							//remitente.setCodigoPostal(sdi.getSupplier().getPostalCode());
+							remitente.setCodigoParroquia(new Integer(sdi.getSupplier().getPostalCode()));
 						}
 						
 						remitente.setEmail(sdi.getSupplier().getContactEmail());
@@ -347,12 +362,16 @@ public class TramacoService implements Serializable{
 						EntityCarga carga = new EntityCarga();
 						carga.setBultos(sdi.getPackages().intValue());
 						Integer contrato = 0;
+						
+						EntityContrato contratoTramaco = null;
 						for(EntityContrato entityContrato:tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs().getLstContrato()){
 							contrato = entityContrato.getId();
-							if(contrato==2977){
+							contratoTramaco = entityContrato;
+							if(contrato==2977){ //2977 --> Produccion
 								break;
 							}
 						}
+						
 						carga.setContrato(contrato);
 						
 						String desc = "";
@@ -470,22 +489,29 @@ public class TramacoService implements Serializable{
 							System.out.println("Valor a cobrar" + carga.getValorCobro());
 							
 							
-							carga.setProducto(1);
+							//carga.setProducto(tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs().getLstContrato().get(0).getLstProducto().get(0).getId());
+							carga.setProducto(contratoTramaco.getLstProducto().get(0).getId());
 							carga.setValorAsegurado(totalAsegurado);
 							carga.setLocalidad(0);
 							carga.setGuia(guideInfo.getOrderComplete().getOrderId());
 						
 						}//for de items
 						
+						System.out.println("Contrato "+carga.getContrato());
+						System.out.println("Producto "+carga.getProducto());
+						//System.out.println("Servicio "+tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs().getLstContrato().get(0).getLstServicio().get(0).getId());
+						
 						entCargaDestino.setCarga(carga);
 						
 						//*************//
 						List<EntityServicio> lstServicio = new ArrayList<>();
-						EntityServicio entServicio = new EntityServicio();
-						entServicio.setId(38); //Verificar
-						entServicio.setTipo("LIV");
-						entServicio.setCantidad(0.0);
-						lstServicio.add(entServicio);
+						//EntityServicio entServicio = new EntityServicio();
+						//entServicio.setId(tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs().getLstContrato().get(0).getLstServicio().get(0).getId()); //Verificar
+						//entServicio.setId(contratoTramaco.getLstServicio().get(0).getId()); //Verificar
+						//entServicio.setId(2977); //Verificar
+						//entServicio.setTipo("LIV");
+						//entServicio.setCantidad(0.0);
+						//lstServicio.add(entServicio);
 						entCargaDestino.setLstServicio(lstServicio);
 						
 						/********/
@@ -551,6 +577,13 @@ public class TramacoService implements Serializable{
 						guideInfo.setErrorList(errorInfo);
 						for(String e:errorInfo){
 							System.out.println("Problemas en::"+e);
+							YaEstaLog yaestalog = new YaEstaLog();
+							yaestalog.setLogDate(new Date());
+							yaestalog.setProcessName("WAYBILL-TRAMACO");
+							yaestalog.setTextinfo(guideInfo.getOrderComplete().getOrderId());
+							yaestalog.setTextinfo(e);
+							yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
+							logService.save(yaestalog);
 						}
 					}
 					
@@ -570,6 +603,13 @@ public class TramacoService implements Serializable{
 			System.out.println("Error en generacion de guias");
 			e.printStackTrace();
 			guideInfo.setResponse("Error "+e.getMessage());
+			YaEstaLog yaestalog = new YaEstaLog();
+			yaestalog.setLogDate(new Date());
+			yaestalog.setProcessName("WAYBILL-TRAMACO");
+			yaestalog.setTextinfo(guideInfo.getOrderComplete().getOrderId());
+			yaestalog.setTextinfo("Error "+e.getMessage());
+			yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
+			logService.save(yaestalog);
 		}
 		
 		
