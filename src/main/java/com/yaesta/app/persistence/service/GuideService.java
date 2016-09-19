@@ -1,5 +1,6 @@
 package com.yaesta.app.persistence.service;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,9 +19,12 @@ import com.yaesta.app.persistence.vo.GuideVO;
 import com.yaesta.app.persistence.vo.TrackingVO;
 import com.yaesta.app.util.GuideUtil;
 import com.yaesta.app.util.TrackingUtil;
+import com.yaesta.app.util.UtilDate;
 import com.yaesta.integration.tramaco.dto.GuideBeanDTO;
 import com.yaesta.integration.tramaco.dto.GuideDTO;
 import com.yaesta.integration.tramaco.service.TramacoService;
+import com.yaesta.integration.vitex.json.bean.OrderComplete;
+import com.yaesta.integration.vitex.service.OrderVitexService;
 
 import dmz.comercial.servicio.cliente.dto.SalidaTrackGuiaWs;
 
@@ -35,6 +39,9 @@ public class GuideService {
 	
 	@Autowired
 	private TramacoService tramacoService;
+	
+	@Autowired
+	private OrderVitexService orderVitexService;
 	
 	public List<Guide> findByOrder(Order order){
 		List<Guide> result = new ArrayList<Guide>();
@@ -79,8 +86,20 @@ public class GuideService {
 		return resultList;
 	}
 	
-	public List<GuideVO> findByDateRangeVO(DateRangeVO dateRange){
+	public List<GuideVO> findByCreateDateRangeVO(DateRangeVO dateRange){
 		List<Guide> found =guideRepository.findByCreateDateBetween(dateRange.getStartDate(), dateRange.getFinishDate());
+		List<GuideVO> resultList = new ArrayList<GuideVO>();
+		if(found!=null && !found.isEmpty()){
+			for(Guide g:found){
+				GuideVO gvo = GuideUtil.fromGuideToGuideVO(g);
+				resultList.add(gvo);
+			}
+		}
+		return resultList;
+	}
+	
+	public List<GuideVO> findByOrderDateRangeVO(DateRangeVO dateRange){
+		List<Guide> found =guideRepository.findByOrderDateBetween(dateRange.getStartDate(), dateRange.getFinishDate());
 		List<GuideVO> resultList = new ArrayList<GuideVO>();
 		if(found!=null && !found.isEmpty()){
 			for(Guide g:found){
@@ -158,5 +177,30 @@ public class GuideService {
 			found=list.get(0);
 		}
 		return found;
+	}
+	
+	public String updateGuides(){
+		String result = "OK";
+		
+		List<Guide> guides = guideRepository.findAll();
+		
+		for(Guide guide:guides){
+			
+			if(guide.getOrderVitexId()!=null){
+				OrderComplete oc = orderVitexService.getOrderComplete(guide.getOrderVitexId());
+				try {
+					guide.setOrderDate(UtilDate.fromIsoToDateTime(oc.getCreationDate()));
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				guide.setCustomerName(oc.getCustomerName());
+				guide.setOrderStatus(oc.getStatus());
+				guideRepository.save(guide);
+			}
+			
+		}
+		
+		return result;
 	}
 }

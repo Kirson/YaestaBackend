@@ -172,6 +172,9 @@ public class Supplier implements Serializable{
 	@Column(name="is_warehouse")
 	private Boolean isWarehouse;
 	
+	@Column(name = "seller_user")
+	private String sellerUser;
+	
 	@Transient
 	private String shippingAddress;
 	
@@ -553,6 +556,16 @@ public class Supplier implements Serializable{
 
 	public void setSupplierType(Catalog supplierType) {
 		this.supplierType = supplierType;
+	}
+	
+	
+
+	public String getSellerUser() {
+		return sellerUser;
+	}
+
+	public void setSellerUser(String sellerUser) {
+		this.sellerUser = sellerUser;
 	}
 
 	@Override

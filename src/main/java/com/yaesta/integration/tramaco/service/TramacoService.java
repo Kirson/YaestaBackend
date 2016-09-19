@@ -362,12 +362,20 @@ public class TramacoService implements Serializable{
 						EntityCarga carga = new EntityCarga();
 						carga.setBultos(sdi.getPackages().intValue());
 						Integer contrato = 0;
-						
+						Integer producto = 0;
 						EntityContrato contratoTramaco = null;
 						for(EntityContrato entityContrato:tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs().getLstContrato()){
 							contrato = entityContrato.getId();
 							contratoTramaco = entityContrato;
 							if(contrato==2977){ //2977 --> Produccion
+								break;
+							}
+						}
+						EntityProducto productoTramaco = null;
+						for(EntityProducto entityProducto:contratoTramaco.getLstProducto()){
+							producto = entityProducto.getId();
+							productoTramaco = entityProducto;
+							if(producto==1){
 								break;
 							}
 						}
@@ -399,14 +407,18 @@ public class TramacoService implements Serializable{
 								carga.setLargo(0D);
 								carga.setPeso(0D);
 							}
+							
+							if(sdi.getItemIdentityType()!=null && sdi.getItemIdentityType().getNemonic().equals("NOMBREPRODUCTO")){
+								desc = desc + "#Can. " + ic.getQuantity()+ " PRO:"+ ic.getName()+" _ ";
+							}else{
 							String[] supplierCodes = SupplierUtil.returnSupplierCode((String)ic.getRefId());
 							desc = desc + "#Can. " + ic.getQuantity()+ " COD:"+ supplierCodes[2]+" _ ";
+							}
 							
-							//desc = desc + "#Can. " + ic.getQuantity()+ " PRO:"+ ic.getName()+" _ ";
-							/*
 							if(desc.length()>250){
 								desc=desc.substring(0, 250);
-							}*/
+							}
+							
 							carga.setDescripcion(desc);
 							carga.setObservacion(observacionText);
 							
@@ -490,7 +502,12 @@ public class TramacoService implements Serializable{
 							
 							
 							//carga.setProducto(tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs().getLstContrato().get(0).getLstProducto().get(0).getId());
-							carga.setProducto(contratoTramaco.getLstProducto().get(0).getId());
+							//carga.setProducto(contratoTramaco.getLstProducto().get(1).getId());
+							if(productoTramaco!=null){
+								carga.setProducto(productoTramaco.getId());
+							}else{
+								carga.setProducto(contratoTramaco.getLstProducto().get(1).getId());
+							}
 							carga.setValorAsegurado(totalAsegurado);
 							carga.setLocalidad(0);
 							carga.setGuia(guideInfo.getOrderComplete().getOrderId());

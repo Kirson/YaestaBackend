@@ -118,6 +118,13 @@ public class Guide implements Serializable{
     @ManyToOne(fetch = FetchType.LAZY)
 	private Catalog guideStatus;
 	
+	@Column(name="order_date",columnDefinition="TIMESTAMP WITH TIME ZONE")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date orderDate;
+	
+	@Column(name="order_status")
+	private String orderStatus;
+	
 	@Transient
 	private List<GuideDetail> details;
 	
@@ -333,6 +340,14 @@ public class Guide implements Serializable{
 	
 	
 
+	public String getOrderStatus() {
+		return orderStatus;
+	}
+
+	public void setOrderStatus(String orderStatus) {
+		this.orderStatus = orderStatus;
+	}
+
 	public Date getDeliveryScheduledDate() {
 		return deliveryScheduledDate;
 	}
@@ -363,6 +378,16 @@ public class Guide implements Serializable{
 
 	public void setGuideId(String guideId) {
 		this.guideId = guideId;
+	}
+	
+	
+
+	public Date getOrderDate() {
+		return orderDate;
+	}
+
+	public void setOrderDate(Date orderDate) {
+		this.orderDate = orderDate;
 	}
 
 	@Override

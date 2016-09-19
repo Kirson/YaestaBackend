@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 	"guideStatus",
 	"deliveryStatus",
 	"creationDate",
+	"orderDate",
 	"deliveryDate",
 	"orderId",
 	"supplierId",
@@ -36,6 +37,7 @@ public class GuideVO implements Serializable {
 	private String guideStatus;
 	private String deliveryStatus;
 	private Date creationDate;
+	private Date orderDate;
 	private Date deliveryDate;
 	private String orderId;
 	private Long supplierId;
@@ -108,6 +110,12 @@ public class GuideVO implements Serializable {
 	}
 	public void setSupplierName(String supplierName) {
 		this.supplierName = supplierName;
+	}
+	public Date getOrderDate() {
+		return orderDate;
+	}
+	public void setOrderDate(Date orderDate) {
+		this.orderDate = orderDate;
 	}
 	
 	

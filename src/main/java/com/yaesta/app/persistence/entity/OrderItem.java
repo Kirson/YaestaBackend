@@ -128,6 +128,9 @@ public class OrderItem implements Serializable{
 	
 	@Column(name="is_warehouse")
 	private Boolean isWarehouse;
+	
+	@Column(name="item_vtex_id")
+	private String itemVTexId;
 
 	public Long getId() {
 		return id;
@@ -378,6 +381,15 @@ public class OrderItem implements Serializable{
 	public void setIsWarehouse(Boolean isWarehouse) {
 		this.isWarehouse = isWarehouse;
 	}
+
+	public String getItemVTexId() {
+		return itemVTexId;
+	}
+
+	public void setItemVTexId(String itemVTexId) {
+		this.itemVTexId = itemVTexId;
+	}
+	
 	
 	
 	

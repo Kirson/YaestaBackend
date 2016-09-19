@@ -18,6 +18,9 @@ public interface GuideRepository extends JpaRepository<Guide, Long>{
 	@Query("Select gui from Guide gui " +
 	         "where gui.createDate between ?1 and ?2")
 	public List<Guide> findByCreateDateBetween(Date start, Date finish);
+	@Query("Select gui from Guide gui " +
+	         "where gui.orderDate between ?1 and ?2")
+	public List<Guide> findByOrderDateBetween(Date start, Date finish);
 
 	public List<Guide> findByVitexDispatcherId(String vitexDispatcherIddispatcherId);
 }

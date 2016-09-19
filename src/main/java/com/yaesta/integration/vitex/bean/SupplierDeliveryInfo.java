@@ -28,8 +28,18 @@ public class SupplierDeliveryInfo implements Serializable{
 	private Boolean selected;
 	private Catalog delivery;
 	private String deliveryId;
+	private Catalog itemIdentityType;
+	private String itemIdentityTypeId;
 	
 	
+	public String getItemIdentityTypeId() {
+		return itemIdentityTypeId;
+	}
+
+	public void setItemIdentityTypeId(String itemIdentityTypeId) {
+		this.itemIdentityTypeId = itemIdentityTypeId;
+	}
+
 	public SupplierDeliveryInfo(){
 		items = new ArrayList<ItemComplete>();
 		packages = 1L;
@@ -100,6 +110,14 @@ public class SupplierDeliveryInfo implements Serializable{
 
 	public void setDeliveryId(String deliveryId) {
 		this.deliveryId = deliveryId;
+	}
+
+	public Catalog getItemIdentityType() {
+		return itemIdentityType;
+	}
+
+	public void setItemIdentityType(Catalog itemIdentityType) {
+		this.itemIdentityType = itemIdentityType;
 	}
 	
 	

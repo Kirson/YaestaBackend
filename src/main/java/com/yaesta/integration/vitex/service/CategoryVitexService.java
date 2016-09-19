@@ -99,6 +99,8 @@ public class CategoryVitexService extends BaseVitexService  {
 
 		System.out.println("json category "+json );
 		
+		
+		
 		result = new Gson().fromJson(json, List.class);
 			
 		return result;

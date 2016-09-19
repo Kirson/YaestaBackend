@@ -21,6 +21,7 @@ import com.yaesta.app.persistence.service.TramacoZoneService;
 import com.yaesta.app.persistence.vo.SupplierVO;
 import com.yaesta.app.persistence.vo.ProvinciaVO;
 import com.yaesta.app.persistence.vo.SupplierBeanVO;
+import com.yaesta.app.persistence.vo.SupplierResponseVO;
 
 @RestController
 @RequestMapping(value = "/supplier")
@@ -150,6 +151,14 @@ public class SupplierController {
 	    }else{
 	    	return new ResponseEntity<List<TramacoZone>>(new ArrayList<TramacoZone>(),HttpStatus.OK);
 	    }
+	}
+	
+	@RequestMapping(value = "/deleteSupplier", method = RequestMethod.POST)
+	public ResponseEntity<SupplierResponseVO> deleteSupplier(@RequestBody SupplierVO supplierVO){
+		
+		SupplierResponseVO response = supplierService.deleteSupplier(supplierVO);
+		
+		return new ResponseEntity<SupplierResponseVO>(response,HttpStatus.OK);
 	}
 
 }

@@ -15,6 +15,7 @@ public class SupplierVO implements Serializable{
 	 */
 	private static final long serialVersionUID = -5790748112162698017L;
 	
+	private Long supplierId;
 	private Supplier supplier;
 	private List<SupplierDeliveryCalendar> deliveryCalendar;
 	private List<SupplierContact> contactList;
@@ -64,6 +65,14 @@ public class SupplierVO implements Serializable{
 
 	public void setContact(SupplierContact contact) {
 		this.contact = contact;
+	}
+
+	public Long getSupplierId() {
+		return supplierId;
+	}
+
+	public void setSupplierId(Long supplierId) {
+		this.supplierId = supplierId;
 	}
 	
 	

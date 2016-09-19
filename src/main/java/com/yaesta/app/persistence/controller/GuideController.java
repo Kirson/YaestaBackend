@@ -76,7 +76,7 @@ public class GuideController implements Serializable {
 		
 		dateRange.setStartDate(startDate);
 		dateRange.setFinishDate(finishDate);
-		List<GuideVO> found = guideService.findByDateRangeVO(dateRange);
+		List<GuideVO> found = guideService.findByOrderDateRangeVO(dateRange);
 		
 		if(found!=null && !found.isEmpty()){
 			return new ResponseEntity<List<GuideVO>>(found,HttpStatus.OK);
@@ -97,7 +97,7 @@ public class GuideController implements Serializable {
 		
 		dateRange.setStartDate(dStartDate);
 		dateRange.setFinishDate(dFinishDate);
-		List<GuideVO> found = guideService.findByDateRangeVO(dateRange);
+		List<GuideVO> found = guideService.findByOrderDateRangeVO(dateRange);
 		
 		if(found!=null && !found.isEmpty()){
 			return new ResponseEntity<List<GuideVO>>(found,HttpStatus.OK);
@@ -132,5 +132,11 @@ public class GuideController implements Serializable {
 	public ResponseEntity<Guide> saveGuide(@RequestBody GuideBeanVO guideBean){
 		Guide result = guideService.saveGuide(guideBean.getGuide());
 		return new ResponseEntity<Guide>(result,HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/updateGuides", method = RequestMethod.GET)
+	public ResponseEntity<String> updateGuides(){
+		String result = guideService.updateGuides();
+		return new ResponseEntity<String>(result,HttpStatus.OK);
 	}
 }

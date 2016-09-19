@@ -664,6 +664,14 @@ public class OrderVitexService extends BaseVitexService {
 				guide.setItemValue(gbd.getItemValue());
 				guide.setDeliveryStatus("GENERATED");
 				guide.setSupplier(gbd.getSupplier());
+				guide.setCustomerName(orderComplete.getCustomerName());
+				try {
+					guide.setOrderDate(UtilDate.fromIsoToDateTime(orderComplete.getCreationDate()));
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				guide.setOrderStatus(orderComplete.getStatus());
 				guideService.saveGuide(guide);
 				gbd.setGuide(guide);
 				guideInfoList.add(gbd);
@@ -1153,6 +1161,7 @@ public class OrderVitexService extends BaseVitexService {
 				oi.setStatusDescription(oc.getStatusDescription());
 				oi.setCustomerName(oc.getCustomerName());
 				oi.setSkuId(ic.getSellerSku());
+				oi.setItemVTexId(ic.getId());
 				if(hasAdjunto){
 					oi.setValueReceivables(itemValue);
 				}else{

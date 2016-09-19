@@ -30,6 +30,7 @@ public class GuideUtil implements Serializable {
 		}
 		result.setCreationDate(source.getCreateDate());
 		result.setDeliveryDate(source.getDeliveryDate());
+		result.setOrderDate(source.getOrderDate());
 		return result;
 	}
 	

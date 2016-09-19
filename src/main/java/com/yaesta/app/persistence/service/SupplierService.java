@@ -42,6 +42,8 @@ import com.yaesta.app.persistence.vo.EmailVO;
 import com.yaesta.app.persistence.vo.PhoneContainerVO;
 import com.yaesta.app.persistence.vo.PhoneVO;
 import com.yaesta.app.persistence.vo.SupplierBeanVO;
+import com.yaesta.app.persistence.vo.SupplierResponseVO;
+import com.yaesta.app.persistence.vo.SupplierVO;
 
 
 @Service
@@ -533,5 +535,38 @@ public class SupplierService implements Serializable {
 			mailService.sendMailTemplate(mailInfo, "newSellerNotification.vm");	
 			System.out.println("Fin notificacion");
 	   }
+   }
+   
+   @Transactional
+   public SupplierResponseVO deleteSupplier(SupplierVO supplierVO){
+	   SupplierResponseVO response = new SupplierResponseVO();
+	   String result = "OK";
+	   
+	   try{
+	   
+		   Supplier supplier;
+		   
+		   if(supplierVO.getSupplierId()!=null){
+			   supplier = supplierRepository.findOne(supplierVO.getSupplierId());
+		   }else{
+			  
+			   supplier = supplierVO.getSupplier();
+		   }
+		   
+		   if(supplier!=null){
+			   List<SupplierContact> contacts = getContacts(supplier);
+		   
+			   if(contacts!=null && !contacts.isEmpty()){
+				   supplierContactRepository.delete(contacts);
+			   }
+		   
+			   supplierRepository.delete(supplier);
+		   }
+	   }catch(Exception e){
+		   result = "Error eliminando proveedor";
+	   }
+	   
+	   response.setResponse(result);
+	   return response;
    }
 }
