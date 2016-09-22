@@ -831,26 +831,7 @@ public class TramacoService implements Serializable{
 	}
 	
 	
-	private List<String> validateSupplierInfo(Supplier supplier){
-		List<String> errorInfoList = new ArrayList<String>();
-		
-		String supplierName = "Proveedor "+supplier.getName();
-		
-		if(supplier.getContactEmail()==null){
-			errorInfoList.add(supplierName+" no posee email");
-		}
-		if(supplier.getContactName()==null){
-			errorInfoList.add(supplierName+" no posee nombre de contacto");
-		}
-		if(supplier.getContactLastName()==null){
-			errorInfoList.add(supplierName+" no posee apellido de contacto");
-		}
-		if(supplier.getPostalCode()==null){
-			errorInfoList.add(supplierName+" no posee codigo postal");
-		}
-		
-		return errorInfoList;
-	}
+	
 	
 	private String getTramacoAdjCode(){
 		String code = tableSequenceService.getNextValue("SEQ_TRAMACO_ADJ")+"";
