@@ -436,6 +436,9 @@ public class DatilService implements Serializable{
 						else if(py.getPaymentSystemName().equals(PaymentEnum.CONSIGNACION_BANCARIA.getPaymentSystemName())){
 							pago.setMedio(PagoEnum.TRANSFER_OTRO_BANCO.getCodigoDatil());
 						}
+						else if(py.getPaymentSystemName().equals(PaymentEnum.TRANSFERENCIA_BANCARIA.getPaymentSystemName())){
+							pago.setMedio(PagoEnum.TRANSFER_OTRO_BANCO.getCodigoDatil());
+						}
 						else if(py.getPaymentSystemName().equals(PaymentEnum.PAYCLUB.getPaymentSystemName())){
 							pago.setMedio(PagoEnum.TARJETA_CREDITO_NACIONAL.getCodigoDatil());
 						}else if(py.getPaymentSystemName().equals(PaymentEnum.TARJETA_ALIA.getPaymentSystemName())){
