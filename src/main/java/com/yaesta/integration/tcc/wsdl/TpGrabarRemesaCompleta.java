@@ -227,6 +227,11 @@ public class TpGrabarRemesaCompleta {
     protected String fuente;
     @XmlElement(namespace = "")
     protected boolean generarDocumentos;
+    
+    public TpGrabarRemesaCompleta(){
+    	documentoreferencia = new ArrayList<TpDocumentoReferencia>();
+    	unidad = new ArrayList<TpUnidad>();
+    }
 
     /**
      * Obtiene el valor de la propiedad clave.

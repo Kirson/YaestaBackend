@@ -130,4 +130,11 @@ public class UtilDate implements Serializable {
     	 
     	 return datePart;
     }
+    
+    public static String fromDateToString(Date date){
+    	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+    	String format = formatter.format(date);
+    	System.out.println(format);
+    	return format;
+    }
 }

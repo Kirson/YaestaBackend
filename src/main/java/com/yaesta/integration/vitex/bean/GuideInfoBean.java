@@ -27,6 +27,7 @@ public class GuideInfoBean implements Serializable {
 	private List<String> errorList;
 	private List<String> pdfPathList;
 	private String customerAdditionalInfo;
+	private String deliveryName;
 	
 	public GuideInfoBean(){
 		error="OK";
@@ -34,6 +35,7 @@ public class GuideInfoBean implements Serializable {
 		errorList = new ArrayList<String>();
 		pdfPathList = new ArrayList<String>();
 		customerAdditionalInfo = "";
+		deliveryName = "TRAMACO";
 	}
 	
 	public OrderComplete getOrderComplete() {
@@ -89,6 +91,15 @@ public class GuideInfoBean implements Serializable {
 	public void setCustomerAdditionalInfo(String customerAdditionalInfo) {
 		this.customerAdditionalInfo = customerAdditionalInfo;
 	}
+
+	public String getDeliveryName() {
+		return deliveryName;
+	}
+
+	public void setDeliveryName(String deliveryName) {
+		this.deliveryName = deliveryName;
+	}
+	
 	
 	
 }

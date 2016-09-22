@@ -175,6 +175,9 @@ public class Supplier implements Serializable{
 	@Column(name = "seller_user")
 	private String sellerUser;
 	
+	@Column(name = "tcc_code")
+	private String tccCode;
+	
 	@Transient
 	private String shippingAddress;
 	
@@ -566,6 +569,16 @@ public class Supplier implements Serializable{
 
 	public void setSellerUser(String sellerUser) {
 		this.sellerUser = sellerUser;
+	}
+	
+	
+
+	public String getTccCode() {
+		return tccCode;
+	}
+
+	public void setTccCode(String tccCode) {
+		this.tccCode = tccCode;
 	}
 
 	@Override

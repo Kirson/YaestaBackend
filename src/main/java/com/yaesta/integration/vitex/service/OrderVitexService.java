@@ -55,6 +55,7 @@ import com.yaesta.integration.datil.json.bean.FacturaConsulta;
 import com.yaesta.integration.datil.json.bean.FacturaRespuestaSRI;
 import com.yaesta.integration.datil.json.enums.PagoEnum;
 import com.yaesta.integration.datil.service.DatilService;
+import com.yaesta.integration.tcc.service.TccService;
 import com.yaesta.integration.tramaco.dto.GuideBeanDTO;
 import com.yaesta.integration.tramaco.dto.GuideDTO;
 import com.yaesta.integration.tramaco.service.TramacoService;
@@ -130,6 +131,9 @@ public class OrderVitexService extends BaseVitexService {
 	
 	@Autowired
 	private TramacoService tramacoService;
+	
+	@Autowired
+	private TccService tccService;
 	
 	@Autowired
 	private MailService mailService;
@@ -630,7 +634,19 @@ public class OrderVitexService extends BaseVitexService {
 		return deliveryInfoList;
 	}
 	
+	
 	public GuideContainerBean generateGuides(GuideInfoBean guideInfoBean){
+		
+		if(guideInfoBean.getDeliveryName().equals("TRAMACO")){
+			return generateGuidesTramaco(guideInfoBean);
+		}else if(guideInfoBean.getDeliveryName().equals("TCC")){
+		    return generateGuidesTcc(guideInfoBean);	
+		}else{
+			return new GuideContainerBean();
+		}
+	}
+	
+	private GuideContainerBean generateGuidesTramaco(GuideInfoBean guideInfoBean){
 		GuideContainerBean result = new GuideContainerBean(); 
 		GuideInfoBean response = guideInfoBean;
 		List<GuideDTO> responseList = new ArrayList<GuideDTO>();
@@ -695,6 +711,92 @@ public class OrderVitexService extends BaseVitexService {
 			
 			responseList.add(resultGuideInfo);
 			guideDTO=resultGuideInfo;
+		}
+		
+		result.setGuideInfoBean(response);
+		
+		result.setGuides(responseList);
+		
+		List<MailInfo> mailInfoList= prepareMailOrder(orderComplete,supplierDeliveryInfoList);
+		
+		for(MailInfo mailInfo:mailInfoList){
+			for(GuideBeanDTO gDto:guideDTO.getGuideBeanList()){
+				if(gDto.getSupplier().getId()==mailInfo.getRefId()){
+					mailInfo.getAttachmentList().add(gDto.getPdfUrl());
+				}
+			}
+			mailService.sendMailTemplate(mailInfo, "guideNotification.vm");	
+		}
+		
+		return result;
+	}
+	
+	private GuideContainerBean generateGuidesTcc(GuideInfoBean guideInfoBean){
+		GuideContainerBean result = new GuideContainerBean(); 
+		GuideInfoBean response = guideInfoBean;
+		List<GuideDTO> responseList = new ArrayList<GuideDTO>();
+		
+		OrderComplete orderComplete = guideInfoBean.getOrderComplete();
+		
+		Order order = orderService.findByVitexId(orderComplete.getOrderId());
+		
+		List<SupplierDeliveryInfo> supplierDeliveryInfoList = guideInfoBean.getSupplierDeliveryInfoList();
+		
+		orderComplete.setSupplierDeliveryInfoList(supplierDeliveryInfoList);
+		GuideDTO guideDTO = new GuideDTO();
+		guideDTO.setOrderComplete(orderComplete);
+		guideDTO.setCustomerAdditionalInfo(guideInfoBean.getCustomerAdditionalInfo());
+		
+		GuideDTO resultGuideInfo = tccService.generateGuides(guideDTO);
+		
+		List<GuideBeanDTO> guideInfoBeanList = resultGuideInfo.getGuideBeanList();
+		List<GuideBeanDTO> guideInfoList = new ArrayList<GuideBeanDTO>();
+		
+		if(guideInfoBeanList!=null && !guideInfoBeanList.isEmpty()){
+			for(GuideBeanDTO gbd:guideInfoBeanList){
+				Guide guide = new Guide();
+				guide.setCreateDate(new Date());
+				guide.setOrderVitexId(orderComplete.getOrderId());
+				guide.setVitexDispatcherId(gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getId()+"%"+gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getGuia());
+				guide.setGuideInfo(new Gson().toJson(gbd));
+				guide.setOrder(order);
+				guide.setDeliveryCost(gbd.getDeliveryCost());
+				guide.setDeliveryPayment(gbd.getDeliveryPayment());
+				guide.setItemValue(gbd.getItemValue());
+				guide.setDeliveryStatus("GENERATED");
+				guide.setSupplier(gbd.getSupplier());
+				guide.setCustomerName(orderComplete.getCustomerName());
+				try {
+					guide.setOrderDate(UtilDate.fromIsoToDateTime(orderComplete.getCreationDate()));
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				guide.setOrderStatus(orderComplete.getStatus());
+				guideService.saveGuide(guide);
+				gbd.setGuide(guide);
+				guideInfoList.add(gbd);
+			}
+			
+			guideDTO.setGuideBeanList(guideInfoList);
+			//LLamar ahora al servicio de pdfs
+			/*
+			resultGuideInfo = tccService.generateGuidesPDF(guideDTO);
+			guideInfoBeanList = resultGuideInfo.getGuideBeanList();
+			List<Guide> guides = new ArrayList<Guide>();
+			for(GuideBeanDTO gbd:guideInfoBeanList){
+				Guide guide = gbd.getGuide();
+				guide.setStatus("GENERATED-PDF");
+				guide.setDocumentUrl(gbd.getPdfUrl());
+				guide.setDeliveryName("TRAMACO");
+				guideService.saveGuide(guide);
+				guides.add(guide);
+				response.getPdfPathList().add(gbd.getPdfUrl());
+			}
+			
+			responseList.add(resultGuideInfo);
+			guideDTO=resultGuideInfo;
+			*/
 		}
 		
 		result.setGuideInfoBean(response);

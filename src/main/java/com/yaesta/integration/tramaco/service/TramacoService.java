@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.stereotype.Service;
 
-import com.yaesta.app.persistence.entity.Supplier;
+
 import com.yaesta.app.persistence.entity.TramacoZone;
 import com.yaesta.app.persistence.entity.YaEstaLog;
 import com.yaesta.app.persistence.repository.TramacoZoneRepository;
@@ -311,7 +311,7 @@ public class TramacoService implements Serializable{
 				
 				for(SupplierDeliveryInfo sdi:guideInfo.getOrderComplete().getSupplierDeliveryInfoList()){
 					
-					List<String> errorInfo = this.validateSupplierInfo(sdi.getSupplier());
+					List<String> errorInfo = SupplierUtil.validateSupplierInfo(sdi.getSupplier());
 					
 					if(errorInfo.isEmpty() && sdi.getSelected() && sdi.getDelivery()!=null && sdi.getDelivery().getNemonic().equals(DeliveryEnum.TRAMACO.getNemonic())){
 											

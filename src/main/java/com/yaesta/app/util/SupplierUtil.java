@@ -1,5 +1,8 @@
 package com.yaesta.app.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.yaesta.app.persistence.entity.Supplier;
 import com.yaesta.app.persistence.vo.SupplierBeanVO;
 
@@ -44,5 +47,26 @@ public class SupplierUtil {
 		
 		return result;
 		
+	}
+	
+	public static List<String> validateSupplierInfo(Supplier supplier){
+		List<String> errorInfoList = new ArrayList<String>();
+		
+		String supplierName = "Proveedor "+supplier.getName();
+		
+		if(supplier.getContactEmail()==null){
+			errorInfoList.add(supplierName+" no posee email");
+		}
+		if(supplier.getContactName()==null){
+			errorInfoList.add(supplierName+" no posee nombre de contacto");
+		}
+		if(supplier.getContactLastName()==null){
+			errorInfoList.add(supplierName+" no posee apellido de contacto");
+		}
+		if(supplier.getPostalCode()==null){
+			errorInfoList.add(supplierName+" no posee codigo postal");
+		}
+		
+		return errorInfoList;
 	}
 }
