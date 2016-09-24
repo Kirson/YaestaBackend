@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "secuencial",
     "fecha_inicio_transporte",
     "fecha_fin_transporte",
+    "direccion_partida",
     "emisor",
     "informacion_adicional",
     "transportista",
@@ -40,6 +41,8 @@ public class GuiaRemisionRespuesta {
     private String fechaInicioTransporte;
     @JsonProperty("fecha_fin_transporte")
     private String fechaFinTransporte;
+    @JsonProperty("direccion_partida")
+    private String direccionPartida;
     @JsonProperty("emisor")
     private Emisor emisor;
     @JsonProperty("informacion_adicional")
@@ -187,6 +190,26 @@ public class GuiaRemisionRespuesta {
     @JsonProperty("fecha_fin_transporte")
     public void setFechaFinTransporte(String fechaFinTransporte) {
         this.fechaFinTransporte = fechaFinTransporte;
+    }
+    
+    /**
+     * 
+     * @return
+     *     The direccionPartida
+     */
+    @JsonProperty("direccion_partida")
+    public String getDireccionPartida() {
+        return direccionPartida;
+    }
+
+    /**
+     * 
+     * @param direccionPartida
+     *     The direccion_partida
+     */
+    @JsonProperty("direccion_partida")
+    public void setDireccionPartida(String direccionPartida) {
+        this.direccionPartida = direccionPartida;
     }
 
     /**

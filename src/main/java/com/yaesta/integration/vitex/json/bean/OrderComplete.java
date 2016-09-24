@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.yaesta.app.persistence.entity.Catalog;
 import com.yaesta.integration.vitex.bean.SupplierDeliveryInfo;
 
 @SuppressWarnings("serial")
@@ -148,6 +149,8 @@ public class OrderComplete implements Serializable {
     private Long motiveCancelId;
     @JsonProperty("motiveCancelText")
     private String motiveCancelText;
+    @JsonProperty("deliverySelected")
+    private Catalog deliverySelected;
     
     
     @JsonIgnore
@@ -915,6 +918,16 @@ public class OrderComplete implements Serializable {
 	@JsonProperty("motiveCancelText")
 	public void setMotiveCancelText(String motiveCancelText) {
 		this.motiveCancelText = motiveCancelText;
+	}
+
+	@JsonProperty("deliverySelected")
+	public Catalog getDeliverySelected() {
+		return deliverySelected;
+	}
+
+	@JsonProperty("deliverySelected")
+	public void setDeliverySelected(Catalog deliverySelected) {
+		this.deliverySelected = deliverySelected;
 	}
     
     

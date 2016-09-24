@@ -22,6 +22,7 @@ public class OrderCompleteBean implements Serializable{
 	private Catalog motiveCancel;
 	private Long motiveCancelId;
 	private String motiveCancelText;
+	private Catalog deliverySelected;
 	
 	public OrderCompleteBean(){
 		error="OK";
@@ -80,6 +81,16 @@ public class OrderCompleteBean implements Serializable{
 	public void setMotiveCancel(Catalog motiveCancel) {
 		this.motiveCancel = motiveCancel;
 	}
+
+	public Catalog getDeliverySelected() {
+		return deliverySelected;
+	}
+
+	public void setDeliverySelected(Catalog deliverySelected) {
+		this.deliverySelected = deliverySelected;
+	}
+
+	
 	
 	
 	

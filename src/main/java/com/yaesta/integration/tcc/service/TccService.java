@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.stereotype.Service;
+import org.springframework.ws.client.core.WebServiceTemplate;
+import org.springframework.ws.soap.client.core.SoapActionCallback;
 
 import com.yaesta.app.persistence.entity.YaEstaLog;
 import com.yaesta.app.persistence.entity.CoberturaTCC;
@@ -29,6 +31,8 @@ import com.yaesta.integration.vitex.json.bean.enums.PaymentEnum;
 import com.yaesta.integration.base.enums.DeliveryEnum;
 import com.yaesta.integration.base.util.BaseUtil;
 import com.yaesta.integration.datil.json.enums.PagoEnum;
+import com.yaesta.integration.tcc.wsdl.GrabarDespacho4;
+import com.yaesta.integration.tcc.wsdl.GrabarDespacho4Response;
 import com.yaesta.integration.tcc.wsdl.ObjectFactory;
 import com.yaesta.integration.tcc.wsdl.TpDocumentoReferencia;
 import com.yaesta.integration.tcc.wsdl.TpGrabarRemesaCompleta;
@@ -39,8 +43,8 @@ public class TccService  {
 
 	
 
-	//@Autowired
-	//private WebServiceTemplate webServiceTemplateTCC;
+	@Autowired
+	WebServiceTemplate webServiceTemplateTCC;
 	
 	@Autowired
 	YaEstaLogService logService;
@@ -86,7 +90,7 @@ public class TccService  {
 			
 				List<String> errorInfo = SupplierUtil.validateSupplierInfo(sdi.getSupplier());
 				
-				if(errorInfo.isEmpty() && sdi.getSelected() && sdi.getDelivery()!=null && sdi.getDelivery().getNemonic().equals(DeliveryEnum.TCC.getNemonic())){
+				if(errorInfo.isEmpty() && sdi.getSelected() && guideInfo.getDeliverySelected()!=null && guideInfo.getDeliverySelected().getNemonic().equals(DeliveryEnum.TCC.getNemonic())){
 					TpGrabarRemesaCompleta objDespacho = objectFactory.createTpGrabarRemesaCompleta();
 					
 					objDespacho.setClave(tccServicePassword);
@@ -218,6 +222,7 @@ public class TccService  {
 						unidad.setDicecontener(desc);
 						unidad.setTipounidad(tccServiceTipoUnidad);
 						unidad.setClaseempaque(tccServiceClaseEmpaque);
+						unidad.setKilosreales("1");
 						
 						objDespacho.getUnidad().add(unidad);
 						
@@ -301,16 +306,28 @@ public class TccService  {
 							System.out.println("No hay adjunto");
 						}
 						
-						
-						objDespacho.setTotalvalormercancia(totalAsegurado+"");
+						System.out.println("Total Valor mercancia "+totalValue);
+						objDespacho.setTotalvalormercancia(1D);
 						objDespacho.setCodigolote(guideInfo.getOrderComplete().getOrderId());
 					
 					}//for de items
 					
+					System.out.println("Total Asegurado "+totalAsegurado);
+					unidad.setValormercancia("1");
+					
+					objDespacho.getUnidad().add(unidad);
 				
-				}
+					GrabarDespacho4 gdes = objectFactory.createGrabarDespacho4();
+					gdes.setObjDespacho(objDespacho);
+					
+					GrabarDespacho4Response gdesResponse = (GrabarDespacho4Response)webServiceTemplateTCC.marshalSendAndReceive(gdes,new SoapActionCallback("http://clientes.tcc.com.co/GrabarDespacho4"));
+				
+					
+					System.out.println("Remesa" + gdesResponse.getMensaje());
+					
+				}//fin no hay error
 			
-			}
+			}//fin SDI
 		}catch(Exception e){
 			YaEstaLog yaestalog = new YaEstaLog();
 			yaestalog.setLogDate(new Date());
@@ -319,6 +336,8 @@ public class TccService  {
 			yaestalog.setTextinfo("Error "+e.getMessage());
 			yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
 			logService.save(yaestalog);
+			System.out.println("Error TCC" +e.getMessage());
+			e.printStackTrace();
 		}
 		
 		return result;

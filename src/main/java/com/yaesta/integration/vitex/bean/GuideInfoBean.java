@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.yaesta.app.persistence.entity.Catalog;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
 
 /**
@@ -28,6 +29,9 @@ public class GuideInfoBean implements Serializable {
 	private List<String> pdfPathList;
 	private String customerAdditionalInfo;
 	private String deliveryName;
+	private Catalog motiveCancel;
+	private String motiveCancelText;
+	private Catalog deliverySelected;
 	
 	public GuideInfoBean(){
 		error="OK";
@@ -98,6 +102,30 @@ public class GuideInfoBean implements Serializable {
 
 	public void setDeliveryName(String deliveryName) {
 		this.deliveryName = deliveryName;
+	}
+
+	public Catalog getMotiveCancel() {
+		return motiveCancel;
+	}
+
+	public void setMotiveCancel(Catalog motiveCancel) {
+		this.motiveCancel = motiveCancel;
+	}
+
+	public String getMotiveCancelText() {
+		return motiveCancelText;
+	}
+
+	public void setMotiveCancelText(String motiveCancelText) {
+		this.motiveCancelText = motiveCancelText;
+	}
+
+	public Catalog getDeliverySelected() {
+		return deliverySelected;
+	}
+
+	public void setDeliverySelected(Catalog deliverySelected) {
+		this.deliverySelected = deliverySelected;
 	}
 	
 	

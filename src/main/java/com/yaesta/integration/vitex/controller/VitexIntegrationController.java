@@ -154,6 +154,10 @@ public class VitexIntegrationController {
 			oc.setMotiveCancelId(orderCompleteBean.getMotiveCancelId());
 			oc.setMotiveCancelText(orderCompleteBean.getMotiveCancelText());
 		}
+		
+		//System.out.println("1>"+oc.getMotiveCancelId());
+		//System.out.println("2>"+oc.getMotiveCancelText());
+		
 		OrderCancel json = orderVitexService.cancelOrder(oc);
 		return new ResponseEntity<OrderCancel>(json, HttpStatus.OK);
 	}

@@ -26,7 +26,7 @@ public class InformacionAdicional {
     private String formaPago;
     
     @JsonProperty("valor_a_cobrar")
-    private Double valorACobrar;
+    private String valorACobrar;
     
     /**
      * 
@@ -69,12 +69,12 @@ public class InformacionAdicional {
 	}
 
 	@JsonProperty("valor_a_cobrar")
-	public Double getValorACobrar() {
+	public String getValorACobrar() {
 		return valorACobrar;
 	}
 
 	@JsonProperty("valor_a_cobrar")
-	public void setValorACobrar(Double valorACobrar) {
+	public void setValorACobrar(String valorACobrar) {
 		this.valorACobrar = valorACobrar;
 	}
 

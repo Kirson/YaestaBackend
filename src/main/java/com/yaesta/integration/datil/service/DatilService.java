@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.yaesta.app.persistence.entity.Catalog;
 import com.yaesta.app.persistence.entity.Guide;
 import com.yaesta.app.persistence.entity.Order;
 import com.yaesta.app.persistence.entity.YaEstaLog;
@@ -100,6 +101,7 @@ public class DatilService implements Serializable{
 	private @Value("${datil.sri.password}") String datilSriPassword;
 	private @Value("${datil.enviroment.type}") String datilEnviromentType;
 	private @Value("${datil.emission.type}") String datilEmissionType;
+	private @Value("${datil.emission.waybill.type}") String datilEmissionWayBillType;
 	private @Value("${datil.social.reason}") String datilSocialReasson;
 	private @Value("${datil.ruc.number}") String datilRucNumber;
 	private @Value("${datil.establishment.code}") String datilEstablishmentCode;
@@ -112,13 +114,24 @@ public class DatilService implements Serializable{
 	private @Value("${datil.iva.code}") String datilIvaCode;
 	private @Value("${datil.iva.code.percent}") String datilIvaCodePercent;
 	private @Value("${datil.transport.code}") String datilTransportCode;
-	private @Value("${datil.carrier.name}") String datilCarrierName;
-	private @Value("${datil.carrier.document}") String datilCarrierDocument;
-	private @Value("${datil.carrier.contact}") String datilCarrierContact;
-	private @Value("${datil.carrier.phone}") String datilCarrierPhone;
-	private @Value("${datil.carrier.email}") String datilCarrierEmail;
-	private @Value("${datil.carrier.address}") String datilCarrierAddress;
-	private @Value("${datil.carrier.license.plate}") String datilCarrierLicensePlate;
+	private @Value("${datil.carrier.motoexpress.name}") String datilCarrierMotoExpressName;
+	private @Value("${datil.carrier.motoexpress.document}") String datilCarrierMotoExpressDocument;
+	private @Value("${datil.carrier.motoexpress.contact}") String datilCarrierMotoExpressContact;
+	private @Value("${datil.carrier.motoexpress.phone}") String datilCarrierMotoExpressPhone;
+	private @Value("${datil.carrier.motoexpress.email}") String datilCarrierMotoExpressEmail;
+	private @Value("${datil.carrier.motoexpress.address}") String datilCarrierMotoExpressAddress;
+	private @Value("${datil.carrier.motoexpress.license.plate}") String datilCarrierMotoExpressLicensePlate;
+	private @Value("${datil.carrier.motoexpress.motive}") String datilCarrierMotoExpressMotive;
+	private @Value("${datil.carrier.motoexpress.route}") String datilCarrierMotoExpressRoute;
+	private @Value("${datil.carrier.internal.name}") String datilCarrierInternalName;
+	private @Value("${datil.carrier.internal.document}") String datilCarrierInternalDocument;
+	private @Value("${datil.carrier.internal.contact}") String datilCarrierInternalContact;
+	private @Value("${datil.carrier.internal.phone}") String datilCarrierInternalPhone;
+	private @Value("${datil.carrier.internal.email}") String datilCarrierInternalEmail;
+	private @Value("${datil.carrier.internal.address}") String datilCarrierInternalAddress;
+	private @Value("${datil.carrier.internal.license.plate}") String datilCarrierInternalLicensePlate;
+	private @Value("${datil.carrier.internal.motive}") String datilCarrierInternalMotive;
+	private @Value("${datil.carrier.internal.route}") String datilCarrierInternalRoute;
 	private @Value("${datil.carrier.motive}") String datilCarrierMotive;
 	private @Value("${datil.carrier.route}") String datilCarrierRoute;
 
@@ -736,15 +749,38 @@ public class DatilService implements Serializable{
 		return emisor;
 	}
 	
-	private Transportista loadCarrier(){
+	private Transportista loadCarrier(Catalog delivery){
+		if(delivery.getNemonic().equals("MOTO_EXPRESS")){
+			return loadCarrierMotoExpress();
+		}else if(delivery.getNemonic().equals("DESPACHO_INTERNO")){
+			return loadCarrierInternal();
+		}else{
+			return new Transportista();
+		}
+	}
+	
+	private Transportista loadCarrierMotoExpress(){
 		Transportista carrier = new Transportista();
-		carrier.setTipoIdentificacion(determineDocumentType(datilCarrierDocument));
-		carrier.setRazonSocial(datilCarrierName + " " + datilCarrierContact);
-		carrier.setEmail(datilCarrierEmail);
-		carrier.setDireccion(datilCarrierAddress);
-		carrier.setIdentificacion(datilCarrierDocument);
-		carrier.setPlaca(datilCarrierLicensePlate);
-		carrier.setTelefono(datilCarrierPhone);
+		carrier.setTipoIdentificacion(determineDocumentType(datilCarrierMotoExpressDocument));
+		carrier.setRazonSocial(datilCarrierMotoExpressName + " " + datilCarrierMotoExpressContact);
+		carrier.setEmail(datilCarrierMotoExpressEmail);
+		carrier.setDireccion(datilCarrierMotoExpressAddress);
+		carrier.setIdentificacion(datilCarrierMotoExpressDocument);
+		carrier.setPlaca(datilCarrierMotoExpressLicensePlate);
+		carrier.setTelefono(datilCarrierMotoExpressPhone);
+		
+		return carrier;
+	}
+	
+	private Transportista loadCarrierInternal(){
+		Transportista carrier = new Transportista();
+		carrier.setTipoIdentificacion(determineDocumentType(datilCarrierInternalDocument));
+		carrier.setRazonSocial(datilCarrierInternalName + " " + datilCarrierInternalContact);
+		carrier.setEmail(datilCarrierInternalEmail);
+		carrier.setDireccion(datilCarrierInternalAddress);
+		carrier.setIdentificacion(datilCarrierInternalDocument);
+		carrier.setPlaca(datilCarrierInternalLicensePlate);
+		carrier.setTelefono(datilCarrierInternalPhone);
 		
 		return carrier;
 	}
@@ -846,7 +882,7 @@ public class DatilService implements Serializable{
 	}
 	
 	
-public WayBillSchema processWayBill(OrderComplete orderComplete){
+public WayBillSchema processWayBill(OrderComplete orderComplete, Catalog delivery, String sequenceName){
 		
 	WayBillSchema response = new WayBillSchema();
 	
@@ -856,17 +892,22 @@ public WayBillSchema processWayBill(OrderComplete orderComplete){
 		InformacionAdicional informacionAdicional = new InformacionAdicional();
 		
 		//Preparar informacion de la Guia de Remision
-		guiaRemision.setSecuencial(tableSequenceService.getNextValue("SEQ_WAY_BILL").intValue());
+		guiaRemision.setSecuencial(tableSequenceService.getNextValue(sequenceName).intValue());
 		guiaRemision.setTipoEmision(new Integer(datilEmissionType).intValue());
 		guiaRemision.setAmbiente(new Integer(datilEnviromentType).intValue());
 		guiaRemision.setFechaInicioTransporte(UtilDate.formatDateISO(new Date()));
 		guiaRemision.setFechaFinTransporte(UtilDate.formatDateISO(new Date()));
 		guiaRemision.setEmisor(loadEmisorInfo());
-		guiaRemision.setTransportista(loadCarrier());
-		guiaRemision.setDireccionPartida("[Proveedor:"+sdi.getSupplier().getName()+"] [Dir: " +sdi.getSupplier().getAddress()+ "] [Tel:"+sdi.getSupplier().getPhone() + "] [email:"+sdi.getSupplier().getContactEmail()+"]");
+		guiaRemision.setTransportista(loadCarrier(delivery));
+		String strDirPar = "[Pro:_"+sdi.getSupplier().getId()+"_"+sdi.getSupplier().getName()+"] [Dir: " +sdi.getSupplier().getAddress()+ "] [Tel:"+sdi.getSupplier().getPhone() + "] [email:"+sdi.getSupplier().getContactEmail()+"]";
+		if(strDirPar.length()>200){
+			strDirPar = strDirPar.substring(0, 199);
+		}
+		guiaRemision.setDireccionPartida(strDirPar);
+		
 		List<Destinatario> destinatarios = new ArrayList<Destinatario>();
 		Destinatario destinatario = loadAddressee(orderComplete);
-		informacionAdicional.setValorACobrar(0D);
+		informacionAdicional.setValorACobrar("0");
 		
 		if(orderComplete.getPaymentData().getTransactions()!=null && !orderComplete.getPaymentData().getTransactions().isEmpty()){
 			for(Transaction tr:orderComplete.getPaymentData().getTransactions()){
@@ -875,7 +916,7 @@ public WayBillSchema processWayBill(OrderComplete orderComplete){
 						informacionAdicional.setFormaPago(py.getPaymentSystemName());
 						System.out.println("SystemPaymentname "+py.getPaymentSystemName());
 						if(py.getPaymentSystemName().equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName())){
-							informacionAdicional.setValorACobrar(orderComplete.getValue().doubleValue());
+							informacionAdicional.setValorACobrar(orderComplete.getValue().doubleValue()+"");
 						}
 						
 					}//fin for

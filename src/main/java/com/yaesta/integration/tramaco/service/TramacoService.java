@@ -326,7 +326,8 @@ public class TramacoService implements Serializable{
 					
 					List<String> errorInfo = SupplierUtil.validateSupplierInfo(sdi.getSupplier());
 					
-					if(errorInfo.isEmpty() && sdi.getSelected() && sdi.getDelivery()!=null && sdi.getDelivery().getNemonic().equals(DeliveryEnum.TRAMACO.getNemonic())){
+					//if(errorInfo.isEmpty() && sdi.getSelected() && sdi.getDelivery()!=null && sdi.getDelivery().getNemonic().equals(DeliveryEnum.TRAMACO.getNemonic())){
+					if(errorInfo.isEmpty() && sdi.getSelected() && guideInfo.getDeliverySelected()!=null && guideInfo.getDeliverySelected().getNemonic().equals(DeliveryEnum.TRAMACO.getNemonic())){
 											
 					   /**
 						* Datos de entrada

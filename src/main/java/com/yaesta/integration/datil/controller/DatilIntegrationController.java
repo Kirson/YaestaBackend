@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.yaesta.app.persistence.entity.Catalog;
 import com.yaesta.app.persistence.entity.Order;
+import com.yaesta.app.persistence.service.CatalogService;
 import com.yaesta.app.persistence.service.OrderService;
 import com.yaesta.integration.datil.json.bean.FacturaConsulta;
 import com.yaesta.integration.datil.json.bean.FacturaRespuestaSRI;
@@ -31,6 +33,9 @@ public class DatilIntegrationController {
 	
 	@Autowired
 	OrderService orderService;
+	
+	@Autowired
+	CatalogService catalogService;
 
 	@RequestMapping(value = "/testFactura/", method = RequestMethod.POST)
 	public FacturaRespuestaSRI testFactura(){
@@ -83,7 +88,8 @@ public class DatilIntegrationController {
 		
 		OrderComplete oc = orderVitexService.getOrderComplete("648410909096-01");
 		
-		return datilService.processWayBill(oc);
+		Catalog motoexpress = catalogService.findByNemonic("MOTO_EXPRESS");
+		return datilService.processWayBill(oc,motoexpress,"SEQ_WAY_BILL_MOTOEXPRESS");
 	}
 	
 }

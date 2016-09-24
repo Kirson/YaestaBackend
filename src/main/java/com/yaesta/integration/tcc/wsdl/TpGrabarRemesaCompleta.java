@@ -204,7 +204,7 @@ public class TpGrabarRemesaCompleta {
     @XmlElement(namespace = "")
     protected String totalpesovolumen;
     @XmlElement(namespace = "")
-    protected String totalvalormercancia;
+    protected Double totalvalormercancia;
     @XmlElement(namespace = "")
     protected String formapago;
     @XmlElement(namespace = "")
@@ -1081,7 +1081,7 @@ public class TpGrabarRemesaCompleta {
      *     {@link String }
      *     
      */
-    public String getTotalvalormercancia() {
+    public Double getTotalvalormercancia() {
         return totalvalormercancia;
     }
 
@@ -1093,7 +1093,7 @@ public class TpGrabarRemesaCompleta {
      *     {@link String }
      *     
      */
-    public void setTotalvalormercancia(String value) {
+    public void setTotalvalormercancia(Double value) {
         this.totalvalormercancia = value;
     }
 

@@ -84,8 +84,8 @@ public class YaestaSoapClient extends BaseConfig{
 
         WebServiceTemplate webServiceTemplate = new WebServiceTemplate(messageFactory());
         webServiceTemplate.setDefaultUri(laarCourierServiceUrl);
-        webServiceTemplate.setMarshaller(getMarshallerVtex());
-        webServiceTemplate.setUnmarshaller(getMarshallerVtex());
+        webServiceTemplate.setMarshaller(getMarshallerLaarCourier());
+        webServiceTemplate.setUnmarshaller(getMarshallerLaarCourier());
         webServiceTemplate.afterPropertiesSet();
         return webServiceTemplate;
     }
@@ -95,8 +95,8 @@ public class YaestaSoapClient extends BaseConfig{
 
         WebServiceTemplate webServiceTemplate = new WebServiceTemplate(messageFactory());
         webServiceTemplate.setDefaultUri(tccServiceUrl);
-        webServiceTemplate.setMarshaller(getMarshallerVtex());
-        webServiceTemplate.setUnmarshaller(getMarshallerVtex());
+        webServiceTemplate.setMarshaller(getMarshallerTCC());
+        webServiceTemplate.setUnmarshaller(getMarshallerTCC());
         webServiceTemplate.afterPropertiesSet();
         return webServiceTemplate;
     }
