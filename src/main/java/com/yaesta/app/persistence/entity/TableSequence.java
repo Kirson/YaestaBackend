@@ -26,6 +26,9 @@ public class TableSequence implements Serializable {
 	@Column(name="seq_increment")
 	private Long increment;
 	
+	@Column(name="seq_max_value")
+	private Long seqMaxValue;
+	
 	@Column(name="seq_type")
 	private String type;
 	
@@ -63,6 +66,14 @@ public class TableSequence implements Serializable {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public Long getSeqMaxValue() {
+		return seqMaxValue;
+	}
+
+	public void setSeqMaxValue(Long seqMaxValue) {
+		this.seqMaxValue = seqMaxValue;
 	}
 	
 	

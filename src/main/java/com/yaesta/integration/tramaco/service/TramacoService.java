@@ -16,12 +16,16 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.stereotype.Service;
 
 
+import com.yaesta.app.mail.MailInfo;
+import com.yaesta.app.mail.MailParticipant;
+import com.yaesta.app.mail.MailService;
 import com.yaesta.app.persistence.entity.TramacoZone;
 import com.yaesta.app.persistence.entity.YaEstaLog;
 import com.yaesta.app.persistence.repository.TramacoZoneRepository;
 import com.yaesta.app.persistence.service.GuideService;
 import com.yaesta.app.persistence.service.TableSequenceService;
 import com.yaesta.app.persistence.service.YaEstaLogService;
+import com.yaesta.app.persistence.vo.TableSequenceResponseVO;
 import com.yaesta.app.util.SupplierUtil;
 import com.yaesta.integration.base.enums.DeliveryEnum;
 import com.yaesta.integration.base.util.BaseUtil;
@@ -89,6 +93,9 @@ public class TramacoService implements Serializable{
 	
 	@Autowired
 	OrderVitexService orderVitexService;
+	
+	@Autowired
+	private MailService mailService;
 
 	private @Value("${tramaco.url}") String tramacoUrl;
 	private @Value("${tramaco.port}") String tramacoPort;
@@ -96,9 +103,15 @@ public class TramacoService implements Serializable{
 	private @Value("${tramaco.password}") String tramacoPassword;
 	private @Value("${tramaco.pdf.path}") String tramacoPdfPath;
 	private @Value("${tramaco.default.document}") String tramacoDefaultDocument;
+	private @Value("${tramaco.maxsequence.warning}") String tramacoMaxSequenceWarning;
 	private @Value("${yaesta.ruc}") String yaestaRuc;
 	private @Value("${datil.iva.value}") String datilIvaValue;
 	private @Value("${datil.iva.percent.value}") String datilIvaPercentValue;
+	private @Value("${mail.smtp.from}") String mailFrom;
+	private @Value("${mail.smtp.to}") String mailTo;
+	private @Value("${mail.smtp.to.name}") String mailToName;
+	private @Value("${mail.text.sequence.tramaco}") String mailTextSequenceTramaco;
+	private @Value("${mail.text.sequence.token}") String mailTextSequenceToken;
 
 	public TramacoAuthDTO authService(){
 
@@ -489,10 +502,19 @@ public class TramacoService implements Serializable{
 							totalValue = (double) Math.round(totalValue * 100) / 100;
 							if(hasAdjunto && itemValue.intValue()>0){
 								carga.setAdjuntos(Boolean.TRUE);
-								String codigoAdjunto =  getTramacoAdjCode();
-								System.out.println("Codigo Adjunto "+codigoAdjunto);
-								carga.setCodigoAdjunto(codigoAdjunto);
+								TableSequenceResponseVO codigoAdjunto =  getTramacoAdjCode();
+						    	
+								System.out.println("Codigo Adjunto "+codigoAdjunto.getCode());
+								carga.setCodigoAdjunto(codigoAdjunto.getCode());
 								carga.setValorCobro(totalValue);
+								
+								if(!codigoAdjunto.getInsideLimit()){
+									//Enviar email
+									
+									MailInfo mailInfo = prepareMailSequence(codigoAdjunto);
+									mailService.sendMailTemplate(mailInfo, "sequenceNotification.vm");	
+								}
+								
 							}else{
 								carga.setAdjuntos(Boolean.FALSE);
 								System.out.println("No hay adjunto");
@@ -833,13 +855,43 @@ public class TramacoService implements Serializable{
 	
 	
 	
-	private String getTramacoAdjCode(){
+	private TableSequenceResponseVO getTramacoAdjCode(){
+		
 		String code = tableSequenceService.getNextValue("SEQ_TRAMACO_ADJ")+"";
 		
 		if(code.length()<7){
 			code = "0"+code;
 		}
 		
-		return code;
+		TableSequenceResponseVO response =tableSequenceService.validateMaxValue("SEQ_TRAMACO_ADJ", new Long(tramacoMaxSequenceWarning));
+		
+		response.setCode(code);
+		
+		return response;
+	}
+	
+   private MailInfo prepareMailSequence(TableSequenceResponseVO tableSequenceResponse){
+		
+			MailInfo mailInfo = new MailInfo();
+			
+			MailParticipant sender = new MailParticipant();
+			sender.setName("YaEsta.com");
+			sender.setEmail(mailFrom);
+			mailInfo.setMailSender(sender);
+			
+			MailParticipant receiver = new MailParticipant();
+			receiver.setName(mailToName);
+			receiver.setEmail(mailTo);
+			mailInfo.setMailReceiver(receiver);
+			
+			
+		    String subject = "Notificación de alerta secuencia Tramaco";
+			String strMailTextTramaco= mailTextSequenceTramaco;
+			strMailTextTramaco = strMailTextTramaco.replace(mailTextSequenceToken, tableSequenceResponse.getDiference()+"");
+			mailInfo.setGeneralText(strMailTextTramaco);
+			mailInfo.setSubject(subject);
+			
+			
+		return mailInfo;
 	}
 }

@@ -1,6 +1,6 @@
 package com.yaesta.integration.tcc.service;
 
-import java.io.Serializable;
+
 import java.util.Date;
 import java.util.List;
 
@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.stereotype.Service;
-import org.springframework.ws.client.core.WebServiceTemplate;
 
 import com.yaesta.app.persistence.entity.YaEstaLog;
 import com.yaesta.app.persistence.entity.CoberturaTCC;
@@ -36,15 +35,12 @@ import com.yaesta.integration.tcc.wsdl.TpGrabarRemesaCompleta;
 import com.yaesta.integration.tcc.wsdl.TpUnidad;
 
 @Service
-public class TccService implements Serializable {
+public class TccService  {
 
-	/**
-	 * Serial Version
-	 */
-	private static final long serialVersionUID = 9222090543065657597L;
+	
 
-	@Autowired
-	private WebServiceTemplate webServiceTemplateTCC;
+	//@Autowired
+	//private WebServiceTemplate webServiceTemplateTCC;
 	
 	@Autowired
 	YaEstaLogService logService;
@@ -58,7 +54,7 @@ public class TccService implements Serializable {
 	@Autowired
 	protected PropertySourcesPlaceholderConfigurer propertyConfigurer;
 	
-    @Autowired
+   
 	public JAXBContext context=JAXBContext.newInstance();
 	
 	public ObjectFactory objectFactory =new ObjectFactory();
@@ -67,8 +63,8 @@ public class TccService implements Serializable {
 	protected @Value("${tcc.service.user}") String tccServiceUser;
 	protected @Value("${tcc.service.password}") String tccServicePassword;
 	protected @Value("${tcc.service.pdf.path}") String tccServicePdfPath;
-	protected @Value("${tcc.business.unit}") String tccBusinessUnit;
-	protected @Value("${tcc.business.account}") String tccBusinessAccount;
+	protected @Value("${tcc.service.business.unit}") String tccBusinessUnit;
+	protected @Value("${tcc.service.business.account}") String tccBusinessAccount;
 	protected @Value("${tcc.service.clase.empaque}") String tccServiceClaseEmpaque;
 	protected @Value("${tcc.service.tipo.unidad}") String tccServiceTipoUnidad;
 	protected @Value("${yaesta.ruc}") String yaestaRuc;
@@ -84,7 +80,7 @@ public class TccService implements Serializable {
 		try{
 			
 			
-			String response = "OK";
+			//String response = "OK";
 			
 			for(SupplierDeliveryInfo sdi:guideInfo.getOrderComplete().getSupplierDeliveryInfoList()){
 			

@@ -133,7 +133,7 @@ public class OrderVitexService extends BaseVitexService {
 	private TramacoService tramacoService;
 	
 	@Autowired
-	private TccService tccService;
+	TccService tccService;
 	
 	@Autowired
 	private MailService mailService;
