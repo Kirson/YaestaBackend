@@ -3,9 +3,11 @@ package com.yaesta.integration.base.enums;
 public enum DeliveryEnum {
 	
 	TRAMACO("1","Tramaco","TRAMACO"),
-	MOTO_ENVIOS("2","Moto Envios","ME"),
+	MOTO_ENVIOS("2","Moto Envios","MOTO_EXPRESS"),
 	TCC("3","TCC","TCC"),
-	LAR_COURIER("4","LAR COURIER","LC");
+	LAAR_COURIER("4","LAR COURIER","LAAR"),
+	DESPACHO_INTERNO("5","DESPACHO INTERNO","DESPACHO_INTERNO"),
+	CICLISTA("6","CICLISTA","CICLISTA");
 	
 	private String id;
 	private String name;

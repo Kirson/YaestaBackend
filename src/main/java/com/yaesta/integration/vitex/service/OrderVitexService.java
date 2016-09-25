@@ -32,6 +32,9 @@ import com.yaesta.app.mail.ItemInfo;
 import com.yaesta.app.mail.MailInfo;
 import com.yaesta.app.mail.MailParticipant;
 import com.yaesta.app.mail.MailService;
+import com.yaesta.app.pdf.BuildGuidePDF;
+import com.yaesta.app.pdf.bean.GuideDataBean;
+import com.yaesta.app.pdf.bean.ItemData;
 import com.yaesta.app.persistence.entity.Catalog;
 import com.yaesta.app.persistence.entity.Customer;
 import com.yaesta.app.persistence.entity.Guide;
@@ -51,9 +54,11 @@ import com.yaesta.app.util.SupplierUtil;
 import com.yaesta.app.util.UtilDate;
 import com.yaesta.integration.base.enums.DeliveryEnum;
 import com.yaesta.integration.base.util.BaseUtil;
+import com.yaesta.integration.datil.json.bean.Destinatario;
 import com.yaesta.integration.datil.json.bean.FacturaConsulta;
 import com.yaesta.integration.datil.json.bean.FacturaRespuestaSRI;
 import com.yaesta.integration.datil.json.bean.GuiaRemisionRespuesta;
+import com.yaesta.integration.datil.json.bean.ItemGuiaRemision;
 import com.yaesta.integration.datil.json.enums.PagoEnum;
 import com.yaesta.integration.datil.service.DatilService;
 import com.yaesta.integration.tcc.service.TccService;
@@ -170,6 +175,11 @@ public class OrderVitexService extends BaseVitexService {
 	private @Value("${tramaco.contacts.names}") String tramacoContactsNames;
 	private @Value("${datil.iva.value}") String datilIvaValue;
 	private @Value("${datil.iva.percent.value}") String datilIvaPercentValue;
+	private @Value("${guide.prefix}") String guidePrefix;
+	private @Value("${moto.pdf.path}") String motoExpressPdfPath;
+	private @Value("${internal.pdf.path}") String internalPdfPath;
+	private @Value("${cyclist.pdf.path}") String cyclistPdfPath;
+	private @Value("${mail.path.logo.image}") String logoPath;
 
 	public OrderVitexService() throws Exception {
 		super();
@@ -929,15 +939,16 @@ public class OrderVitexService extends BaseVitexService {
 	
 	private GuideContainerBean generateGuideMotoExpress(GuideInfoBean guideInfoBean){
 		GuideContainerBean result = new GuideContainerBean();
-		WayBillSchema response = datilService.processWayBill(guideInfoBean.getOrderComplete(), guideInfoBean.getDeliverySelected(), "SEQ_WAYBILL_MOTOEXPRESS");
+		//WayBillSchema response = datilService.processWayBill(guideInfoBean.getOrderComplete(), guideInfoBean.getDeliverySelected(), "SEQ_WAYBILL_MOTOEXPRESS");
+		WayBillSchema response = datilService.processWayBill(guideInfoBean.getOrderComplete(), guideInfoBean.getDeliverySelected(), "SEQ_WAYBILL");
 		result = processStandarGuide(response, guideInfoBean.getOrderComplete(),guideInfoBean.getDeliverySelected(),guideInfoBean.getSupplierDeliveryInfoList());
 		return result;
 	}
 	
 	private GuideContainerBean generateGuideMotoInternal(GuideInfoBean guideInfoBean){
 		GuideContainerBean result = new GuideContainerBean();
-		WayBillSchema response = datilService.processWayBill(guideInfoBean.getOrderComplete(), guideInfoBean.getDeliverySelected(), "SEQ_WAYBILL_INTERNAL");
-		
+		//WayBillSchema response = datilService.processWayBill(guideInfoBean.getOrderComplete(), guideInfoBean.getDeliverySelected(), "SEQ_WAYBILL_INTERNAL");
+		WayBillSchema response = datilService.processWayBill(guideInfoBean.getOrderComplete(), guideInfoBean.getDeliverySelected(), "SEQ_WAYBILL");
 		result = processStandarGuide(response, guideInfoBean.getOrderComplete(),guideInfoBean.getDeliverySelected(),guideInfoBean.getSupplierDeliveryInfoList());
 		return result;
 	}
@@ -964,11 +975,10 @@ public class OrderVitexService extends BaseVitexService {
 				guide.setDeliveryStatus("GENERATED-PDF");
 				guide.setStatus("GENERATED-PDF");
 				guide.setOrderStatus(orderComplete.getStatus());
-				guide.setDocumentUrl(grr.getClaveAcceso());
+				guide.setAccessCode(grr.getClaveAcceso());;
 				guide.setSerial(grr.getSecuencial()+"");
 				try{
-					String provData[] = grr.getDireccionPartida().split("_");
-					Long idSup = new Long(provData[1]);
+					Long idSup = new Long(grr.getInformacionAdicional().getIdProveedor());
 					Supplier supp = supplierService.findById(idSup);
 				
 					guide.setSupplier(supp);
@@ -985,7 +995,40 @@ public class OrderVitexService extends BaseVitexService {
 					e.printStackTrace();
 				}
 				
+				String pdfURL = "";
+				
+				if(delivery.getNemonic().equals("MOTO_EXPRESS")){
+					pdfURL = motoExpressPdfPath;
+				}else if(delivery.getNemonic().equals("DESPACHO_INTERNO")){
+					pdfURL = internalPdfPath;
+				}else if(delivery.getNemonic().equals("CICLISTA")){
+					pdfURL = cyclistPdfPath;
+				}
+				
+				GuideDataBean gdb = new GuideDataBean();
+				pdfURL = pdfURL+guidePrefix+ delivery.getNemonic() +"_"+grr.getSecuencial()+"_"+".pdf";
+				gdb.setPdfPath(pdfURL);
+				gbd.setPdfUrl(pdfURL);
+				gdb.setLogoPath(logoPath);
+				guide.setDocumentUrl(pdfURL);
+				List<ItemData> itemDataList = new ArrayList<ItemData>();
+				for(Destinatario des:grr.getDestinatarios()){
+					for(ItemGuiaRemision igr: des.getItems()){
+						ItemData id = new ItemData();
+						id.setCode(igr.getCodigoPrincipal());
+						id.setName(igr.getDescripcion());
+						id.setQuantity(igr.getCantidad()+"");
+						itemDataList.add(id);
+					}
+				}
+				gdb.setItemDataList(itemDataList);
+				List<String> strList = new ArrayList<String>();
+				String str = "Guia # "+ grr.getSecuencial();
+				strList.add(str);
+				gdb.setParagraphs(strList);
 				guideService.saveGuide(guide);
+				
+				gdb= BuildGuidePDF.generateGuidePDF(gdb);
 				guideInfoBeanList.add(gbd);
 			}//fin for
 			
@@ -994,7 +1037,7 @@ public class OrderVitexService extends BaseVitexService {
 			for(MailInfo mailInfo:mailInfoList){
 				for(GuideBeanDTO gDto:guideInfoBeanList){
 					if(gDto.getSupplier().getId()==mailInfo.getRefId()){
-						//mailInfo.getAttachmentList().add(gDto.getPdfUrl());
+						mailInfo.getAttachmentList().add(gDto.getPdfUrl());
 					}
 				}
 				mailService.sendMailTemplate(mailInfo, "guideNotification.vm");	

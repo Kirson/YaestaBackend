@@ -28,6 +28,7 @@ import com.google.gson.GsonBuilder;
 import com.yaesta.app.persistence.entity.Catalog;
 import com.yaesta.app.persistence.entity.Guide;
 import com.yaesta.app.persistence.entity.Order;
+import com.yaesta.app.persistence.entity.Supplier;
 import com.yaesta.app.persistence.entity.YaEstaLog;
 import com.yaesta.app.persistence.service.GuideService;
 import com.yaesta.app.persistence.service.OrderService;
@@ -134,7 +135,16 @@ public class DatilService implements Serializable{
 	private @Value("${datil.carrier.internal.route}") String datilCarrierInternalRoute;
 	private @Value("${datil.carrier.motive}") String datilCarrierMotive;
 	private @Value("${datil.carrier.route}") String datilCarrierRoute;
-
+	private @Value("${datil.carrier.cyclist.name}") String datilCarrierCyclistName;
+	private @Value("${datil.carrier.cyclist.document}") String datilCarrierCyclistDocument;
+	private @Value("${datil.carrier.cyclist.contact}") String datilCarrierCyclistContact;
+	private @Value("${datil.carrier.cyclist.phone}") String datilCarrierCyclistPhone;
+	private @Value("${datil.carrier.cyclist.email}") String datilCarrierCyclistEmail;
+	private @Value("${datil.carrier.cyclist.address}") String datilCarrierCyclistAddress;
+	private @Value("${datil.carrier.cyclist.license.plate}") String datilCarrierCyclistLicensePlate;
+	private @Value("${datil.carrier.cyclist.motive}") String datilCarrierCyclistMotive;
+	private @Value("${datil.carrier.cyclist.route}") String datilCarrierCyclistRoute;
+	
 	
 	private Client client;
 	private WebTarget target;
@@ -754,7 +764,10 @@ public class DatilService implements Serializable{
 			return loadCarrierMotoExpress();
 		}else if(delivery.getNemonic().equals("DESPACHO_INTERNO")){
 			return loadCarrierInternal();
-		}else{
+		}else if(delivery.getNemonic().equals("CICLISTA")){
+			return loadCarrierCyclist();
+		}
+		else{
 			return new Transportista();
 		}
 	}
@@ -781,6 +794,19 @@ public class DatilService implements Serializable{
 		carrier.setIdentificacion(datilCarrierInternalDocument);
 		carrier.setPlaca(datilCarrierInternalLicensePlate);
 		carrier.setTelefono(datilCarrierInternalPhone);
+		
+		return carrier;
+	}
+	
+	private Transportista loadCarrierCyclist(){
+		Transportista carrier = new Transportista();
+		carrier.setTipoIdentificacion(determineDocumentType(datilCarrierCyclistDocument));
+		carrier.setRazonSocial(datilCarrierCyclistName + " " + datilCarrierCyclistContact);
+		carrier.setEmail(datilCarrierCyclistEmail);
+		carrier.setDireccion(datilCarrierCyclistAddress);
+		carrier.setIdentificacion(datilCarrierCyclistDocument);
+		carrier.setPlaca(datilCarrierCyclistLicensePlate);
+		carrier.setTelefono(datilCarrierCyclistPhone);
 		
 		return carrier;
 	}
@@ -842,6 +868,34 @@ public class DatilService implements Serializable{
 		return addressee;
 	}
 	
+	private Destinatario loadSupplier(OrderComplete orderComplete, Supplier supplier){
+		
+		Destinatario dSupplier = new Destinatario();
+		dSupplier.setDocumentoAduaneroUnico("");
+		String [] authNumber = orderComplete.getOrderId().split("-");
+		dSupplier.setNumeroAutorizacionDocumentoSustento(authNumber[0]);
+		if(supplier.getContactDocument()!=null){
+			dSupplier.setIdentificacion(supplier.getContactDocument());
+		}else{
+			dSupplier.setIdentificacion(datilCarrierInternalDocument);
+		}
+		dSupplier.setEmail(supplier.getContactEmail());
+		dSupplier.setRazonSocial(supplier.getName());
+		dSupplier.setTipoIdentificacion(determineDocumentType(orderComplete.getClientProfileData().getDocument()));
+		dSupplier.setTelefono(supplier.getPhone());
+		String direccion = "";
+		if(supplier.getAddress()!=null){
+			direccion = direccion+ supplier.getAddress();
+		}
+		dSupplier.setDireccion(direccion);
+		dSupplier.setCodigoEstablecimientoDestino(datilEstablishmentCode);
+		dSupplier.setMotivoTraslado("Retiro de productos");
+		dSupplier.setRuta(datilCarrierRoute);
+		
+		
+		return dSupplier;
+	}
+	
 	
 	private String determineDocumentType(String document){
 		String result  = "05"; //CEDULA
@@ -899,7 +953,9 @@ public WayBillSchema processWayBill(OrderComplete orderComplete, Catalog deliver
 		guiaRemision.setFechaFinTransporte(UtilDate.formatDateISO(new Date()));
 		guiaRemision.setEmisor(loadEmisorInfo());
 		guiaRemision.setTransportista(loadCarrier(delivery));
-		String strDirPar = "[Pro:_"+sdi.getSupplier().getId()+"_"+sdi.getSupplier().getName()+"] [Dir: " +sdi.getSupplier().getAddress()+ "] [Tel:"+sdi.getSupplier().getPhone() + "] [email:"+sdi.getSupplier().getContactEmail()+"]";
+		
+		//String strDirPar = "[Pro:_"+sdi.getSupplier().getId()+"_"+sdi.getSupplier().getName()+"] [Dir: " +sdi.getSupplier().getAddress()+ "] [Tel:"+sdi.getSupplier().getPhone() + "] [email:"+sdi.getSupplier().getContactEmail()+"]";
+		String strDirPar = " [Dir: " +sdi.getSupplier().getAddress()+ "]";
 		if(strDirPar.length()>200){
 			strDirPar = strDirPar.substring(0, 199);
 		}
@@ -925,6 +981,9 @@ public WayBillSchema processWayBill(OrderComplete orderComplete, Catalog deliver
 		}
 		
 		informacionAdicional.setNombreProveedor(sdi.getSupplier().getName());
+		informacionAdicional.setIdProveedor(sdi.getSupplier().getId()+"");
+		informacionAdicional.setTelefonoProveedor(sdi.getSupplier().getPhone());
+		informacionAdicional.setEmailProveedor(sdi.getSupplier().getContactEmail());
 		
 		List<ItemGuiaRemision> items = new ArrayList<ItemGuiaRemision>();
 		
@@ -949,6 +1008,16 @@ public WayBillSchema processWayBill(OrderComplete orderComplete, Catalog deliver
 		
 		guiaRemision.setInformacionAdicional(informacionAdicional);
 		destinatario.setItems(items);
+		Destinatario dSupplier = loadSupplier(orderComplete,sdi.getSupplier());
+		List<ItemGuiaRemision> itemsSupp = new ArrayList<ItemGuiaRemision>();
+		ItemGuiaRemision item = new ItemGuiaRemision();
+		item.setCantidad(new Double(1));
+		item.setCodigoPrincipal("00");
+		//item.setCodigoAuxiliar("00");
+		item.setDescripcion("Despacho de productos");
+		itemsSupp.add(item);
+		dSupplier.setItems(itemsSupp);
+		//destinatarios.add(dSupplier);
 		destinatarios.add(destinatario);
 		guiaRemision.setDestinatarios(destinatarios);
 		

@@ -125,6 +125,9 @@ public class Guide implements Serializable{
 	@Column(name="order_status")
 	private String orderStatus;
 	
+	@Column(name="access_code")
+	private String accessCode;
+	
 	@Transient
 	private List<GuideDetail> details;
 	
@@ -388,6 +391,16 @@ public class Guide implements Serializable{
 
 	public void setOrderDate(Date orderDate) {
 		this.orderDate = orderDate;
+	}
+	
+	
+
+	public String getAccessCode() {
+		return accessCode;
+	}
+
+	public void setAccessCode(String accessCode) {
+		this.accessCode = accessCode;
 	}
 
 	@Override
