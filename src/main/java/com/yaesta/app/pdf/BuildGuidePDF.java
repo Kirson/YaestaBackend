@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.Document;
@@ -12,13 +13,21 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.Barcode128;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.yaesta.app.pdf.bean.GuideDataBean;
 
-public class BuildGuidePDF {
+public class BuildGuidePDF implements Serializable {
 	
-	
-	@SuppressWarnings("unused")
+	/**
+	 * Serial version
+	 */
+	private static final long serialVersionUID = -5372397406436416938L;
+
 	public static GuideDataBean generateGuidePDF(GuideDataBean guideData){
 		
 		String result = "OK";
@@ -34,6 +43,25 @@ public class BuildGuidePDF {
 			if(guideData.getLogoPath()!=null){
 				inputImagePdf(document,guideData.getLogoPath()); // input image in pdf
 			}
+			
+			PdfContentByte cb = writer.getDirectContent();
+			 
+	        PdfPTable table = new PdfPTable(2);
+	        
+	        Barcode128 code128 = new Barcode128();
+	        table.addCell("# Orden:");
+	        code128.setBaseline(-1);
+	        code128.setSize(12);
+	        code128.setCode(guideData.getOrderId());
+	        code128.setCodeType(Barcode128.CODE128);
+	        Image code128Image = code128.createImageWithBarcode(cb, null, null);
+	        PdfPCell cell = new PdfPCell();
+	        cell.addElement(new Phrase("Orden #: " + guideData.getOrderId()));
+	        cell.addElement(code128Image);
+	        table.addCell(cell);
+	 
+	        document.add(table);
+	        
 			if(guideData.getParagraphs()!=null && !guideData.getParagraphs().isEmpty()){
 				for(String str:guideData.getParagraphs()){
 					inputParagraphPDF(document,str);
@@ -50,6 +78,7 @@ public class BuildGuidePDF {
 			
 		}catch(Exception e){
 			result = "Error "+e.getMessage();
+			e.printStackTrace();
 		}
 		
 		guideData.setResultMessage(result);
