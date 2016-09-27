@@ -14,6 +14,7 @@ import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.soap.client.core.SoapActionCallback;
 
 import com.yaesta.app.persistence.entity.YaEstaLog;
+import com.google.gson.Gson;
 import com.yaesta.app.persistence.entity.CoberturaTCC;
 import com.yaesta.app.persistence.service.CoberturaTCCService;
 import com.yaesta.app.persistence.service.TableSequenceService;
@@ -106,7 +107,7 @@ public class TccService  {
 					List<CoberturaTCC> coberturaTccList = coberturaTccService.findByProvinciaCantonParroquia(province, canton, parroquia);
 					
 					if(coberturaTccList!= null && !coberturaTccList.isEmpty()){
-						objDespacho.setCiudaddestinatario(coberturaTccList.get(0).getParroquia());
+						objDespacho.setCiudaddestinatario(coberturaTccList.get(0).getCodigo());
 					}
 					
 					objDespacho.setPrimernombredestinatario(guideInfo.getOrderComplete().getClientProfileData().getFirstName());
@@ -174,11 +175,12 @@ public class TccService  {
 					objDespacho.setObservaciones(observacionText);
 					objDespacho.setFormapago(formaPago);
 					
-					//destinatario
+					//remitente
 					objDespacho.setPrimerapellidoremitente(sdi.getSupplier().getName() + " - ");
 					objDespacho.setPrimerapellidoremitente(sdi.getSupplier().getContactName() + " " + sdi.getSupplier().getContactLastName());
 					objDespacho.setDireccionremitente(sdi.getSupplier().getAddress());
 					objDespacho.setTelefonoremitente(sdi.getSupplier().getPhone());
+					objDespacho.setCiudadorigen(sdi.getSupplier().getTccCode());
 					
 					//Items
 					Long ite = new Long(1);
@@ -319,6 +321,10 @@ public class TccService  {
 				
 					GrabarDespacho4 gdes = objectFactory.createGrabarDespacho4();
 					gdes.setObjDespacho(objDespacho);
+					
+					String json = new Gson().toJson(gdes);
+					
+					System.out.println("Objeto "+ json);
 					
 					GrabarDespacho4Response gdesResponse = (GrabarDespacho4Response)webServiceTemplateTCC.marshalSendAndReceive(gdes,new SoapActionCallback("http://clientes.tcc.com.co/GrabarDespacho4"));
 				
