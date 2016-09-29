@@ -814,9 +814,16 @@ public class DatilService implements Serializable{
 	private Comprador loadComprador(OrderComplete orderComplete){
 		Comprador comprador = new Comprador();
 		comprador.setEmail(orderComplete.getClientProfileData().getEmail());
-		comprador.setIdentificacion(orderComplete.getClientProfileData().getDocument());
+		if(orderComplete.getClientProfileData().getDocument()!=null){
+			comprador.setIdentificacion(orderComplete.getClientProfileData().getDocument());
+			comprador.setTipoIdentificacion(determineDocumentType(orderComplete.getClientProfileData().getDocument()));
+		}else if(orderComplete.getClientProfileData().getIsCorporate() && orderComplete.getClientProfileData().getCorporateDocument()!=null)
+		{
+			comprador.setIdentificacion(orderComplete.getClientProfileData().getCorporateDocument());
+			comprador.setTipoIdentificacion(determineDocumentType(orderComplete.getClientProfileData().getCorporateDocument()));
+		}
 		comprador.setRazonSocial(orderComplete.getCustomerName());
-		comprador.setTipoIdentificacion(determineDocumentType(orderComplete.getClientProfileData().getDocument()));
+		
 		
 		String direccion = "";
 		if(orderComplete.getShippingData()!=null){

@@ -50,7 +50,7 @@ public class ClientProfileData {
     @JsonProperty("tradeName")
     private Object tradeName;
     @JsonProperty("corporateDocument")
-    private Object corporateDocument;
+    private String corporateDocument;
     @JsonProperty("stateInscription")
     private Object stateInscription;
     @JsonProperty("corporatePhone")
@@ -248,7 +248,7 @@ public class ClientProfileData {
      *     The corporateDocument
      */
     @JsonProperty("corporateDocument")
-    public Object getCorporateDocument() {
+    public String getCorporateDocument() {
         return corporateDocument;
     }
 
@@ -258,7 +258,7 @@ public class ClientProfileData {
      *     The corporateDocument
      */
     @JsonProperty("corporateDocument")
-    public void setCorporateDocument(Object corporateDocument) {
+    public void setCorporateDocument(String corporateDocument) {
         this.corporateDocument = corporateDocument;
     }
 

@@ -233,10 +233,15 @@ public class TramacoService implements Serializable{
 				
 				if(guideInfo.getOrderComplete().getClientProfileData().getDocument()!=null){
 					destinatario.setCiRuc(guideInfo.getOrderComplete().getClientProfileData().getDocument());
+					destinatario.setTipoIden("05");
+				}else if(guideInfo.getOrderComplete().getClientProfileData().getIsCorporate() && guideInfo.getOrderComplete().getClientProfileData().getCorporateDocument()!=null){
+					destinatario.setCiRuc(guideInfo.getOrderComplete().getClientProfileData().getCorporateDocument());
+					destinatario.setTipoIden("04");
 				}else{
 					destinatario.setCiRuc(tramacoDefaultDocument);
+					destinatario.setTipoIden("08");
 				}
-				destinatario.setTipoIden("05");
+				
 				
 				if(guideInfo.getOrderComplete().getShippingData().getAddress().getCity()!=null){
 					String province =guideInfo.getOrderComplete().getShippingData().getAddress().getState().toUpperCase();
