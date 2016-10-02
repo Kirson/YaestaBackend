@@ -12,6 +12,8 @@ public class TramacoAuthDTO implements Serializable{
 	private static final long serialVersionUID = -4506145221191568129L;
 	private String response;
 	private RespuestaAutenticarWs respuestaAutenticarWs;
+	private String message;
+	
 	public String getResponse() {
 		return response;
 	}
@@ -23,6 +25,12 @@ public class TramacoAuthDTO implements Serializable{
 	}
 	public void setRespuestaAutenticarWs(RespuestaAutenticarWs respuestaAutenticarWs) {
 		this.respuestaAutenticarWs = respuestaAutenticarWs;
+	}
+	public String getMessage() {
+		return message;
+	}
+	public void setMessage(String message) {
+		this.message = message;
 	}
 	
 	

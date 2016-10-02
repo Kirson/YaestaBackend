@@ -117,6 +117,7 @@ public class TramacoService implements Serializable{
 
 		TramacoAuthDTO tramacoAuth = new TramacoAuthDTO();
 		String response = "OK";
+		String mensaje = "EXITO";
 		
 		System.out.println("Inicio auhtService"); 
 
@@ -148,6 +149,11 @@ public class TramacoService implements Serializable{
 							respuestaAutenticarWs.getCuerpoRespuesta().getMensaje());
 					System.out.println("EXCEPCION:" +
 							respuestaAutenticarWs.getCuerpoRespuesta().getExcepcion());
+					
+					if(!respuestaAutenticarWs.getCuerpoRespuesta().getCodigo().equals("1")){
+						response = "ERROR";
+					}
+					mensaje = respuestaAutenticarWs.getCuerpoRespuesta().getMensaje();
 				}
 				if (respuestaAutenticarWs.getSalidaAutenticarWs() != null) {
 					SalidaAutenticarWs salida = respuestaAutenticarWs.getSalidaAutenticarWs();
@@ -189,9 +195,10 @@ public class TramacoService implements Serializable{
 
 			System.out.println("Error al consumir servicio tramaco Auth");
 
-			response= "error";
+			response= "ERROR";
 		}
 		
+		tramacoAuth.setMessage(mensaje);
 		tramacoAuth.setResponse(response);
 
 		return tramacoAuth;
@@ -674,6 +681,8 @@ public class TramacoService implements Serializable{
 		//Autenticar
 		TramacoAuthDTO tramacoAuth = authService();
 		
+		guideInfo.getGuideBean().setResponse("OK");
+		
 		if(response.equals(tramacoAuth.getResponse())){
 			
 			System.out.println("Esta Auth");
@@ -853,6 +862,8 @@ public class TramacoService implements Serializable{
 				}
 				guideInfo.getGuideBean().setGuideTrackResponse(respuestaTrackGuiaWs);
 			}
+		}else{
+		   guideInfo.getGuideBean().setResponse("ERROR");
 		}
 		
 		return guideInfo;

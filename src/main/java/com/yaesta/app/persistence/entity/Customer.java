@@ -13,8 +13,11 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "client",schema="yaesta")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Customer implements Serializable {
 
 	/**

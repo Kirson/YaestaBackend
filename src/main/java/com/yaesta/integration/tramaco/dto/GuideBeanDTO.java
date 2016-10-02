@@ -30,6 +30,7 @@ public class GuideBeanDTO implements Serializable{
 	private String guideDeliveryId;
 	private Supplier supplier;
 	private List<ItemComplete> itemList;
+	private String response;
 	
 	public GuideBeanDTO(){
 		errorList = new ArrayList<String>();
@@ -111,6 +112,14 @@ public class GuideBeanDTO implements Serializable{
 
 	public void setItemList(List<ItemComplete> itemList) {
 		this.itemList = itemList;
+	}
+
+	public String getResponse() {
+		return response;
+	}
+
+	public void setResponse(String response) {
+		this.response = response;
 	}
 	
 	

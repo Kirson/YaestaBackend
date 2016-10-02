@@ -150,7 +150,7 @@ public class GuideService {
 				guideInfo.setGuideBean(gbd);
 				GuideDTO response=tramacoService.trackingService(guideInfo);
 				
-				if(response.getGuideBean().getGuideTrackResponse().getLstSalidaTrackGuiaWs()!=null && !response.getGuideBean().getGuideTrackResponse().getLstSalidaTrackGuiaWs().isEmpty()){
+				if(response.getGuideBean().equals("OK") && response.getGuideBean().getGuideTrackResponse()!=null && response.getGuideBean().getGuideTrackResponse().getLstSalidaTrackGuiaWs()!=null && !response.getGuideBean().getGuideTrackResponse().getLstSalidaTrackGuiaWs().isEmpty()){
 					for(SalidaTrackGuiaWs st:response.getGuideBean().getGuideTrackResponse().getLstSalidaTrackGuiaWs()){
 						TrackingVO tvo = TrackingUtil.fromSalidaTrackGuiaWsToTrackingVO(st);
 						trackingList.add(tvo);

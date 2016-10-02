@@ -17,9 +17,11 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "order_item",schema="yaesta")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class OrderItem implements Serializable{
 
 	/**

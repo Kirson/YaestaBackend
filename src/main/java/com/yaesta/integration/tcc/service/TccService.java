@@ -73,6 +73,7 @@ public class TccService  {
 	protected @Value("${tcc.service.clase.empaque}") String tccServiceClaseEmpaque;
 	protected @Value("${tcc.service.tipo.unidad}") String tccServiceTipoUnidad;
 	protected @Value("${yaesta.ruc}") String yaestaRuc;
+	protected @Value("${yaesta.razon.social}") String yaestaRazonSocial;
 	protected @Value("${datil.iva.value}") String datilIvaValue;
 	protected @Value("${datil.iva.percent.value}") String datilIvaPercentValue;
 	
@@ -87,6 +88,8 @@ public class TccService  {
 			
 			//String response = "OK";
 			
+			System.out.println("# proveedores "+ guideInfo.getOrderComplete().getSupplierDeliveryInfoList().size());
+			
 			for(SupplierDeliveryInfo sdi:guideInfo.getOrderComplete().getSupplierDeliveryInfoList()){
 			
 				List<String> errorInfo = SupplierUtil.validateSupplierInfo(sdi.getSupplier());
@@ -95,11 +98,12 @@ public class TccService  {
 					TpGrabarRemesaCompleta objDespacho = objectFactory.createTpGrabarRemesaCompleta();
 					
 					objDespacho.setClave(tccServicePassword);
+					//documentacion dice enviar vacio
 					objDespacho.setFechahoralote(UtilDate.fromDateToString(new Date()));
 					objDespacho.setUnidadnegocio(tccBusinessUnit);
 					objDespacho.setFechadespacho(UtilDate.fromDateToString(new Date()));
 					objDespacho.setCuentaremitente(tccBusinessUnit);
-					objDespacho.setDirecciondestinatario(guideInfo.getOrderComplete().getShippingData().getAddress().getStreet());
+					//objDespacho.setDirecciondestinatario(guideInfo.getOrderComplete().getShippingData().getAddress().getStreet());
 					
 					String province =guideInfo.getOrderComplete().getShippingData().getAddress().getState().toUpperCase();
 					String canton = guideInfo.getOrderComplete().getShippingData().getAddress().getCity().toUpperCase();
@@ -114,8 +118,11 @@ public class TccService  {
 					objDespacho.setPrimerapellidodestinatario(guideInfo.getOrderComplete().getClientProfileData().getLastName());
 					objDespacho.setIdentificaciondestinatario(guideInfo.getOrderComplete().getClientProfileData().getDocument());
 					objDespacho.setTelefonodestinatario(guideInfo.getOrderComplete().getClientProfileData().getPhone());
-					objDespacho.setNaturalezadestinatario("N");  //confirmar
-					objDespacho.setTipoidentificaciondestinatario("NIT"); //confirmar
+					
+					String docType[] = determineDocumentType(guideInfo.getOrderComplete().getClientProfileData().getDocument());
+					
+					objDespacho.setNaturalezadestinatario(docType[1]);  //confirmar
+					objDespacho.setTipoidentificaciondestinatario(docType[0]); //confirmar
 					
 					objDespacho.setGenerarDocumentos(true);
 					
@@ -173,14 +180,22 @@ public class TccService  {
 					}
 					
 					objDespacho.setObservaciones(observacionText);
-					objDespacho.setFormapago(formaPago);
+					objDespacho.setFormapago("8"); //Validar TCC
 					
 					//remitente
-					objDespacho.setPrimerapellidoremitente(sdi.getSupplier().getName() + " - ");
+					objDespacho.setPrimernombreremitente(sdi.getSupplier().getName() + " - ");
 					objDespacho.setPrimerapellidoremitente(sdi.getSupplier().getContactName() + " " + sdi.getSupplier().getContactLastName());
 					objDespacho.setDireccionremitente(sdi.getSupplier().getAddress());
 					objDespacho.setTelefonoremitente(sdi.getSupplier().getPhone());
 					objDespacho.setCiudadorigen(sdi.getSupplier().getTccCode());
+					
+				
+					String docTypeSup[] = determineDocumentType(yaestaRuc);
+					
+					objDespacho.setNaturalezaremitente(docTypeSup[1]);  //confirmar
+					objDespacho.setTipoidentificacionremitente(docTypeSup[0]); //confirmar
+					
+					objDespacho.setRazonsocialremitente(yaestaRazonSocial);
 					
 					//Items
 					Long ite = new Long(1);
@@ -190,6 +205,7 @@ public class TccService  {
 					Double totalAsegurado = 0D;
 					String desc = "";
 					TpUnidad unidad = new TpUnidad();
+					System.out.println("# items "+sdi.getItems().size());
 					for(ItemComplete ic:sdi.getItems())
 					{
 						itemValue =0D;
@@ -226,7 +242,6 @@ public class TccService  {
 						unidad.setClaseempaque(tccServiceClaseEmpaque);
 						unidad.setKilosreales("1");
 						
-						objDespacho.getUnidad().add(unidad);
 						
 						
 						itemValue = itemValue+ic.getPrice()*ic.getQuantity();
@@ -300,7 +315,10 @@ public class TccService  {
 							String codigoAdjunto =  getAdjCode();
 							System.out.println("Codigo Adjunto "+codigoAdjunto);
 							docReferencia.setNumerodocumento(codigoAdjunto);
+							//docReferencia.setNumerodocumento(guideInfo.getOrderComplete().getOrderId());
 							docReferencia.setTipodocumento("FA"); //confirmar
+							docReferencia.setFechadocumento(UtilDate.fromDateToString(new Date()));
+						
 							
 							objDespacho.getDocumentoreferencia().add(docReferencia);
 						}else{
@@ -310,14 +328,23 @@ public class TccService  {
 						
 						System.out.println("Total Valor mercancia "+totalValue);
 						objDespacho.setTotalvalormercancia(1D);
-						objDespacho.setCodigolote(guideInfo.getOrderComplete().getOrderId());
-					
+						
+						//documentacion dice enviar vacio
+						//objDespacho.setCodigolote(guideInfo.getOrderComplete().getOrderId());
+						objDespacho.setCodigolote(getLoteCode());
+						//objDespacho.setNumeroDepacho(guideInfo.getOrderComplete().getOrderId());
+					    objDespacho.setNumeroReferenciaCliente(guideInfo.getOrderComplete().getOrderId());
+						
 					}//for de items
 					
 					System.out.println("Total Asegurado "+totalAsegurado);
 					unidad.setValormercancia("1");
-					
+					unidad.setNumerobolsa("1");
+					unidad.setReferencias("");
+					unidad.setCodigobarras("");
+					unidad.setTipoempaque("CLEM_CAJA");
 					objDespacho.getUnidad().add(unidad);
+					objDespacho.setFuente("WSTCC");
 				
 					GrabarDespacho4 gdes = objectFactory.createGrabarDespacho4();
 					gdes.setObjDespacho(objDespacho);
@@ -353,11 +380,44 @@ public class TccService  {
 	private String getAdjCode(){
 		String code = tableSequenceService.getNextValue("SEQ_TCC_ADJ")+"";
 		
-		if(code.length()<7){
+		while(code.length()<7){
 			code = "0"+code;
 		}
 		
 		return code;
 	}
+	
+	protected String getLoteCode(){
+		String code = tableSequenceService.getNextValue("SEQ_LOTE_TCC")+"";
+		
+		while(code.length()<5){
+			code = "0"+code;
+		}
+		
+		return code;
+	}
+	
+	protected String[] determineDocumentType(String document){
+		String result[] = new String[3];
+		if(document!=null){
+			if(document.length()==10){
+				result[0]="CC";
+				result[1]="N";
+			}else if(document.length()==13){
+				result[0]="NIT";
+				result[1]="J";
+			}else{
+				result[0]="PAS";
+				result[1]="N";
+			}
+		}else{
+			result[0]="N/A";
+			result[1]="N/A";
+
+		}
+		
+		return result;
+	}
+	
 
 }

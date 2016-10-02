@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.yaesta.app.util.Constants;
 import com.yaesta.app.util.SupplierUtil;
+import com.yaesta.integration.sellercenter.json.bean.SellerUser;
+import com.yaesta.integration.sellercenter.service.SellerCenterService;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -81,6 +83,9 @@ public class SupplierService implements Serializable {
 	@Autowired
 	TableSequenceService tableSequenceService;
 	
+	@Autowired
+	SellerCenterService sellerCenterService;
+	
 	private @Value("${mail.smtp.from}") String mailFrom;
 	private @Value("${mail.smtp.supplier.to}") String mailTo;
 	private @Value("${mail.smtp.supplier.to.name}") String mailToName;
@@ -90,14 +95,21 @@ public class SupplierService implements Serializable {
 	@Transactional
 	public Supplier save(Supplier entity, List<SupplierDeliveryCalendar> deliveryCalendar, List<SupplierContact> contactList, List<SupplierContact> removeContactList){
 		
+		Boolean isNew = Boolean.FALSE;
+		
 		if(entity.getId()==null){
 			entity.setId(tableSequenceService.getNextValue("SEQ_SUPPLIER"));
+			isNew = Boolean.TRUE;
 		}
 		
 		String postalCode = entity.getPostalCode();
-		if(postalCode!=null){
-			TramacoZone zone = tramacoZoneRepository.findOne(new Long(postalCode));
-			entity.setZone(zone);
+		if(postalCode!=null && !postalCode.equals("")){
+			try{
+				TramacoZone zone = tramacoZoneRepository.findOne(new Long(postalCode));
+				entity.setZone(zone);
+			}catch(Exception e){
+				System.out.println("Error asignando codigo de zona a proveedor");
+			}
 		}
 		
 		//if(entity.getStreetMain()==null){
@@ -133,6 +145,18 @@ public class SupplierService implements Serializable {
 		}
 		
 		sendNewSupplierMail(entity);
+		
+		if(isNew){
+			SellerUser su = new SellerUser();
+			su.setName(entity.getName());
+			su.setPerfil("seller");
+			su.setUsername(entity.getSellerUser());
+			su.setEMail(entity.getContactEmail());
+			su.setSellerId("(-"+entity.getId()+"-)");
+			
+			su = sellerCenterService.createUser(su);
+			
+		}
 		
 		return entity;
 	}
@@ -554,12 +578,20 @@ public class SupplierService implements Serializable {
 		   }
 		   
 		   if(supplier!=null){
+			   //Eliminar lista de contactos
 			   List<SupplierContact> contacts = getContacts(supplier);
 		   
 			   if(contacts!=null && !contacts.isEmpty()){
 				   supplierContactRepository.delete(contacts);
 			   }
+			   
+			   //Eliminar lista de direcciones
+			   List<Address> addressList = addressRepository.findBySupplier(supplier);
 		   
+			   if(addressList!=null && !addressList.isEmpty()){
+				   addressRepository.delete(addressList);
+			   }
+			   
 			   supplierRepository.delete(supplier);
 		   }
 	   }catch(Exception e){

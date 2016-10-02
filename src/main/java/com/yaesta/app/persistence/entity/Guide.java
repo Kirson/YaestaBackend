@@ -19,9 +19,11 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "guide",schema="yaesta")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Guide implements Serializable{
 
 	/**

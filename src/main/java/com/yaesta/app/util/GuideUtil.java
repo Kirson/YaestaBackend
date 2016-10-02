@@ -17,9 +17,11 @@ public class GuideUtil implements Serializable {
 		result.setId(source.getId());
 		result.setDeliveryName(source.getDeliveryName());
 		result.setOrderId(source.getOrderVitexId());
-		if(source.getDeliveryName().equals("TRAMACO")){
-			String [] guideStrID = source.getVitexDispatcherId().split("%");
-			result.setGuideNumber(guideStrID[1]);
+		if(source.getDeliveryName()!=null){
+			if(source.getDeliveryName().equals("TRAMACO")){
+				String [] guideStrID = source.getVitexDispatcherId().split("%");
+				result.setGuideNumber(guideStrID[1]);
+			}
 		}
 		result.setCustomerName(source.getCustomerName());
 		result.setGuideStatus(source.getStatus());

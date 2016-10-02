@@ -638,7 +638,9 @@ public class OrderVitexService extends BaseVitexService {
 					String refId = (String) ic.getRefId();
 					String[] supplierCode = SupplierUtil.returnSupplierCode(refId);
 					if (sc.equals(supplierCode[0])) {
-						sdi.getItems().add(ic);
+						if(!sdi.getItems().contains(ic)){ //prevenenir items duplicados
+							sdi.getItems().add(ic);
+						}
 					}
 				}
 				deliveryInfoList.add(sdi);
@@ -656,7 +658,8 @@ public class OrderVitexService extends BaseVitexService {
 		}else if(guideInfoBean.getDeliverySelected().getNemonic().equals("TCC")){
 		    return generateGuidesTcc(guideInfoBean);	
 		}else if(guideInfoBean.getDeliverySelected().getNemonic().equals("MOTO_EXPRESS")  || 
-				 guideInfoBean.getDeliverySelected().getNemonic().equals("DESPACHO_INTERNO")){
+				 guideInfoBean.getDeliverySelected().getNemonic().equals("DESPACHO_INTERNO") ||
+				 guideInfoBean.getDeliverySelected().getNemonic().equals("CICLISTA")){
 		    return generateGuideStandar(guideInfoBean);	
 		}
 		else{
@@ -1167,7 +1170,7 @@ public class OrderVitexService extends BaseVitexService {
 					iInfo.setSupplierName(sdi.getSupplier().getName());
 					iInfo.setName(ic.getName());
 					iInfo.setPrice(ic.getPrice());
-					iInfo.setUrl(ic.getImageUrl());
+					iInfo.setUrl("http:"+ic.getImageUrl());
 					if(ic.getRefId()!=null){
 						iInfo.setRefCode((String)ic.getRefId());
 					}
