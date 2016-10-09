@@ -26,11 +26,17 @@ public class MailInfo implements Serializable {
 	private Long refId;
 	private String refVtexId;
 	private List<String> textList;
+	private List<ItemInfoGuide> itemInfoGuideList;
+	private List<ItemInfoSupplier> itemInfoSupplierList;
+	private Boolean sendMail;
 	
 	public MailInfo(){
 		attachmentList = new ArrayList<String>();
 		itemInfoList = new ArrayList<ItemInfo>();
 		textList = new ArrayList<String>();
+		itemInfoGuideList = new ArrayList<ItemInfoGuide>();
+		itemInfoSupplierList = new ArrayList<ItemInfoSupplier>();
+		sendMail = Boolean.FALSE;
 	}
 	
 	public MailParticipant getMailSender() {
@@ -128,6 +134,30 @@ public class MailInfo implements Serializable {
 
 	public void setTextList(List<String> textList) {
 		this.textList = textList;
+	}
+
+	public List<ItemInfoGuide> getItemInfoGuideList() {
+		return itemInfoGuideList;
+	}
+
+	public void setItemInfoGuideList(List<ItemInfoGuide> itemInfoGuideList) {
+		this.itemInfoGuideList = itemInfoGuideList;
+	}
+
+	public List<ItemInfoSupplier> getItemInfoSupplierList() {
+		return itemInfoSupplierList;
+	}
+
+	public void setItemInfoSupplierList(List<ItemInfoSupplier> itemInfoSupplierList) {
+		this.itemInfoSupplierList = itemInfoSupplierList;
+	}
+
+	public Boolean getSendMail() {
+		return sendMail;
+	}
+
+	public void setSendMail(Boolean sendMail) {
+		this.sendMail = sendMail;
 	}
 	
 	

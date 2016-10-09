@@ -178,6 +178,12 @@ public class Supplier implements Serializable{
 	@Column(name = "tcc_code")
 	private String tccCode;
 	
+	@Column(name = "city")
+	private String city;
+	
+	@Column(name = "password")
+	private String password;
+	
 	@Transient
 	private String shippingAddress;
 	
@@ -478,6 +484,16 @@ public class Supplier implements Serializable{
 	public void setAccountEmail(String accountEmail) {
 		this.accountEmail = accountEmail;
 	}
+	
+	
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
 
 	public String getShippingAddress() {
 		
@@ -579,6 +595,16 @@ public class Supplier implements Serializable{
 
 	public void setTccCode(String tccCode) {
 		this.tccCode = tccCode;
+	}
+	
+	
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	@Override

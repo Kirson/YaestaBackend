@@ -22,6 +22,7 @@ public class TableSequenceService {
 	 * @param seqName
 	 * @return
 	 */
+	@Transactional
 	public Long getNextValue(String seqName){
 		
 		System.out.println("Secuencia: "+seqName);

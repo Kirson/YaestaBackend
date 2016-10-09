@@ -101,9 +101,28 @@ public class Order implements Serializable{
 	@Column(name="periode")
 	private String periode;
 	
+	@Column(name="pending")
+	private Boolean pending;
+	
+	@Column(name="motive_pending")
+	private String motivePending;
+	
+	@Column(name="pending_solution")
+	private String pendingSolution;
+	
+	@Column(name="invoice_number")
+	private String invoiceNumber;
+	
+	@Column(name="invoice_reference")
+	private String invoiceReference;
+	
+	@Column(name="delivery_name")
+	private String deliveryName;
+	
 	public Order(){
 		this.status = "registered";
 		this.hasItems = "0";
+		this.pending = Boolean.FALSE;
 	}
 
 	public Long getId() {
@@ -259,6 +278,62 @@ public class Order implements Serializable{
 
 	public void setPeriode(String periode) {
 		this.periode = periode;
+	}
+	
+	
+
+	public Boolean getPending() {
+		return pending;
+	}
+
+	public void setPending(Boolean pending) {
+		this.pending = pending;
+	}
+
+	public String getMotivePending() {
+		return motivePending;
+	}
+
+	public void setMotivePending(String motivePending) {
+		this.motivePending = motivePending;
+	}
+
+	public String getPendingSolution() {
+		return pendingSolution;
+	}
+
+	public void setPendingSolution(String pendingSolution) {
+		this.pendingSolution = pendingSolution;
+	}
+	
+	
+
+	public String getInvoiceNumber() {
+		return invoiceNumber;
+	}
+
+	public void setInvoiceNumber(String invoiceNumber) {
+		this.invoiceNumber = invoiceNumber;
+	}
+	
+	
+
+	public String getDeliveryName() {
+		return deliveryName;
+	}
+
+	public void setDeliveryName(String deliveryName) {
+		this.deliveryName = deliveryName;
+	}
+	
+	
+
+	public String getInvoiceReference() {
+		return invoiceReference;
+	}
+
+	public void setInvoiceReference(String invoiceReference) {
+		this.invoiceReference = invoiceReference;
 	}
 
 	@Override

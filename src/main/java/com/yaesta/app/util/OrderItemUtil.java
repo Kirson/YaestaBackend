@@ -16,6 +16,7 @@ public class OrderItemUtil {
 		obj.setCustomerPhone("'"+item.getCustomerPhone());
 		obj.setCustomerState(item.getCustomerState());
 		obj.setCustomerValue(item.getCustomerValue());
+		obj.setDeliveryName(item.getDeliveryName());
 		obj.setOrderDate(item.getOrderDate().toString());
 		obj.setDiscount(item.getDiscount());
 		obj.setOrderSequence(item.getOrderSequence());
@@ -29,6 +30,8 @@ public class OrderItemUtil {
 		obj.setValueReceivables(item.getValueReceivables());
 		obj.setVitexId(item.getVitexId());
 		obj.setWayToPay(item.getWayToPay());
+		obj.setInvoiceNumber(item.getInvoiceNumber());
+		obj.setGuideNumber(item.getGuideNumber());
 		return obj;
 	}
 	

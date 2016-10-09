@@ -183,5 +183,12 @@ public class OrderController {
 			return new ResponseEntity<List<WarehouseVO>>(new ArrayList<WarehouseVO>(),HttpStatus.OK);
 		}
 	}
+	
+	@RequestMapping(value = "/getPendingOrders", method = RequestMethod.GET)
+	public ResponseEntity<List<Order>> getPendingOrders(){
+		List<Order> found = orderService.getPendingOrders();
+		
+		return new ResponseEntity<List<Order>>(found,HttpStatus.OK);
+	}
 
 }

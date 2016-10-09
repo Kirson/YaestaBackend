@@ -21,6 +21,8 @@ import com.yaesta.app.persistence.entity.Guide;
 import com.yaesta.app.persistence.service.GuideService;
 import com.yaesta.app.persistence.vo.DateRangeVO;
 import com.yaesta.app.persistence.vo.GuideBeanVO;
+import com.yaesta.app.persistence.vo.GuideDeliveryNotificationVO;
+import com.yaesta.app.persistence.vo.GuideSearchVO;
 import com.yaesta.app.persistence.vo.GuideVO;
 import com.yaesta.app.persistence.vo.TrackingVO;
 
@@ -138,5 +140,82 @@ public class GuideController implements Serializable {
 	public ResponseEntity<String> updateGuides(){
 		String result = guideService.updateGuides();
 		return new ResponseEntity<String>(result,HttpStatus.OK);
+	}
+	
+	
+	@RequestMapping(value = "/getGuidesByStatusVO/{status}", method = RequestMethod.GET)
+	public ResponseEntity<List<GuideVO>> getGuidesByStatusVO(@PathVariable("status") String status) throws ParseException{
+		
+		GuideSearchVO guideSearch = new GuideSearchVO();
+		
+	    guideSearch.setStatus(status);
+		
+		List<GuideVO> found = guideService.findByStatus(guideSearch);
+		
+		if(found!=null && !found.isEmpty()){
+			return new ResponseEntity<List<GuideVO>>(found,HttpStatus.OK);
+		}else{
+			return new ResponseEntity<List<GuideVO>>(new ArrayList<GuideVO>(),HttpStatus.OK);
+		}
+	}
+	
+	@RequestMapping(value = "/getGuidesByStatusDeliveryDateVO/{status}/{deliveryDate}", method = RequestMethod.GET)
+	public ResponseEntity<List<GuideVO>> getGuidesByStatusDeliveryDateVO(@PathVariable("status") String status,@PathVariable("deliveryDate") Date deliveryDate) throws ParseException{
+		
+		GuideSearchVO guideSearch = new GuideSearchVO();
+		
+		//SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		
+		//Date dDeliveryDate = format.parse(deliveryDate);
+		
+		guideSearch.setDeliveryDate(deliveryDate);
+		guideSearch.setStatus(status);
+		
+		List<GuideVO> found = guideService.findByStatusAndDeliveryDate(guideSearch);
+		
+		if(found!=null && !found.isEmpty()){
+			return new ResponseEntity<List<GuideVO>>(found,HttpStatus.OK);
+		}else{
+			return new ResponseEntity<List<GuideVO>>(new ArrayList<GuideVO>(),HttpStatus.OK);
+		}
+	}
+	
+	@RequestMapping(value = "/getGuidesByStatusDateRangeVO/{status}/{startDate}/{finishDate}", method = RequestMethod.GET)
+	public ResponseEntity<List<GuideVO>> getGuidesByStatusDateRangeVO(@PathVariable("status") String status,@PathVariable("startDate") String startDate,@PathVariable("finishDate") String finishDate) throws ParseException{
+		
+		GuideSearchVO guideSearch = new GuideSearchVO();
+		
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		
+		Date dStartDate = format.parse(startDate);
+		Date dFinishDate = format.parse(finishDate);
+		
+		guideSearch.setStartDate(dStartDate);
+		guideSearch.setFinishDate(dFinishDate);
+		guideSearch.setStatus(status);
+		
+		List<GuideVO> found = guideService.findByStatusAndDeliveryDate(guideSearch);
+		
+		if(found!=null && !found.isEmpty()){
+			return new ResponseEntity<List<GuideVO>>(found,HttpStatus.OK);
+		}else{
+			return new ResponseEntity<List<GuideVO>>(new ArrayList<GuideVO>(),HttpStatus.OK);
+		}
+	}
+	
+	@RequestMapping(value = "/sendDeliveryNotification/{status}/{deliveryDate}", method = RequestMethod.GET)
+	public ResponseEntity<GuideDeliveryNotificationVO> sendDeliveryNotification(@PathVariable("status") String status,@PathVariable("deliveryDate")Date deliveryDate) throws ParseException{
+		GuideSearchVO guideSearch = new GuideSearchVO();
+		
+		//SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		
+		//Date dDeliveryDate = format.parse(deliveryDate);
+		
+		guideSearch.setDeliveryDate(deliveryDate);
+		guideSearch.setStatus(status);
+		
+		GuideDeliveryNotificationVO found = guideService.sendProgrammedGuides(guideSearch);
+		
+		return new ResponseEntity<GuideDeliveryNotificationVO>(found,HttpStatus.OK);
 	}
 }

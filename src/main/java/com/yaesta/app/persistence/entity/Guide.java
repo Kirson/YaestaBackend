@@ -20,6 +20,7 @@ import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.yaesta.app.util.UtilDate;
 
 @Entity
 @Table(name = "guide",schema="yaesta")
@@ -130,6 +131,21 @@ public class Guide implements Serializable{
 	@Column(name="access_code")
 	private String accessCode;
 	
+	@Column(name="str_delivery_date")
+	private String strDeliveryDate;
+	
+	@Column(name="periode")
+	private String periode;
+	
+	@Column(name="guide_number")
+	private String guideNumber;
+	
+	@Column(name="customer_phone")
+	private String customerPhone;
+	
+	@Column(name="tracking_url")
+	private String trackingUrl;
+	
 	@Transient
 	private List<GuideDetail> details;
 	
@@ -189,6 +205,10 @@ public class Guide implements Serializable{
 	}
 
 	public void setDeliveryDate(Date deliveryDate) {
+		if(deliveryDate!=null){
+			this.setStrDeliveryDate(UtilDate.fromDateToString(deliveryDate, "yyyy-MM-dd"));
+			this.setPeriode(UtilDate.fromDateToString(deliveryDate, "yyyy-MM"));
+		}
 		this.deliveryDate = deliveryDate;
 	}
 
@@ -403,6 +423,52 @@ public class Guide implements Serializable{
 
 	public void setAccessCode(String accessCode) {
 		this.accessCode = accessCode;
+	}
+	
+	
+
+	public String getStrDeliveryDate() {
+		return strDeliveryDate;
+	}
+
+	public void setStrDeliveryDate(String strDeliveryDate) {
+		this.strDeliveryDate = strDeliveryDate;
+	}
+
+	public String getPeriode() {
+		return periode;
+	}
+
+	public void setPeriode(String periode) {
+		this.periode = periode;
+	}
+	
+	
+
+	public String getGuideNumber() {
+		return guideNumber;
+	}
+
+	public void setGuideNumber(String guideNumber) {
+		this.guideNumber = guideNumber;
+	}
+
+	public String getCustomerPhone() {
+		return customerPhone;
+	}
+
+	public void setCustomerPhone(String customerPhone) {
+		this.customerPhone = customerPhone;
+	}
+	
+	
+
+	public String getTrackingUrl() {
+		return trackingUrl;
+	}
+
+	public void setTrackingUrl(String trackingUrl) {
+		this.trackingUrl = trackingUrl;
 	}
 
 	@Override

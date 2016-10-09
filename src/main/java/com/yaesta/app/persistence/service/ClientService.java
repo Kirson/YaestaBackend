@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service;
 import com.yaesta.app.persistence.entity.Customer;
 import com.yaesta.app.persistence.entity.ClienteBodega;
 import com.yaesta.app.persistence.entity.TramacoZone;
+import com.yaesta.app.persistence.entity.YaEstaLog;
 import com.yaesta.app.persistence.repository.ClientRepository;
 import com.yaesta.app.persistence.repository.ClienteBodegaRepository;
+import com.yaesta.app.persistence.vo.ClientResponseVO;
 import com.yaesta.app.persistence.vo.ClientVO;
 import com.yaesta.app.persistence.vo.ClientWarehouseVO;
 import com.yaesta.app.util.ClientUtil;
@@ -39,6 +41,9 @@ public class ClientService {
 
 	@Autowired
 	private TramacoZoneService tramacoZoneService;
+	
+	@Autowired
+	YaEstaLogService logService;
 
 	public List<Customer> getClients() {
 		return clientRepository.findAll();
@@ -203,6 +208,30 @@ public class ClientService {
 
 		return newList;
 	}
+	@Transactional
+	public ClientResponseVO updateWarehouseClient(){
+		ClientResponseVO crv = new ClientResponseVO();
+		
+		crv.setResponse("OK");
+		try{
+		List<ClienteBodega> updList = getNewToWarehouse();
+		
+			if(updList!=null && !updList.isEmpty()){
+				for(ClienteBodega cb:updList){
+					cb.setNuevo("N");
+					clienteBodegaRepository.save(cb);
+				}
+			}
+		}catch(Exception e){
+			crv.setResponse("ERROR "+e.getMessage());
+			YaEstaLog yaestalog = new YaEstaLog();
+			yaestalog.setLogDate(new Date());
+			yaestalog.setProcessName("WAREHOUSECUSTOMER-UPDATE");
+			yaestalog.setTextinfo(crv.getResponse());
+			logService.save(yaestalog);
+		}
+		return crv;
+	}
 
 	public List<ClientWarehouseVO> getNewClient() {
 		List<ClientWarehouseVO> result = new ArrayList<ClientWarehouseVO>();
@@ -307,7 +336,7 @@ public class ClientService {
 		}
 
 		String code = "COD" + client.getDocument();
-		ClienteBodega foundB = clienteBodegaRepository.findOne(code);
+		//ClienteBodega foundB = clienteBodegaRepository.findOne(code);
 		if (found == null) {
 			ClienteBodega nCb = new ClienteBodega();
 			nCb.setCodigo(code);
@@ -318,10 +347,11 @@ public class ClientService {
 			nCb.setNuevo("S");
 			nCb.setFechaCreacion(new Date());
 			clienteBodegaRepository.save(nCb);
-		} else {
+		}/* 
+		else {
 			foundB.setNuevo("N");
 			clienteBodegaRepository.save(foundB);
-		}
+		}*/
 		
 		return client;
 	}

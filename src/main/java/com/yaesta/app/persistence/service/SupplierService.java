@@ -2,6 +2,7 @@ package com.yaesta.app.persistence.service;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.transaction.Transactional;
@@ -12,7 +13,8 @@ import org.springframework.stereotype.Service;
 
 import com.yaesta.app.util.Constants;
 import com.yaesta.app.util.SupplierUtil;
-import com.yaesta.integration.sellercenter.json.bean.SellerUser;
+import com.yaesta.integration.sellercenter.json.bean.UserBean;
+import com.yaesta.integration.sellercenter.json.bean.UserResponseContainer;
 import com.yaesta.integration.sellercenter.service.SellerCenterService;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -28,6 +30,7 @@ import com.yaesta.app.persistence.entity.SupplierContact;
 import com.yaesta.app.persistence.entity.SupplierDeliveryCalendar;
 import com.yaesta.app.persistence.entity.TramacoSupplier;
 import com.yaesta.app.persistence.entity.TramacoZone;
+import com.yaesta.app.persistence.entity.YaEstaLog;
 import com.yaesta.app.persistence.repository.AddressRepository;
 import com.yaesta.app.persistence.repository.ProveedorRepository;
 import com.yaesta.app.persistence.repository.SupplierContactRepository;
@@ -86,11 +89,15 @@ public class SupplierService implements Serializable {
 	@Autowired
 	SellerCenterService sellerCenterService;
 	
+	@Autowired
+	YaEstaLogService logService;
+	
 	private @Value("${mail.smtp.from}") String mailFrom;
 	private @Value("${mail.smtp.supplier.to}") String mailTo;
 	private @Value("${mail.smtp.supplier.to.name}") String mailToName;
 	private @Value("${mail.smtp.supplier.contacts}") String mailSmtpSupplierContacts;
 	private @Value("${mail.smtp.supplier.contacts.names}") String mailSmtpSupplierContactsNames;
+	private @Value("${sellercenter.url}") String sellerCenterUrl;
 	
 	@Transactional
 	public Supplier save(Supplier entity, List<SupplierDeliveryCalendar> deliveryCalendar, List<SupplierContact> contactList, List<SupplierContact> removeContactList){
@@ -147,15 +154,27 @@ public class SupplierService implements Serializable {
 		sendNewSupplierMail(entity);
 		
 		if(isNew){
-			SellerUser su = new SellerUser();
-			su.setName(entity.getName());
+			UserBean su = new UserBean();
+			su.setNombre(entity.getName());
 			su.setPerfil("seller");
-			su.setUsername(entity.getSellerUser());
-			su.setEMail(entity.getContactEmail());
-			su.setSellerId("(-"+entity.getId()+"-)");
+			su.setUsuario(entity.getSellerUser());
+			su.setEmail(entity.getContactEmail());
+			su.setId("(-"+entity.getId()+"-)");
 			
-			su = sellerCenterService.createUser(su);
+			UserResponseContainer resp = sellerCenterService.createUser(su);
 			
+			if(!resp.getEstado().equals("error")){
+				entity.setPassword(resp.getUsuario().getPassword());
+				supplierRepository.save(entity);
+				//enviar notificacion de acceso al proveedor
+				sendNewSellerMail(entity,resp);
+			}else{
+				YaEstaLog yaestalog = new YaEstaLog();
+				yaestalog.setLogDate(new Date());
+				yaestalog.setProcessName("SELLERCENTER-CREATE");
+				yaestalog.setTextinfo(entity.getName()+ " ==> "+resp.getMsg());
+				logService.save(yaestalog);
+			}
 		}
 		
 		return entity;
@@ -557,6 +576,49 @@ public class SupplierService implements Serializable {
 			mailInfo.setGeneralText(generalText);
 			
 			mailService.sendMailTemplate(mailInfo, "newSellerNotification.vm");	
+			System.out.println("Fin notificacion");
+	   }
+   }
+   
+   private void sendNewSellerMail(Supplier supplier, UserResponseContainer urc){
+	   if(supplier.getIsNew()){
+		   System.out.println("Inicio notificacion");
+		   MailInfo mailInfo = new MailInfo();
+		   MailParticipant sender = new MailParticipant();
+		   sender.setName("YaEsta.com");
+		   sender.setEmail(mailFrom);
+		   mailInfo.setMailSender(sender);
+		   MailParticipant receiver = new MailParticipant();
+		   receiver.setName(supplier.getName());
+		   receiver.setEmail(supplier.getContactEmail());
+		   mailInfo.setMailReceiver(receiver);
+		   /*
+		   List<MailParticipant> ccList = new ArrayList<MailParticipant>();
+		   String[] contactsNames = mailSmtpSupplierContactsNames.split("%");
+		   String[] contactsEmails = mailSmtpSupplierContacts.split("%");
+		
+			for(int j=0;j<contactsNames.length;j++){
+				MailParticipant cc = new MailParticipant();
+				cc.setEmail(contactsEmails[j]);
+				cc.setName(contactsNames[j]);
+				ccList.add(cc);
+			}
+			
+			mailInfo.setReceivers(ccList);
+			*/
+			
+			String subject="Notificación de clave de nuevo proveedor " + supplier.getName();
+			
+			mailInfo.setSubject(subject);
+			
+			String generalText = "Se informa de la creación en el sistema del proveedor " + supplier.getName() 
+								 + " identificado en el sistema con el ID " + supplier.getId() + ".<br></br>"
+								 + "Usted podra ingresar al sistema de SELLERS de YAESTA con las credenciales usuario <b>" + urc.getUsuario().getUsuario() + "</b> y clave <b>" + urc.getUsuario().getPassword() + "</b><br></br>"
+								 +"Para ingresar utilice el siguiente url " + sellerCenterUrl;	
+			
+			mailInfo.setGeneralText(generalText);
+			
+			mailService.sendMailTemplate(mailInfo, "newSellertoSellerNotification.vm");	
 			System.out.println("Fin notificacion");
 	   }
    }

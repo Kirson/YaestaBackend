@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yaesta.app.persistence.entity.Customer;
 import com.yaesta.app.persistence.service.ClientService;
+import com.yaesta.app.persistence.vo.ClientResponseVO;
 import com.yaesta.app.persistence.vo.ClientVO;
 import com.yaesta.app.persistence.vo.ClientWarehouseVO;
 
@@ -55,5 +56,13 @@ public class ClientController implements Serializable {
 		List<ClientVO> list = clientService.getAllVO();
 		
 		return new ResponseEntity<List<ClientVO>>(list, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/updateWarehouseClient", method = RequestMethod.GET)
+	public ResponseEntity<ClientResponseVO> updateWarehouseClient(){
+		ClientResponseVO crv = clientService.updateWarehouseClient();
+		
+		return new ResponseEntity<ClientResponseVO>(crv,HttpStatus.OK);
+		
 	}
 }

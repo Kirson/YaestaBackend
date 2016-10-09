@@ -22,5 +22,13 @@ public interface GuideRepository extends JpaRepository<Guide, Long>{
 	         "where gui.orderDate between ?1 and ?2")
 	public List<Guide> findByOrderDateBetween(Date start, Date finish);
 
-	public List<Guide> findByVitexDispatcherId(String vitexDispatcherIddispatcherId);
+	public List<Guide> findByVitexDispatcherId(String vitexDispatcherId);
+	public List<Guide> findByOrderVitexId(String orderVitexId);
+	
+	public List<Guide> findByStatusAndStrDeliveryDate(String status, String strDeliveryDate);
+	public List<Guide> findByStatusAndStrDeliveryDateAndDeliveryName(String status, String strDeliveryDate, String deliveryName);
+	
+	@Query("Select gui from Guide gui " +
+	         "where gui.orderDate between ?1 and ?2 and gui.status = ?3")
+	public List<Guide> findByOrderDateBetweenAndStatus(Date start, Date finish, String status);
 }

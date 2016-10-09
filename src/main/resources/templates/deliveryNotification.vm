@@ -16,6 +16,79 @@
 			 ${mailInfo.generalText}
 		</p>
 		
+		<div id="Guides">
+            <table border="1">
+              <tr>
+                <th><b>Proveedor</b></th>
+              	<th><b>Nombre Destinatario</b></th>
+              	<th><b>Tel&eacute;fono Destinatario</b></th>
+              	<th><b>C&oacute;digo de Compra</b></th>
+              	<th><b>Pedido</b></th>
+              	<th><b># Guia</b></th>
+              </tr>
+              #foreach( $item in $mailInfo.itemInfoGuideList )
+    				<tr>
+    					<td>
+    					   $item.supplierName	
+    					</td>
+    					<td>
+    					   $item.customerName
+    					</td>
+    					<td>
+    					   $item.customerPhone	
+    					</td>
+    					<td>
+    						<b>$item.orderId</b>	
+    					</td>
+    					<td align="right"><b>$item.orderSequence</b>
+    					</td>
+    					<td>
+    						<b>$item.guideNumber</b>	
+    					</td>
+    				</tr>
+				#end
+            </table>
+            <br></br>
+            <br></br>
+            <table border="1">
+              <tr>
+                <th><b>Proveedor</b></th>
+              	<th><b>Direcci&oacute;n</b></th>
+              	<th><b>Tel&eacute;fono</b></th>
+              	<th><b>Contacto</b></th>
+              	<th><b>Ciudad</b></th>
+              	<th><b># Guia</b></th>
+              </tr>
+              #foreach( $item in $mailInfo.itemInfoSupplierList )
+    				<tr>
+    					<td>$item.supplierName	
+    					</td>
+    					<td>
+    					   $item.supplierAddress
+    					</td>
+    					<td>
+    					   $item.phone	
+    					</td>
+    					<td>
+    						$item.contactNames	
+    					</td>
+    					<td align="right"><b>$item.city</b>
+    					</td>
+    					<td>
+    					   <b>$item.guideNumber</b>	
+    					</td>
+    				</tr>
+				#end
+            </table>
+            <br></br>
+            <br></br>
+            #foreach( $textInfo in $mailInfo.textList )
+            <p>
+                $textInfo
+            </p>
+            #end
+        </div>
+		
 	</body>
 
 </html>

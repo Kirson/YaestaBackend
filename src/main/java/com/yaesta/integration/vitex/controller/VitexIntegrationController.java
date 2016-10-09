@@ -20,6 +20,7 @@ import com.yaesta.integration.vitex.bean.CreditNoteBean;
 import com.yaesta.integration.vitex.bean.GuideContainerBean;
 import com.yaesta.integration.vitex.bean.GuideInfoBean;
 import com.yaesta.integration.vitex.bean.OrderCompleteBean;
+import com.yaesta.integration.vitex.bean.OrderResponseBean;
 import com.yaesta.integration.vitex.json.bean.CategoryVtex;
 import com.yaesta.integration.vitex.json.bean.InvoiceResponse;
 import com.yaesta.integration.vitex.json.bean.OrderCancel;
@@ -160,6 +161,21 @@ public class VitexIntegrationController {
 		
 		OrderCancel json = orderVitexService.cancelOrder(oc);
 		return new ResponseEntity<OrderCancel>(json, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/pendingOrder", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<OrderResponseBean> pendingOrder(@RequestBody OrderCompleteBean orderCompleteBean) {	  		 		
+		
+		OrderComplete oc = orderCompleteBean.getOrder();
+		
+		OrderResponseBean json = orderVitexService.processPendingOrder(oc);
+		return new ResponseEntity<OrderResponseBean>(json, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/getPendingOrders", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<OrderComplete>> getPendingOrders(){
+		List<OrderComplete> found = orderVitexService.getPendingOrders();
+		return new ResponseEntity<List<OrderComplete>>(found, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/generateGuide", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)

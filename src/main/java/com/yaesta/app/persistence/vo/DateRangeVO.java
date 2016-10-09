@@ -9,8 +9,8 @@ public class DateRangeVO implements Serializable{
 	 * Serial version
 	 */
 	private static final long serialVersionUID = 7576257334283690871L;
-	private Date startDate;
-	private Date finishDate;
+	protected Date startDate;
+	protected Date finishDate;
 	
 	
 	public Date getStartDate() {

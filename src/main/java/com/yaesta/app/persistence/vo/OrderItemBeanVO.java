@@ -30,7 +30,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 	"customerValue",
 	"valueReceivables",
 	"statusDescription",
-	"orderDate"
+	"orderDate",
+	"deliveryName",
+	"guideNumber",
+	"invoiceNumber"
 })
 public class OrderItemBeanVO implements Serializable {
 
@@ -58,6 +61,9 @@ public class OrderItemBeanVO implements Serializable {
 	private Double valueReceivables;
 	private String statusDescription;
 	private String orderDate;
+	private String deliveryName;
+	private String guideNumber;
+	private String invoiceNumber;
 	
 	public String getSupplierName() {
 		return supplierName;
@@ -179,6 +185,24 @@ public class OrderItemBeanVO implements Serializable {
 	}
 	public void setOrderDate(String orderDate) {
 		this.orderDate = orderDate;
+	}
+	public String getDeliveryName() {
+		return deliveryName;
+	}
+	public void setDeliveryName(String deliveryName) {
+		this.deliveryName = deliveryName;
+	}
+	public String getGuideNumber() {
+		return guideNumber;
+	}
+	public void setGuideNumber(String guideNumber) {
+		this.guideNumber = guideNumber;
+	}
+	public String getInvoiceNumber() {
+		return invoiceNumber;
+	}
+	public void setInvoiceNumber(String invoiceNumber) {
+		this.invoiceNumber = invoiceNumber;
 	}
 	
 	

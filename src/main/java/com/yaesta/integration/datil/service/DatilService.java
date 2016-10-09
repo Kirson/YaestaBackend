@@ -26,7 +26,6 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.yaesta.app.persistence.entity.Catalog;
-import com.yaesta.app.persistence.entity.Guide;
 import com.yaesta.app.persistence.entity.Order;
 import com.yaesta.app.persistence.entity.Supplier;
 import com.yaesta.app.persistence.entity.YaEstaLog;
@@ -144,6 +143,8 @@ public class DatilService implements Serializable{
 	private @Value("${datil.carrier.cyclist.license.plate}") String datilCarrierCyclistLicensePlate;
 	private @Value("${datil.carrier.cyclist.motive}") String datilCarrierCyclistMotive;
 	private @Value("${datil.carrier.cyclist.route}") String datilCarrierCyclistRoute;
+	private @Value("${datil.do.invoice}") String datilDoInvoice;
+	
 	
 	
 	private Client client;
@@ -164,17 +165,21 @@ public class DatilService implements Serializable{
 		String json = gson.toJson(input);
 		
 		System.out.println("Factura:"+json);
-		String responseJson = target.request(MediaType.APPLICATION_JSON_TYPE).headers(buildHeaders()).post(Entity.json(json), String.class);
-		System.out.println("==>>"+responseJson);
 		
-		YaEstaLog yaestaLog = new YaEstaLog();
-		yaestaLog.setLogDate(new Date());
-		yaestaLog.setXmlInfo(responseJson);
-		yaestaLog.setProcessName("INVOICE");
-		yaestaLog.setTextinfo(orderComplete.getOrderId());
-		logService.save(yaestaLog);
-		
-		response = gson.fromJson(responseJson, FacturaRespuestaSRI.class);
+		if(datilDoInvoice.equals("Y")){
+			String responseJson = target.request(MediaType.APPLICATION_JSON_TYPE).headers(buildHeaders()).post(Entity.json(json), String.class);
+			System.out.println("==>>"+responseJson);
+			
+			YaEstaLog yaestaLog = new YaEstaLog();
+			yaestaLog.setLogDate(new Date());
+			yaestaLog.setXmlInfo(responseJson);
+			yaestaLog.setProcessName("INVOICE");
+			yaestaLog.setTextinfo(orderComplete.getOrderId());
+			logService.save(yaestaLog);
+			
+			response = gson.fromJson(responseJson, FacturaRespuestaSRI.class);
+			
+		}
 		return response;
 	}
 	
@@ -257,6 +262,7 @@ public class DatilService implements Serializable{
 		Double subTotalShipping = new Double(0);
 		Double subTotalIVAShipping = new Double(0);
 		Double addDiscount = 0D;
+		
 		
 		for(ItemComplete ic:orderComplete.getItems()){
 			Item it = new Item();
@@ -490,6 +496,8 @@ public class DatilService implements Serializable{
 		
 		String toJson = gson.toJson(response);
 		order.setInvoice(toJson);
+		
+		order.setInvoiceReference(response.getId());
 		
 		orderService.saveOrder(order);
 		
@@ -814,15 +822,18 @@ public class DatilService implements Serializable{
 	private Comprador loadComprador(OrderComplete orderComplete){
 		Comprador comprador = new Comprador();
 		comprador.setEmail(orderComplete.getClientProfileData().getEmail());
-		if(orderComplete.getClientProfileData().getDocument()!=null){
+		comprador.setRazonSocial(orderComplete.getCustomerName());
+		comprador.setTipoIdentificacion(determineDocumentType(orderComplete.getClientProfileData().getDocument()));
+		if(orderComplete.getClientProfileData().getIsCorporate()!=null && !orderComplete.getClientProfileData().getIsCorporate()){
 			comprador.setIdentificacion(orderComplete.getClientProfileData().getDocument());
 			comprador.setTipoIdentificacion(determineDocumentType(orderComplete.getClientProfileData().getDocument()));
 		}else if(orderComplete.getClientProfileData().getIsCorporate() && orderComplete.getClientProfileData().getCorporateDocument()!=null)
 		{
 			comprador.setIdentificacion(orderComplete.getClientProfileData().getCorporateDocument());
 			comprador.setTipoIdentificacion(determineDocumentType(orderComplete.getClientProfileData().getCorporateDocument()));
+			comprador.setRazonSocial(orderComplete.getClientProfileData().getCorporateName());
 		}
-		comprador.setRazonSocial(orderComplete.getCustomerName());
+		
 		
 		
 		String direccion = "";
@@ -906,14 +917,17 @@ public class DatilService implements Serializable{
 	
 	private String determineDocumentType(String document){
 		String result  = "05"; //CEDULA
-		if(document.length()==10){
-			return result;
-		}else if(document.length()==13){
-			result  = "04"; //RUC
+		if(document!=null){
+			if(document.length()==10){
+				return result;
+			}else if(document.length()==13){
+				result  = "04"; //RUC
+			}else{
+				result  = "06"; //Pasaporte
+			}
 		}else{
-			result  = "06"; //Pasaporte
+			result  = "06";
 		}
-		
 		return result;
 	}
 	
@@ -1030,6 +1044,7 @@ public WayBillSchema processWayBill(OrderComplete orderComplete, Catalog deliver
 		
 		GuiaRemisionRespuesta grr = waybill(guiaRemision);
 		
+		/*
 		Order order = orderService.findByVitexId(orderComplete.getOrderId());
 		
 		Guide guide = new Guide();
@@ -1042,7 +1057,7 @@ public WayBillSchema processWayBill(OrderComplete orderComplete, Catalog deliver
 		guide.setGuideInfo(toJson);
 		
 		guideService.saveGuide(guide);
-		
+		*/
 		response.getGuideList().add(grr);
 	}
 		return response;

@@ -46,9 +46,9 @@ public class ClientProfileData {
     @JsonProperty("phone")
     private String phone;
     @JsonProperty("corporateName")
-    private Object corporateName;
+    private String corporateName;
     @JsonProperty("tradeName")
-    private Object tradeName;
+    private String tradeName;
     @JsonProperty("corporateDocument")
     private String corporateDocument;
     @JsonProperty("stateInscription")
@@ -208,7 +208,7 @@ public class ClientProfileData {
      *     The corporateName
      */
     @JsonProperty("corporateName")
-    public Object getCorporateName() {
+    public String getCorporateName() {
         return corporateName;
     }
 
@@ -218,7 +218,7 @@ public class ClientProfileData {
      *     The corporateName
      */
     @JsonProperty("corporateName")
-    public void setCorporateName(Object corporateName) {
+    public void setCorporateName(String corporateName) {
         this.corporateName = corporateName;
     }
 
@@ -228,7 +228,7 @@ public class ClientProfileData {
      *     The tradeName
      */
     @JsonProperty("tradeName")
-    public Object getTradeName() {
+    public String getTradeName() {
         return tradeName;
     }
 
@@ -238,7 +238,7 @@ public class ClientProfileData {
      *     The tradeName
      */
     @JsonProperty("tradeName")
-    public void setTradeName(Object tradeName) {
+    public void setTradeName(String tradeName) {
         this.tradeName = tradeName;
     }
 

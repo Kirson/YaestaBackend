@@ -23,6 +23,9 @@ public class OrderCompleteBean implements Serializable{
 	private Long motiveCancelId;
 	private String motiveCancelText;
 	private Catalog deliverySelected;
+	private Boolean pending;
+	private String motivePending;
+	private String pendingSolution;
 	
 	public OrderCompleteBean(){
 		error="OK";
@@ -88,6 +91,30 @@ public class OrderCompleteBean implements Serializable{
 
 	public void setDeliverySelected(Catalog deliverySelected) {
 		this.deliverySelected = deliverySelected;
+	}
+
+	public Boolean getPending() {
+		return pending;
+	}
+
+	public void setPending(Boolean pending) {
+		this.pending = pending;
+	}
+
+	public String getMotivePending() {
+		return motivePending;
+	}
+
+	public void setMotivePending(String motivePending) {
+		this.motivePending = motivePending;
+	}
+
+	public String getPendingSolution() {
+		return pendingSolution;
+	}
+
+	public void setPendingSolution(String pendingSolution) {
+		this.pendingSolution = pendingSolution;
 	}
 
 	

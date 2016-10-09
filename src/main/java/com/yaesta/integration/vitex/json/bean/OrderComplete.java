@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.yaesta.app.persistence.entity.Catalog;
+import com.yaesta.app.persistence.entity.Guide;
 import com.yaesta.integration.vitex.bean.SupplierDeliveryInfo;
 
 @SuppressWarnings("serial")
@@ -63,7 +64,11 @@ import com.yaesta.integration.vitex.bean.SupplierDeliveryInfo;
     "supplierDeliveryInfoList",
     "error",
     "motiveCancelId",
-    "motiveCancelText"
+    "motiveCancelText",
+    "pending",
+    "motivePendingText",
+    "pendingSolutionText",
+    "guides"
 })
 public class OrderComplete implements Serializable {
 
@@ -151,13 +156,23 @@ public class OrderComplete implements Serializable {
     private String motiveCancelText;
     @JsonProperty("deliverySelected")
     private Catalog deliverySelected;
-    
+    @JsonProperty("pending")
+    private Boolean pending;
+    @JsonProperty("motivePendingText")
+    private String motivePendingText;
+    @JsonProperty("pendingSolutionText")
+    private String pendingSolutionText;
+    @JsonProperty("guides")
+    private List<Guide> guides;
     
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     
-    public OrderComplete(){}
+    public OrderComplete(){
+    	pending=Boolean.FALSE;
+    	guides = new ArrayList<Guide>();
+    }
     
     /**
      * 
@@ -928,6 +943,46 @@ public class OrderComplete implements Serializable {
 	@JsonProperty("deliverySelected")
 	public void setDeliverySelected(Catalog deliverySelected) {
 		this.deliverySelected = deliverySelected;
+	}
+
+	@JsonProperty("pending")
+	public Boolean getPending() {
+		return pending;
+	}
+
+	@JsonProperty("pending")
+	public void setPending(Boolean pending) {
+		this.pending = pending;
+	}
+
+	@JsonProperty("motivePendingText")
+	public String getMotivePendingText() {
+		return motivePendingText;
+	}
+
+	@JsonProperty("motivePendingText")
+	public void setMotivePendingText(String motivePendingText) {
+		this.motivePendingText = motivePendingText;
+	}
+
+	@JsonProperty("pendingSolutionText")
+	public String getPendingSolutionText() {
+		return pendingSolutionText;
+	}
+
+	@JsonProperty("pendingSolutionText")
+	public void setPendingSolutionText(String pendingSolutionText) {
+		this.pendingSolutionText = pendingSolutionText;
+	}
+
+	@JsonProperty("guides")
+	public List<Guide> getGuides() {
+		return guides;
+	}
+
+	@JsonProperty("guides")
+	public void setGuides(List<Guide> guides) {
+		this.guides = guides;
 	}
     
     

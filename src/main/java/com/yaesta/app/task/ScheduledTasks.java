@@ -34,16 +34,18 @@ public class ScheduledTasks implements Serializable {
 	ClientService clientService;
 	
 	
-	 @Scheduled(cron="0 0 7-18 * * MON-FRI")
+	 @Scheduled(cron="0 0 6-20 * * MON-FRI")
 	 public void launchTask() {
 	    System.out.println("Antes de actualizar items-orders " + dateFormat.format(new Date()));
 	    orderVitexService.loadOrderItem();
+	    System.out.println("Antes de actualizar customers " + dateFormat.format(new Date()));
+	    clientService.updateNewCustomerList();
 	 }
-	 
+	 /*
 	 @Scheduled(cron="0 30 10 * * MON-FRI")
 	 public void launchUpdNewCustomer(){
 		 System.out.println("Antes de actualizar clientes nuevos " + dateFormat.format(new Date()));
 		 clientService.updateNewCustomerList();
 	 }
-	 
+	 */
 }

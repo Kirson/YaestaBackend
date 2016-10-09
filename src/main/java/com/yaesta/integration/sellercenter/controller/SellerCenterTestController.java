@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yaesta.integration.sellercenter.json.bean.SellerUser;
+
+import com.yaesta.integration.sellercenter.json.bean.UserBean;
+import com.yaesta.integration.sellercenter.json.bean.UserResponseContainer;
 import com.yaesta.integration.sellercenter.service.SellerCenterService;
 
 @RestController
@@ -20,17 +22,17 @@ public class SellerCenterTestController {
 	SellerCenterService sellerCenterService;
 	
 	@RequestMapping(value = "/createUser", method = RequestMethod.POST)
-	public  ResponseEntity<SellerUser> createUser(){
-		SellerUser su = new SellerUser();
-		su.setName("cherrera");
+	public  ResponseEntity<UserResponseContainer> createUser(){
+		UserBean su = new UserBean();
+		su.setUsuario("cherrera");
 		su.setPerfil("seller");
-		su.setUsername("cherrera");
-		su.setEMail("cristhian.herrera@gmail.com");
-		su.setSellerId("(-300-)");
+		su.setNombre("Cristhian Herrera");
+		su.setEmail("cristhian.herrera@gmail.com");
+		su.setId("(-3000-)");
 		
-		su = sellerCenterService.createUser(su);
+		UserResponseContainer resp = sellerCenterService.createUser(su);
 		
-		return new ResponseEntity<SellerUser>(su,HttpStatus.OK);
+		return new ResponseEntity<UserResponseContainer>(resp,HttpStatus.OK);
 	}
 
 }
