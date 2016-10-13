@@ -1,5 +1,7 @@
 package com.yaesta.integration.vitex.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.ParseException;
@@ -7,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -16,7 +19,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.MultivaluedHashMap;
 
-
+import org.apache.commons.io.FileUtils;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.DeserializationConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +29,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.stereotype.Service;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.soap.client.core.SoapActionCallback;
+
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -42,12 +48,14 @@ import com.yaesta.app.persistence.entity.Order;
 import com.yaesta.app.persistence.entity.OrderItem;
 import com.yaesta.app.persistence.entity.Supplier;
 import com.yaesta.app.persistence.entity.SupplierContact;
+import com.yaesta.app.persistence.entity.YaEstaLog;
 import com.yaesta.app.persistence.repository.SupplierContactRepository;
 import com.yaesta.app.persistence.service.CatalogService;
 import com.yaesta.app.persistence.service.ClientService;
 import com.yaesta.app.persistence.service.GuideService;
 import com.yaesta.app.persistence.service.OrderService;
 import com.yaesta.app.persistence.service.SupplierService;
+import com.yaesta.app.persistence.service.YaEstaLogService;
 //import com.yaesta.app.persistence.util.HibernateProxyTypeAdapter;
 import com.yaesta.app.persistence.util.YaestaTypeAdapter;
 import com.yaesta.app.util.SupplierUtil;
@@ -154,6 +162,9 @@ public class OrderVitexService extends BaseVitexService {
 	
 	@Autowired
 	private ClientService clientService;
+	
+	@Autowired
+	private YaEstaLogService logService;
 
 	private Client client;
 	private WebTarget target;
@@ -190,6 +201,8 @@ public class OrderVitexService extends BaseVitexService {
 	private @Value("${mail.text.guide.customer.3}") String mailTextGuideCustomer3;
 	private @Value("${mail.text.guide.customer.4}") String mailTextGuideCustomer4;
 	private @Value("${mail.text.guide.customer.5}") String mailTextGuideCustomer5;
+	private @Value("${yaesta.log.path}") String yaestaLogPath;
+	private @Value("${yaesta.log.prefix}") String yaestaPrefix;
 
 	public OrderVitexService() throws Exception {
 		super();
@@ -396,6 +409,28 @@ public class OrderVitexService extends BaseVitexService {
 
 		OrderSchema response = new Gson().fromJson(json, OrderSchema.class);
 		
+		try {
+			
+			ObjectMapper mapper = new ObjectMapper();
+		
+			mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			Object oJson = mapper.readValue(json, OrderSchema.class);
+			String indented = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(oJson);
+			String fileName = yaestaLogPath+yaestaPrefix+(new Date()).getTime()+".txt";
+			FileUtils.writeStringToFile(new File(fileName), indented);
+			
+		} catch (IOException e) {
+			
+			YaEstaLog yaestalog = new YaEstaLog();
+			yaestalog.setLogDate(new Date());
+			yaestalog.setProcessName("ORDER_FEED-QUERY");
+			yaestalog.setTextinfo("Error consulta VTEX ordenes");
+			//yaestalog.setXmlInfo(json);
+			logService.save(yaestalog);
+			
+			e.printStackTrace();
+		}
+		
 		if(response.getList()!=null && !response.getList().isEmpty()){
 			List<OrderBean> list = new ArrayList<OrderBean>();
 			for(OrderBean ob:response.getList()){
@@ -495,7 +530,17 @@ public class OrderVitexService extends BaseVitexService {
 				try{
 					String refId = (String)ic.getRefId();
 					String[] supplierCode = SupplierUtil.returnSupplierCode(refId);
-					Supplier sp = supplierService.findById(new Long(supplierCode[0]));
+					Supplier sp = new Supplier();
+					try{
+					 sp = supplierService.findById(new Long(supplierCode[0]));
+					}catch(EntityNotFoundException e){
+						YaEstaLog yaestalog = new YaEstaLog();
+						yaestalog.setLogDate(new Date());
+						yaestalog.setProcessName("SUPPLIER-QUERY");
+						yaestalog.setTextinfo("NO existe proveedor con ID"+supplierCode[0]);
+						yaestalog.setOrderId(orderId);
+						logService.save(yaestalog);
+					}
 					itc.setSupplierName(sp.getName());
 				}catch(Exception e){
 					//Nothing TODO.
@@ -648,7 +693,20 @@ public class OrderVitexService extends BaseVitexService {
 
 		for (String sc : supplierCodes) {
 			if (sc != null && !sc.equals("")) {
-				Supplier supplier = supplierService.findById(new Long(sc));
+				
+				
+				Supplier supplier = new Supplier();
+				try{
+				 supplier = supplierService.findById(new Long(sc));
+				}catch(EntityNotFoundException e){
+					YaEstaLog yaestalog = new YaEstaLog();
+					yaestalog.setLogDate(new Date());
+					yaestalog.setProcessName("SUPPLIER-QUERY");
+					yaestalog.setTextinfo("NO existe proveedor con ID"+sc);
+					yaestalog.setOrderId(orderComplete.getOrderId());
+					logService.save(yaestalog);
+				}
+				
 				SupplierDeliveryInfo sdi = new SupplierDeliveryInfo();
 				sdi.setSupplier(supplier);
 				for (ItemComplete ic : orderComplete.getItems()) {
@@ -1042,7 +1100,18 @@ public class OrderVitexService extends BaseVitexService {
 				
 				try{
 					Long idSup = new Long(grr.getInformacionAdicional().getIdProveedor());
-					Supplier supp = supplierService.findById(idSup);
+					
+					Supplier supp = new Supplier();
+					try{
+						supp = supplierService.findById(idSup);
+					}catch(EntityNotFoundException e){
+						YaEstaLog yaestalog = new YaEstaLog();
+						yaestalog.setLogDate(new Date());
+						yaestalog.setProcessName("SUPPLIER-QUERY");
+						yaestalog.setTextinfo("NO existe proveedor con ID"+idSup);
+						yaestalog.setOrderId(orderComplete.getOrderId());
+						logService.save(yaestalog);
+					}
 				
 					guide.setSupplier(supp);
 					gbd.setSupplier(supp);
@@ -1531,8 +1600,19 @@ public class OrderVitexService extends BaseVitexService {
 				
 				
 				oi.setCustomerAddress(address);
-				oi.setSupplierName(sdi.getSupplier().getName());
-				oi.setSupplier(sdi.getSupplier());
+				try{
+					oi.setSupplierName(sdi.getSupplier().getName());
+					oi.setSupplier(sdi.getSupplier());
+					oi.setIsWarehouse(sdi.getSupplier().getIsWarehouse());
+				}catch(EntityNotFoundException e){
+					YaEstaLog yaestalog = new YaEstaLog();
+					yaestalog.setLogDate(new Date());
+					yaestalog.setProcessName("WAYBILL-PDF-TRAMACO");
+					yaestalog.setProcessName("SUPPLIER-QUERY");
+					yaestalog.setTextinfo("NO existe proveedor "+sdi.getSupplierId());
+					yaestalog.setOrderId(oc.getOrderId());
+					logService.save(yaestalog);
+				}
 				oi.setVitexId(oc.getOrderId());
 				oi.setUnitPrice(ic.getPrice());
 				oi.setDiscount(discount);
@@ -1563,7 +1643,7 @@ public class OrderVitexService extends BaseVitexService {
 						oi.setCategoryName(cvt.getName());
 					}
 				}
-				oi.setIsWarehouse(sdi.getSupplier().getIsWarehouse());
+				
 				orderService.saveOrderItem(oi);
 			}
 		}

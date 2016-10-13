@@ -9,6 +9,7 @@ import javax.annotation.Generated;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -32,11 +33,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "workflowInErrorState",
     "workflowInRetry",
     "lastMessageUnread",
-    "ShippingEstimatedDate",
+    "shippingEstimatedDate",
     "orderIsComplete",
     "listId",
     "listType"
 })
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderBean {
 
     @JsonProperty("orderId")
@@ -56,7 +58,7 @@ public class OrderBean {
     @JsonProperty("statusDescription")
     private String statusDescription;
     @JsonProperty("marketPlaceOrderId")
-    private Object marketPlaceOrderId;
+    private String marketPlaceOrderId;
     @JsonProperty("sequence")
     private String sequence;
     @JsonProperty("salesChannel")
@@ -71,8 +73,8 @@ public class OrderBean {
     private Boolean workflowInRetry;
     @JsonProperty("lastMessageUnread")
     private String lastMessageUnread;
-    @JsonProperty("ShippingEstimatedDate")
-    private Object shippingEstimatedDate;
+    @JsonProperty("shippingEstimatedDate")
+    private String shippingEstimatedDate;
     @JsonProperty("orderIsComplete")
     private Boolean orderIsComplete;
     @JsonProperty("listId")
@@ -248,7 +250,7 @@ public class OrderBean {
      *     The marketPlaceOrderId
      */
     @JsonProperty("marketPlaceOrderId")
-    public Object getMarketPlaceOrderId() {
+    public String getMarketPlaceOrderId() {
         return marketPlaceOrderId;
     }
 
@@ -258,7 +260,7 @@ public class OrderBean {
      *     The marketPlaceOrderId
      */
     @JsonProperty("marketPlaceOrderId")
-    public void setMarketPlaceOrderId(Object marketPlaceOrderId) {
+    public void setMarketPlaceOrderId(String marketPlaceOrderId) {
         this.marketPlaceOrderId = marketPlaceOrderId;
     }
 
@@ -407,8 +409,8 @@ public class OrderBean {
      * @return
      *     The shippingEstimatedDate
      */
-    @JsonProperty("ShippingEstimatedDate")
-    public Object getShippingEstimatedDate() {
+    @JsonProperty("shippingEstimatedDate")
+    public String getShippingEstimatedDate() {
         return shippingEstimatedDate;
     }
 
@@ -417,8 +419,8 @@ public class OrderBean {
      * @param shippingEstimatedDate
      *     The ShippingEstimatedDate
      */
-    @JsonProperty("ShippingEstimatedDate")
-    public void setShippingEstimatedDate(Object shippingEstimatedDate) {
+    @JsonProperty("shippingEstimatedDate")
+    public void setShippingEstimatedDate(String shippingEstimatedDate) {
         this.shippingEstimatedDate = shippingEstimatedDate;
     }
 
