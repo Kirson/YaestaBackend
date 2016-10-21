@@ -218,4 +218,14 @@ public class GuideController implements Serializable {
 		
 		return new ResponseEntity<GuideDeliveryNotificationVO>(found,HttpStatus.OK);
 	}
+	
+	@RequestMapping(value = "/processTracking", method = RequestMethod.GET)
+	public ResponseEntity<String> processTracking(){
+		String result = "OK";
+		
+		guideService.processGuideTracking();
+		
+		return new ResponseEntity<String>(result,HttpStatus.OK);
+		
+	}
 }

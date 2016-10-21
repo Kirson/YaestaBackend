@@ -1,5 +1,7 @@
 package com.yaesta.app.persistence.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -7,11 +9,15 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import org.apache.commons.io.FileUtils;
+import org.codehaus.jackson.map.DeserializationConfig;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.stereotype.Service;
 
+import com.google.gson.Gson;
 import com.yaesta.app.mail.ItemInfoGuide;
 import com.yaesta.app.mail.ItemInfoSupplier;
 import com.yaesta.app.mail.MailInfo;
@@ -22,12 +28,14 @@ import com.yaesta.app.persistence.entity.GuideDetail;
 import com.yaesta.app.persistence.entity.Order;
 import com.yaesta.app.persistence.entity.Supplier;
 import com.yaesta.app.persistence.entity.SupplierContact;
+import com.yaesta.app.persistence.entity.YaEstaLog;
 import com.yaesta.app.persistence.repository.GuideDetailRepository;
 import com.yaesta.app.persistence.repository.GuideRepository;
 import com.yaesta.app.persistence.vo.DateRangeVO;
 import com.yaesta.app.persistence.vo.GuideDeliveryNotificationVO;
 import com.yaesta.app.persistence.vo.GuideSearchVO;
 import com.yaesta.app.persistence.vo.GuideVO;
+import com.yaesta.app.persistence.vo.TrackingContainerVO;
 import com.yaesta.app.persistence.vo.TrackingVO;
 import com.yaesta.app.util.GuideUtil;
 import com.yaesta.app.util.TrackingUtil;
@@ -64,6 +72,9 @@ public class GuideService {
 	@Autowired
 	private MailService mailService;
 	
+	@Autowired
+	private YaEstaLogService logService;
+	
 	private @Value("${mail.smtp.from}") String mailFrom;
 	private @Value("${mail.smtp.to}") String mailTo;
 	private @Value("${mail.smtp.to.name}") String mailToName;
@@ -79,6 +90,7 @@ public class GuideService {
 	private @Value("${datil.carrier.internal.email2}") String despachoInternoEmail2;
 	private @Value("${datil.carrier.cyclist.email}") String ciclistaEmail1;
 	private @Value("${datil.carrier.cyclist.email2}") String ciclistaEmail2;
+	private @Value("${yaesta.log.path}") String yaestaLogPath;
 	
 	
 	public List<Guide> findByOrder(Order order){
@@ -493,5 +505,58 @@ public class GuideService {
 		}
 		
 		return mailInfo;
+	}
+	
+	public void processGuideTracking(){
+		
+		List<Guide> guides = guideRepository.findAll();
+		
+		if(guides!=null && !guides.isEmpty()){
+			for(Guide guide:guides){
+				try{
+					
+				 List<TrackingVO> trackList = this.getTrackingInfo(guide.getId()+"", guide.getDeliveryName());
+					
+				 TrackingContainerVO tcv = new TrackingContainerVO();
+				 tcv.setTrackingList(trackList);
+				 
+				 try {
+						
+						ObjectMapper mapper = new ObjectMapper();
+						
+						String json = new Gson().toJson(tcv);
+					
+						mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+						Object oJson = mapper.readValue(json, TrackingContainerVO.class);
+						String indented = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(oJson);
+						String fileName = yaestaLogPath+"GUIDETRACKING"+(new Date()).getTime()+".txt";
+						FileUtils.writeStringToFile(new File(fileName), indented);
+						
+					} catch (IOException e) {
+						
+						YaEstaLog yaestalog = new YaEstaLog();
+						yaestalog.setLogDate(new Date());
+						yaestalog.setProcessName("GUIDETRACKING"+guide.getGuideId());
+						yaestalog.setTextinfo("Error consulta VTEX ordenes");
+						//yaestalog.setXmlInfo(json);
+						logService.save(yaestalog);
+						
+						e.printStackTrace();
+					}
+					
+					
+				}catch(Exception e){
+					
+					YaEstaLog yaestalog = new YaEstaLog();
+					yaestalog.setLogDate(new Date());
+					yaestalog.setProcessName("Guide Tracking");
+					yaestalog.setTextinfo("Error al obtener tracking de Guia" + guide.getGuideNumber());
+					//yaestalog.setXmlInfo(json);
+					logService.save(yaestalog);
+					
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }

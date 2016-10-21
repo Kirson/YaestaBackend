@@ -21,6 +21,7 @@ import com.yaesta.integration.vitex.bean.GuideContainerBean;
 import com.yaesta.integration.vitex.bean.GuideInfoBean;
 import com.yaesta.integration.vitex.bean.OrderCompleteBean;
 import com.yaesta.integration.vitex.bean.OrderResponseBean;
+import com.yaesta.integration.vitex.bean.OrderSchemaContainerBean;
 import com.yaesta.integration.vitex.json.bean.CategoryVtex;
 import com.yaesta.integration.vitex.json.bean.InvoiceResponse;
 import com.yaesta.integration.vitex.json.bean.OrderCancel;
@@ -117,6 +118,13 @@ public class VitexIntegrationController {
 		
 		OrderSchema json = orderVitexService.getOrdersRest(null);
 		return new ResponseEntity<OrderSchema>(json, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/getOrdersVitexRest", method = RequestMethod.GET)
+	public ResponseEntity<OrderSchemaContainerBean> getOrdersVitexRest() {	  		 		
+		
+		OrderSchemaContainerBean json = orderVitexService.getVitexOrders(null);
+		return new ResponseEntity<OrderSchemaContainerBean>(json, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/getOrdersRestStatus{status}", method = RequestMethod.GET)

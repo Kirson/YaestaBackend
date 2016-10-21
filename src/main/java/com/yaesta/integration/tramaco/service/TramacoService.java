@@ -19,8 +19,10 @@ import org.springframework.stereotype.Service;
 import com.yaesta.app.mail.MailInfo;
 import com.yaesta.app.mail.MailParticipant;
 import com.yaesta.app.mail.MailService;
+import com.yaesta.app.persistence.entity.Guide;
 import com.yaesta.app.persistence.entity.TramacoZone;
 import com.yaesta.app.persistence.entity.YaEstaLog;
+import com.yaesta.app.persistence.repository.GuideRepository;
 import com.yaesta.app.persistence.repository.TramacoZoneRepository;
 import com.yaesta.app.persistence.service.GuideService;
 import com.yaesta.app.persistence.service.TableSequenceService;
@@ -90,6 +92,9 @@ public class TramacoService implements Serializable{
 	
 	@Autowired
 	GuideService guideService;
+	
+	@Autowired
+	GuideRepository guideRepository;
 	
 	@Autowired
 	OrderVitexService orderVitexService;
@@ -855,12 +860,23 @@ public class TramacoService implements Serializable{
 						 
 					}
 					
+					Guide guide = guideInfo.getGuideBean().getGuide();
+					
 					System.out.println("COORDENADAS:" + respuestaTrackGuiaWs.getTransaccion().getLatitud() + ":" + respuestaTrackGuiaWs.getTransaccion().getLongitud());
 					if(respuestaTrackGuiaWs.getTransaccion().getLatitud()!=null){
 						guideInfo.setLatitude(respuestaTrackGuiaWs.getTransaccion().getLatitud().toString());
 					}
 					if(respuestaTrackGuiaWs.getTransaccion().getLongitud()!=null){
 						guideInfo.setLongitude(respuestaTrackGuiaWs.getTransaccion().getLongitud().toString());
+					}
+					
+					if(guide!=null){
+						if(respuestaTrackGuiaWs.getTransaccion().getLatitud()!=null && respuestaTrackGuiaWs.getTransaccion().getLongitud()!=null){
+							guide.setLatitude(respuestaTrackGuiaWs.getTransaccion().getLatitud().toString());
+							guide.setLongitude(respuestaTrackGuiaWs.getTransaccion().getLongitud().toString());
+							
+							guideRepository.save(guide);
+						}
 					}
 				
 				}

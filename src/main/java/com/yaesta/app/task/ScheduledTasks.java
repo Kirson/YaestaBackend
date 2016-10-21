@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import com.yaesta.app.persistence.service.ClientService;
+import com.yaesta.app.persistence.service.GuideService;
 import com.yaesta.integration.vitex.service.OrderVitexService;
 
 
@@ -33,6 +34,9 @@ public class ScheduledTasks implements Serializable {
 	@Autowired
 	ClientService clientService;
 	
+	@Autowired
+	GuideService guideService;
+	
 	
 	 @Scheduled(cron="0 0 1-23 * * SUN-SAT")
 	 public void launchTask() {
@@ -41,11 +45,10 @@ public class ScheduledTasks implements Serializable {
 	    System.out.println("Antes de actualizar customers " + dateFormat.format(new Date()));
 	    clientService.updateNewCustomerList();
 	 }
-	 /*
-	 @Scheduled(cron="0 30 10 * * MON-FRI")
+	 @Scheduled(cron="0 30 23 * * MON-FRI")
 	 public void launchUpdNewCustomer(){
-		 System.out.println("Antes de actualizar clientes nuevos " + dateFormat.format(new Date()));
-		 clientService.updateNewCustomerList();
+		 System.out.println("Antes de actualizar tracking " + dateFormat.format(new Date()));
+		 guideService.processGuideTracking();
 	 }
-	 */
+	 
 }

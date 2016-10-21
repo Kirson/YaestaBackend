@@ -77,6 +77,7 @@ import com.yaesta.integration.vitex.bean.GuideContainerBean;
 import com.yaesta.integration.vitex.bean.GuideInfoBean;
 import com.yaesta.integration.vitex.bean.InvoiceSchemaBean;
 import com.yaesta.integration.vitex.bean.OrderResponseBean;
+import com.yaesta.integration.vitex.bean.OrderSchemaContainerBean;
 import com.yaesta.integration.vitex.bean.SupplierDeliveryInfo;
 import com.yaesta.integration.vitex.bean.WayBillSchema;
 import com.yaesta.integration.vitex.json.bean.CategoryVtex;
@@ -203,6 +204,7 @@ public class OrderVitexService extends BaseVitexService {
 	private @Value("${mail.text.guide.customer.5}") String mailTextGuideCustomer5;
 	private @Value("${yaesta.log.path}") String yaestaLogPath;
 	private @Value("${yaesta.log.prefix}") String yaestaPrefix;
+	private @Value("${vitex.rest.maxpages}") String vitexRestMaxPages;
 
 	public OrderVitexService() throws Exception {
 		super();
@@ -393,6 +395,61 @@ public class OrderVitexService extends BaseVitexService {
 		client = ClientBuilder.newClient();
 
 		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/?per_page=100";
+		
+		if(status!=null){
+			restUrl = restUrl + "&filter=status:"+status;
+		}
+		
+		System.out.println("restUrl::"+restUrl);
+		
+		target = client.target(restUrl);
+		
+		MultivaluedMap<String, Object> myHeaders = new MultivaluedHashMap<String, Object>();
+		myHeaders.add(vitexRestAppkeyName, vitexRestAppkey);
+		myHeaders.add(vitexRestTokenName, vitexRestToken);
+		String json = target.request(MediaType.TEXT_PLAIN).headers(myHeaders).get(String.class);
+
+		OrderSchema response = new Gson().fromJson(json, OrderSchema.class);
+		
+		try {
+			
+			ObjectMapper mapper = new ObjectMapper();
+		
+			mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			Object oJson = mapper.readValue(json, OrderSchema.class);
+			String indented = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(oJson);
+			String fileName = yaestaLogPath+yaestaPrefix+(new Date()).getTime()+".txt";
+			FileUtils.writeStringToFile(new File(fileName), indented);
+			
+		} catch (IOException e) {
+			
+			YaEstaLog yaestalog = new YaEstaLog();
+			yaestalog.setLogDate(new Date());
+			yaestalog.setProcessName("ORDER_FEED-QUERY");
+			yaestalog.setTextinfo("Error consulta VTEX ordenes");
+			//yaestalog.setXmlInfo(json);
+			logService.save(yaestalog);
+			
+			e.printStackTrace();
+		}
+		
+		if(response.getList()!=null && !response.getList().isEmpty()){
+			List<OrderBean> list = new ArrayList<OrderBean>();
+			for(OrderBean ob:response.getList()){
+				OrderBean obean = OrderVtexUtil.setRealValuesToOrderBean(ob);
+				list.add(obean);
+			}
+			response.setList(list);
+		}
+		
+		return response;
+	}
+	
+	public OrderSchema getOrdersRestPage(String status, Long page) {
+
+		client = ClientBuilder.newClient();
+
+		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/?per_page=100&page="+page;
 		
 		if(status!=null){
 			restUrl = restUrl + "&filter=status:"+status;
@@ -1459,10 +1516,10 @@ public class OrderVitexService extends BaseVitexService {
 	public synchronized  String loadOrderItem(){
 		String response = "OK";
 		try{
-		OrderSchema os = getOrdersRest(null);
+		OrderSchemaContainerBean oscb = this.getVitexOrders(new Long(this.vitexRestMaxPages));
 		
-		if(os!=null){
-			for(OrderBean ob:os.getList()){
+		if(oscb!=null){
+			for(OrderBean ob:oscb.getOrderBeanList()){
 				OrderComplete oc = getOrderComplete(ob.getOrderId());
 				System.out.println("Orden completa "+oc.getOrderId());
 				Order order = orderService.findByVitexId(oc.getOrderId());
@@ -1773,6 +1830,62 @@ public class OrderVitexService extends BaseVitexService {
 		
 	}
 	
+	
+	public OrderSchemaContainerBean getVitexOrders(Long maxPages){
+		OrderSchemaContainerBean oscb = new OrderSchemaContainerBean();
+		OrderSchema os = getOrdersRest(null);
+		
+		oscb.getSchemaList().add(os);
+		oscb.setTotalPages(new Long(os.getPaging().getPages()));
+		
+		if(maxPages==null){
+			maxPages = new Long(vitexRestMaxPages);
+		}
+		
+		oscb.getSearchPages().add(1L);
+		
+		
+		if(os.getList()!=null && !os.getList().isEmpty()){
+			oscb.getOrderBeanList().addAll(os.getList());
+		}
+		
+		Long count = 2L;
+		
+		while(count<=maxPages){
+			
+			OrderSchema ordSc = getOrdersRestPage(null,count);
+			oscb.getOrderBeanList().addAll(ordSc.getList());
+			oscb.getSchemaList().add(ordSc);
+			oscb.getSearchPages().add(count);
+			count++;
+		}
+		
+		try {
+			
+			ObjectMapper mapper = new ObjectMapper();
+			
+			String json = new Gson().toJson(oscb);
+		
+			mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			Object oJson = mapper.readValue(json, OrderSchemaContainerBean.class);
+			String indented = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(oJson);
+			String fileName = yaestaLogPath+yaestaPrefix+"PAGING"+(new Date()).getTime()+".txt";
+			FileUtils.writeStringToFile(new File(fileName), indented);
+			
+		} catch (IOException e) {
+			
+			YaEstaLog yaestalog = new YaEstaLog();
+			yaestalog.setLogDate(new Date());
+			yaestalog.setProcessName("ORDER_FEED-QUERYPAGE");
+			yaestalog.setTextinfo("Error consulta VTEX ordenes");
+			//yaestalog.setXmlInfo(json);
+			logService.save(yaestalog);
+			
+			e.printStackTrace();
+		}
+		
+		return oscb;
+	}
 	
   
 }
