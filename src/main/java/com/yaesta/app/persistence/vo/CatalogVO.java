@@ -15,6 +15,8 @@ public class CatalogVO implements Serializable{
 	private Catalog catalog;
 	private List<Catalog> detailList;
 	private List<Catalog> removeList;
+	private Catalog detail;
+	private String response;
 	
 	public CatalogVO(){
 	   detailList = new ArrayList<Catalog>();	
@@ -43,6 +45,22 @@ public class CatalogVO implements Serializable{
 
 	public void setRemoveList(List<Catalog> removeList) {
 		this.removeList = removeList;
+	}
+
+	public Catalog getDetail() {
+		return detail;
+	}
+
+	public void setDetail(Catalog detail) {
+		this.detail = detail;
+	}
+
+	public String getResponse() {
+		return response;
+	}
+
+	public void setResponse(String response) {
+		this.response = response;
 	}
 	
 	

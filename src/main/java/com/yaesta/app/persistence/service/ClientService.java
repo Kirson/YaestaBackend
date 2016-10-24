@@ -18,6 +18,7 @@ import com.yaesta.app.persistence.repository.ClienteBodegaRepository;
 import com.yaesta.app.persistence.vo.ClientResponseVO;
 import com.yaesta.app.persistence.vo.ClientVO;
 import com.yaesta.app.persistence.vo.ClientWarehouseVO;
+import com.yaesta.app.service.SystemOutService;
 import com.yaesta.app.util.ClientUtil;
 import com.yaesta.integration.vitex.json.bean.OrderBean;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
@@ -44,6 +45,9 @@ public class ClientService {
 	
 	@Autowired
 	YaEstaLogService logService;
+	
+	@Autowired
+	SystemOutService systemOut;
 
 	public List<Customer> getClients() {
 		return clientRepository.findAll();
@@ -112,7 +116,7 @@ public class ClientService {
 					if (tr.getPayments() != null && !tr.getPayments().isEmpty()) {
 						for (Payment py : tr.getPayments()) {
 							client.setLastPaymentMethod(py.getPaymentSystemName());
-							System.out.println("SystemPaymentname " + py.getPaymentSystemName());
+							systemOut.println("SystemPaymentname " + py.getPaymentSystemName());
 							if (py.getPaymentSystemName()
 									.equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName())) {
 								client.setUseCreditCard(Boolean.FALSE);
@@ -195,7 +199,7 @@ public class ClientService {
 			}
 			
 		}catch(Exception e){
-			System.out.println("Error es "+e.getMessage());
+			systemOut.println("Error es "+e.getMessage());
 			result = "ERROR";
 		}
 		return result;
@@ -308,7 +312,7 @@ public class ClientService {
 				if (tr.getPayments() != null && !tr.getPayments().isEmpty()) {
 					for (Payment py : tr.getPayments()) {
 						client.setLastPaymentMethod(py.getPaymentSystemName());
-						System.out.println("SystemPaymentname " + py.getPaymentSystemName());
+						systemOut.println("SystemPaymentname " + py.getPaymentSystemName());
 						if (py.getPaymentSystemName().equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName())) {
 							client.setUseCreditCard(Boolean.FALSE);
 						} else if (py.getPaymentSystemName().equals(PaymentEnum.SAFETYPAY.getPaymentSystemName())) {

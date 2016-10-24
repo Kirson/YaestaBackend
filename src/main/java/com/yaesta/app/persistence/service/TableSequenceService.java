@@ -10,12 +10,16 @@ import org.springframework.stereotype.Service;
 import com.yaesta.app.persistence.entity.TableSequence;
 import com.yaesta.app.persistence.repository.TableSequenceRepository;
 import com.yaesta.app.persistence.vo.TableSequenceResponseVO;
+import com.yaesta.app.service.SystemOutService;
 
 @Service
 public class TableSequenceService {
 	
 	@Autowired
 	TableSequenceRepository tableSequenceRepository;
+	
+	@Autowired
+	SystemOutService systemOut;
 
 	/**
 	 * Devolver el siguiente valor
@@ -25,7 +29,7 @@ public class TableSequenceService {
 	@Transactional
 	public Long getNextValue(String seqName){
 		
-		System.out.println("Secuencia: "+seqName);
+		systemOut.println("Secuencia: "+seqName);
 		TableSequence ts = tableSequenceRepository.getOne(seqName);
 		
 		if(ts!=null){

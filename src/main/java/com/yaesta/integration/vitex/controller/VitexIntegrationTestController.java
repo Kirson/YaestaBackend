@@ -15,6 +15,7 @@ import com.yaesta.app.persistence.entity.Brand;
 import com.yaesta.app.persistence.entity.Category;
 import com.yaesta.app.persistence.entity.Product;
 import com.yaesta.app.persistence.entity.Supplier;
+import com.yaesta.app.service.SystemOutService;
 import com.yaesta.integration.vitex.json.bean.CategoryVtex;
 import com.yaesta.integration.vitex.json.bean.OrderCancel;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
@@ -39,10 +40,13 @@ public class VitexIntegrationTestController {
 	
 	@Autowired
 	MailService mailService;
+	
+	@Autowired
+	SystemOutService systemOut;
 
 	@RequestMapping(value = "/createDummyProduct/", method = RequestMethod.POST)
 	public ResponseEntity<ProductDTO> createDummyProduct() {	  		 		
-		System.out.println("==>>A<<===");
+		systemOut.println("==>>A<<===");
 		Product product = new Product();
 		product.setName("Test");
 		product.setDescription("Uno");
@@ -57,7 +61,7 @@ public class VitexIntegrationTestController {
 		supplier.setVitexId("1");
 		product.setSupplier(supplier);
 		ProductDTO result = productVitexService.createProduct(product);
-		System.out.println("==>>B<<===");
+		systemOut.println("==>>B<<===");
 		return new ResponseEntity<ProductDTO>(result, HttpStatus.OK);
 	}
 	

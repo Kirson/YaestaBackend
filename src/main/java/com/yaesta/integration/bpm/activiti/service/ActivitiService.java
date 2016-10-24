@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.stereotype.Service;
 
-
+import com.yaesta.app.service.SystemOutService;
 import com.yaesta.integration.bpm.activiti.bean.UserActiviti;
 
 @Service
@@ -19,6 +19,9 @@ public class ActivitiService {
 	
 	@Autowired
 	PropertySourcesPlaceholderConfigurer propertyConfigurer;
+	
+	@Autowired
+	private SystemOutService systemOut;
 
 	private @Value("${activiti.url}") String activitiUrl;
 	
@@ -39,7 +42,7 @@ public class ActivitiService {
 		
 		//Response response = target.request().put(Entity.json(ua));
 		Response response= target.request().put(Entity.json(ua));
-		System.out.println("-->>"+response.toString());
+		systemOut.println("-->>"+response.toString());
 		return ua;
 	}
 }

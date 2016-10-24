@@ -19,6 +19,7 @@ import com.yaesta.app.persistence.entity.CoberturaTCC;
 import com.yaesta.app.persistence.service.CoberturaTCCService;
 import com.yaesta.app.persistence.service.TableSequenceService;
 import com.yaesta.app.persistence.service.YaEstaLogService;
+import com.yaesta.app.service.SystemOutService;
 import com.yaesta.app.util.SupplierUtil;
 import com.yaesta.app.util.UtilDate;
 import com.yaesta.integration.tramaco.dto.GuideDTO;
@@ -59,6 +60,9 @@ public class TccService  {
 	@Autowired
 	protected PropertySourcesPlaceholderConfigurer propertyConfigurer;
 	
+	@Autowired
+	SystemOutService systemOut;
+	
    
 	public JAXBContext context=JAXBContext.newInstance();
 	
@@ -88,7 +92,7 @@ public class TccService  {
 			
 			//String response = "OK";
 			
-			System.out.println("# proveedores "+ guideInfo.getOrderComplete().getSupplierDeliveryInfoList().size());
+			systemOut.println("# proveedores "+ guideInfo.getOrderComplete().getSupplierDeliveryInfoList().size());
 			
 			for(SupplierDeliveryInfo sdi:guideInfo.getOrderComplete().getSupplierDeliveryInfoList()){
 			
@@ -205,11 +209,11 @@ public class TccService  {
 					Double totalAsegurado = 0D;
 					String desc = "";
 					TpUnidad unidad = new TpUnidad();
-					System.out.println("# items "+sdi.getItems().size());
+					systemOut.println("# items "+sdi.getItems().size());
 					for(ItemComplete ic:sdi.getItems())
 					{
 						itemValue =0D;
-						System.out.println("Ite==>> "+ite);
+						systemOut.println("Ite==>> "+ite);
 						ite++;
 						Dimension dim = (Dimension) ic.getAdditionalProperties().get("dimension");
 					     	
@@ -246,7 +250,7 @@ public class TccService  {
 						
 						itemValue = itemValue+ic.getPrice()*ic.getQuantity();
 						itemValue = (double) Math.round(itemValue * 100) / 100;
-						//System.out.println("1> "+itemValue+ " "+totalValue);
+						//systemOut.println("1> "+itemValue+ " "+totalValue);
 						Double discount=0D;
 						Boolean hasTax = Boolean.FALSE;
 						if(ic.getPriceTags()!=null && !ic.getPriceTags().isEmpty()){
@@ -278,11 +282,11 @@ public class TccService  {
 						}
 						
 						if(ic.getShippingPrice()!=null){
-							System.out.println("shippingPrice "+ ic.getShippingPrice());
+							systemOut.println("shippingPrice "+ ic.getShippingPrice());
 							unidad.setValormercancia(ic.getShippingPrice()+"");
 							deliveryCost = deliveryCost+ic.getShippingPrice();
 						}else{
-							System.out.println("Sin costo de cobro de envio");
+							systemOut.println("Sin costo de cobro de envio");
 							//carga.setValorCobro(0D);
 						}
 						Double iva = 0D;
@@ -291,7 +295,7 @@ public class TccService  {
 						itemValue = itemValue - discount;
 						itemValue = (double) Math.round(itemValue * 100) / 100;
 						
-						//System.out.println("2> "+itemValue+ " "+totalValue);
+						//systemOut.println("2> "+itemValue+ " "+totalValue);
 						
 						if(ic.getTax()>0){
 							iva=ic.getTax();
@@ -305,7 +309,7 @@ public class TccService  {
 						}
 						itemValue = (double) Math.round(itemValue * 100) / 100;
 						
-						//System.out.println("3> "+itemValue+ " "+totalValue);
+						//systemOut.println("3> "+itemValue+ " "+totalValue);
 						totalValue = totalValue+itemValue;
 						totalValue = (double) Math.round(totalValue * 100) / 100;
 						if(hasAdjunto && itemValue.intValue()>0){
@@ -313,7 +317,7 @@ public class TccService  {
 							TpDocumentoReferencia docReferencia = new TpDocumentoReferencia();
 							
 							String codigoAdjunto =  getAdjCode();
-							System.out.println("Codigo Adjunto "+codigoAdjunto);
+							systemOut.println("Codigo Adjunto "+codigoAdjunto);
 							docReferencia.setNumerodocumento(codigoAdjunto);
 							//docReferencia.setNumerodocumento(guideInfo.getOrderComplete().getOrderId());
 							docReferencia.setTipodocumento("FA"); //confirmar
@@ -323,10 +327,10 @@ public class TccService  {
 							objDespacho.getDocumentoreferencia().add(docReferencia);
 						}else{
 							
-							System.out.println("No hay adjunto");
+							systemOut.println("No hay adjunto");
 						}
 						
-						System.out.println("Total Valor mercancia "+totalValue);
+						systemOut.println("Total Valor mercancia "+totalValue);
 						objDespacho.setTotalvalormercancia(1D);
 						
 						//documentacion dice enviar vacio
@@ -337,7 +341,7 @@ public class TccService  {
 						
 					}//for de items
 					
-					System.out.println("Total Asegurado "+totalAsegurado);
+					systemOut.println("Total Asegurado "+totalAsegurado);
 					unidad.setValormercancia("1");
 					unidad.setNumerobolsa("1");
 					unidad.setReferencias("");
@@ -351,12 +355,12 @@ public class TccService  {
 					
 					String json = new Gson().toJson(gdes);
 					
-					System.out.println("Objeto "+ json);
+					systemOut.println("Objeto "+ json);
 					
 					GrabarDespacho4Response gdesResponse = (GrabarDespacho4Response)webServiceTemplateTCC.marshalSendAndReceive(gdes,new SoapActionCallback("http://clientes.tcc.com.co/GrabarDespacho4"));
 				
 					
-					System.out.println("Remesa" + gdesResponse.getMensaje());
+					systemOut.println("Remesa" + gdesResponse.getMensaje());
 					
 				}//fin no hay error
 			
@@ -369,7 +373,7 @@ public class TccService  {
 			yaestalog.setTextinfo("Error "+e.getMessage());
 			yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
 			logService.save(yaestalog);
-			System.out.println("Error TCC" +e.getMessage());
+			systemOut.println("Error TCC" +e.getMessage());
 			e.printStackTrace();
 		}
 		

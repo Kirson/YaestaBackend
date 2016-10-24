@@ -49,6 +49,7 @@ import com.yaesta.app.persistence.vo.PhoneVO;
 import com.yaesta.app.persistence.vo.SupplierBeanVO;
 import com.yaesta.app.persistence.vo.SupplierResponseVO;
 import com.yaesta.app.persistence.vo.SupplierVO;
+import com.yaesta.app.service.SystemOutService;
 
 
 @Service
@@ -92,6 +93,9 @@ public class SupplierService implements Serializable {
 	@Autowired
 	YaEstaLogService logService;
 	
+	@Autowired
+	SystemOutService systemOut;
+	
 	private @Value("${mail.smtp.from}") String mailFrom;
 	private @Value("${mail.smtp.supplier.to}") String mailTo;
 	private @Value("${mail.smtp.supplier.to.name}") String mailToName;
@@ -115,7 +119,7 @@ public class SupplierService implements Serializable {
 				TramacoZone zone = tramacoZoneRepository.findOne(new Long(postalCode));
 				entity.setZone(zone);
 			}catch(Exception e){
-				System.out.println("Error asignando codigo de zona a proveedor");
+				systemOut.println("Error asignando codigo de zona a proveedor");
 			}
 		}
 		
@@ -259,11 +263,11 @@ public class SupplierService implements Serializable {
 				
 					updSupplier = new Supplier();
 					
-					System.out.println("NO Encuentra "+proveedor.getNombreProveedor() +" "+ proveedor.getCodigo());
+					systemOut.println("NO Encuentra "+proveedor.getNombreProveedor() +" "+ proveedor.getCodigo());
 				}else{
 					count++;
 					found=true;
-					System.out.println("Encuentra "+updSupplier.getName() +" "+ updSupplier.getId());
+					systemOut.println("Encuentra "+updSupplier.getName() +" "+ updSupplier.getId());
 				}
 				
 				updSupplier.setName(proveedor.getNombreProveedor());
@@ -302,10 +306,10 @@ public class SupplierService implements Serializable {
 			}
 			
 			
-			System.out.println("Encontrados "+count);
+			systemOut.println("Encontrados "+count);
 			
 		}catch(Exception e){
-			System.out.println("Error en "+e.getMessage());
+			systemOut.println("Error en "+e.getMessage());
 			e.printStackTrace();
 		}
 		
@@ -328,9 +332,9 @@ public class SupplierService implements Serializable {
 				if(supplier.getContactList()!=null){
 					String strContactList = "{ contact_list:"+supplier.getContactList()+"}";
 					strContactList = strContactList.replace("\"name\"", "name");
-					System.out.println("contact_list "+strContactList);
+					systemOut.println("contact_list "+strContactList);
 					contactContainer = gson.fromJson(strContactList, ContactContainerVO.class);
-					System.out.println("contactContainer "+contactContainer.getContactList().size());
+					systemOut.println("contactContainer "+contactContainer.getContactList().size());
 				}
 				if(supplier.getEmailList()!=null){
 					String strEmailList = "{ email_list:"+supplier.getEmailList()+"}";
@@ -362,9 +366,9 @@ public class SupplierService implements Serializable {
 						   j++;
 					   }
 					   sc.setSupplier(supplier);
-					   System.out.println("==>>1");
+					   systemOut.println("==>>1");
 					   supplierContactRepository.save(sc);
-					   System.out.println("==>>"+sc.getId());
+					   systemOut.println("==>>"+sc.getId());
 				   }	
 				}//
 				else{
@@ -382,9 +386,9 @@ public class SupplierService implements Serializable {
 								   i++;
 							   }
 							   sc.setSupplier(supplier);
-							   System.out.println("==>>2");
+							   systemOut.println("==>>2");
 							   supplierContactRepository.save(sc);
-							   System.out.println("==>>"+sc.getId());
+							   systemOut.println("==>>"+sc.getId());
 						   }
 					}else{
 						if(!phoneContainer.getPhoneList().isEmpty()){
@@ -394,10 +398,10 @@ public class SupplierService implements Serializable {
 								/*if(pvo.getExt()!=null){
 									sc.setExt(pvo.getExt().get(0));
 								}*/
-								System.out.println("==>>3");
+								systemOut.println("==>>3");
 								sc.setSupplier(supplier);
 								supplierContactRepository.save(sc);
-								System.out.println("==>>"+sc.getId());
+								systemOut.println("==>>"+sc.getId());
 							}
 						}
 					}
@@ -405,10 +409,10 @@ public class SupplierService implements Serializable {
 			}
 			
 		}catch(JsonSyntaxException e){
-			System.out.println("Error actualizando contactos formatException");
+			systemOut.println("Error actualizando contactos formatException");
 			e.printStackTrace();
 		}catch(Exception e){
-			System.out.println("Error actualizando contactos");
+			systemOut.println("Error actualizando contactos");
 			e.printStackTrace();
 		}
 		
@@ -543,7 +547,7 @@ public class SupplierService implements Serializable {
 	
    private void sendNewSupplierMail(Supplier supplier){
 	   if(supplier.getIsNew()){
-		   System.out.println("Inicio notificacion");
+		   systemOut.println("Inicio notificacion");
 		   MailInfo mailInfo = new MailInfo();
 		   MailParticipant sender = new MailParticipant();
 		   sender.setName("YaEsta.com");
@@ -576,13 +580,13 @@ public class SupplierService implements Serializable {
 			mailInfo.setGeneralText(generalText);
 			
 			mailService.sendMailTemplate(mailInfo, "newSellerNotification.vm");	
-			System.out.println("Fin notificacion");
+			systemOut.println("Fin notificacion");
 	   }
    }
    
    private void sendNewSellerMail(Supplier supplier, UserResponseContainer urc){
 	   if(supplier.getIsNew()){
-		   System.out.println("Inicio notificacion");
+		   systemOut.println("Inicio notificacion");
 		   MailInfo mailInfo = new MailInfo();
 		   MailParticipant sender = new MailParticipant();
 		   sender.setName("YaEsta.com");
@@ -619,7 +623,7 @@ public class SupplierService implements Serializable {
 			mailInfo.setGeneralText(generalText);
 			
 			mailService.sendMailTemplate(mailInfo, "newSellertoSellerNotification.vm");	
-			System.out.println("Fin notificacion");
+			systemOut.println("Fin notificacion");
 	   }
    }
    

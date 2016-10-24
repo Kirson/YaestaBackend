@@ -58,6 +58,7 @@ import com.yaesta.app.persistence.service.SupplierService;
 import com.yaesta.app.persistence.service.YaEstaLogService;
 //import com.yaesta.app.persistence.util.HibernateProxyTypeAdapter;
 import com.yaesta.app.persistence.util.YaestaTypeAdapter;
+import com.yaesta.app.service.SystemOutService;
 import com.yaesta.app.util.SupplierUtil;
 import com.yaesta.app.util.UtilDate;
 import com.yaesta.integration.base.enums.DeliveryEnum;
@@ -166,6 +167,9 @@ public class OrderVitexService extends BaseVitexService {
 	
 	@Autowired
 	private YaEstaLogService logService;
+	
+	@Autowired
+	SystemOutService systemOut;
 
 	private Client client;
 	private WebTarget target;
@@ -400,7 +404,7 @@ public class OrderVitexService extends BaseVitexService {
 			restUrl = restUrl + "&filter=status:"+status;
 		}
 		
-		System.out.println("restUrl::"+restUrl);
+		systemOut.println("restUrl::"+restUrl);
 		
 		target = client.target(restUrl);
 		
@@ -455,7 +459,7 @@ public class OrderVitexService extends BaseVitexService {
 			restUrl = restUrl + "&filter=status:"+status;
 		}
 		
-		System.out.println("restUrl::"+restUrl);
+		systemOut.println("restUrl::"+restUrl);
 		
 		target = client.target(restUrl);
 		
@@ -515,7 +519,7 @@ public class OrderVitexService extends BaseVitexService {
 		Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
 		String jsonInput = gson.toJson(input);
 		restUrl=restUrl+"["+jsonInput+"]";
-		System.out.println("rest"+restUrl);
+		systemOut.println("rest"+restUrl);
 		target = client.target(restUrl);
 		
 		MultivaluedMap<String, Object> myHeaders = new MultivaluedHashMap<String, Object>();
@@ -551,9 +555,9 @@ public class OrderVitexService extends BaseVitexService {
 		BigDecimal totalDiscounts = new BigDecimal(0);
 		BigDecimal totalShipping = new BigDecimal(0);
 		for (Total total : response.getTotals()) {
-			// System.out.println("====>>>>"+total.getName());
+			// systemOut.println("====>>>>"+total.getName());
 			if (total.getId().equals("Items")) {
-				// System.out.println("====>>>>");
+				// systemOut.println("====>>>>");
 				total.setSpanishName("Total Items");
 				totalPrice.add(new BigDecimal(total.getValue()));
 			} else if (total.getId().equals("Discounts")) {
@@ -646,7 +650,7 @@ public class OrderVitexService extends BaseVitexService {
 			if(json!=null){
 				json = json.substring(1,json.length());
 				json = json.substring(0,json.length()-1);
-				System.out.println("json "+ json);
+				systemOut.println("json "+ json);
 				String [] partZero = json.split("\"to\":");
 				String [] partOne = partZero[1].split("\"email\":");
 				String [] emailData = partOne[1].split(",");
@@ -655,7 +659,7 @@ public class OrderVitexService extends BaseVitexService {
 				email = email.trim();
 			}
 		}catch(Exception e){
-			System.out.println("Error obteniendo email enmascarado de cliente "+json);
+			systemOut.println("Error obteniendo email enmascarado de cliente "+json);
 		}
 		OrderConversation ocon = new OrderConversation();
 		
@@ -702,7 +706,7 @@ public class OrderVitexService extends BaseVitexService {
 		//gBuilder.registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
 		gBuilder.registerTypeAdapter(OrderComplete.class, new YaestaTypeAdapter<OrderComplete>());
 		
-		System.out.println("Order Complete " + orderComplete.getOrderId());
+		systemOut.println("Order Complete " + orderComplete.getOrderId());
 
 		Gson gson = gBuilder.create();
 
@@ -738,11 +742,11 @@ public class OrderVitexService extends BaseVitexService {
 		for (ItemComplete ic : orderComplete.getItems()) {
 			if (ic.getRefId() != null) {
 				String refId = (String) ic.getRefId();
-				System.out.println("refId " + refId);
+				systemOut.println("refId " + refId);
 				String[] supplierCode = SupplierUtil.returnSupplierCode(refId);
-				System.out.println("refId " + supplierCode[0] + " " + supplierCode[1]);
+				systemOut.println("refId " + supplierCode[0] + " " + supplierCode[1]);
 				if (!supplierCodes.contains(supplierCode[0])) {
-					System.out.println("agrega " + supplierCode[0]);
+					systemOut.println("agrega " + supplierCode[0]);
 					supplierCodes.add(supplierCode[0]);
 				}
 			}
@@ -902,7 +906,7 @@ public class OrderVitexService extends BaseVitexService {
 	
 	private GuideContainerBean generateGuidesTcc(GuideInfoBean guideInfoBean){
 		
-		System.out.println("Inicio guias TCC");
+		systemOut.println("Inicio guias TCC");
 		GuideContainerBean result = new GuideContainerBean(); 
 		GuideInfoBean response = guideInfoBean;
 		List<GuideDTO> responseList = new ArrayList<GuideDTO>();
@@ -1030,7 +1034,7 @@ public class OrderVitexService extends BaseVitexService {
 		
 		if (orderComplete != null) {
 			orderComplete.setError("OK");
-			System.out.println("====>>>>1)");
+			systemOut.println("====>>>>1)");
 			try{
 			if(action==null){
 				action = orderComplete.getAppStatus();
@@ -1061,7 +1065,7 @@ public class OrderVitexService extends BaseVitexService {
 			}
 
 		}else{
-			System.out.println("====>>>>2)");
+			systemOut.println("====>>>>2)");
 			
 		}
 		return orderComplete;
@@ -1262,11 +1266,11 @@ public class OrderVitexService extends BaseVitexService {
 			for(MailInfo mailInfo:mailInfoList){
 				for(GuideBeanDTO gDto:guideInfoBeanList){
 					if(gDto.getSupplier().getId().longValue()==mailInfo.getRefId().longValue()){
-						//System.out.println("A "+gDto.getSupplier().getId());
-						//System.out.println("A1 "+gDto.getPdfUrl());
+						//systemOut.println("A "+gDto.getSupplier().getId());
+						//systemOut.println("A1 "+gDto.getPdfUrl());
 						mailInfo.getAttachmentList().add(gDto.getPdfUrl());
 					}else{
-						System.out.println("B "+gDto.getSupplier().getId());
+						systemOut.println("B "+gDto.getSupplier().getId());
 					}
 				}
 				mailService.sendMailTemplate(mailInfo, "guideNotification.vm");	
@@ -1476,7 +1480,7 @@ public class OrderVitexService extends BaseVitexService {
 		InvoiceResponse response = new InvoiceResponse();
 		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/" + invoiceSchemaBean.getOrderComplete().getOrderId() + "/invoice";
 		
-		System.out.println("URL" + restUrl);
+		systemOut.println("URL" + restUrl);
 		
 		client = ClientBuilder.newClient();
 		target = client.target(restUrl);
@@ -1485,13 +1489,13 @@ public class OrderVitexService extends BaseVitexService {
 		
 		String json = gson.toJson(invoiceSchemaBean.getInvoiceSchema());
 		
-		System.out.println("VTEXT INVOICE:"+json);
+		systemOut.println("VTEXT INVOICE:"+json);
 		
 		
 		
 		String responseJson = target.request(MediaType.APPLICATION_JSON_TYPE).headers(buildHeaders()).post(Entity.json(json), String.class);
 		
-		System.out.println("==>>"+responseJson);
+		systemOut.println("==>>"+responseJson);
 		
 		response = gson.fromJson(responseJson, InvoiceResponse.class);
 		
@@ -1521,7 +1525,7 @@ public class OrderVitexService extends BaseVitexService {
 		if(oscb!=null){
 			for(OrderBean ob:oscb.getOrderBeanList()){
 				OrderComplete oc = getOrderComplete(ob.getOrderId());
-				System.out.println("Orden completa "+oc.getOrderId());
+				systemOut.println("Orden completa "+oc.getOrderId());
 				Order order = orderService.findByVitexId(oc.getOrderId());
 				if(order!=null && order.getInvoiceReference()!=null){
 					FacturaConsulta fc = datilService.findInvoice(order.getInvoiceReference());
@@ -1535,7 +1539,7 @@ public class OrderVitexService extends BaseVitexService {
 		}
 		}catch(Exception e){
 			response="ERROR";
-			System.out.println("Error en "+e.getMessage());
+			systemOut.println("Error en "+e.getMessage());
 			e.printStackTrace();
 		}
 		return response;
@@ -1639,9 +1643,9 @@ public class OrderVitexService extends BaseVitexService {
 				}
 				
 				if(ic.getShippingPrice()!=null){
-					System.out.println("shippingPrice "+ ic.getShippingPrice());
+					systemOut.println("shippingPrice "+ ic.getShippingPrice());
 				}else{
-					System.out.println("Sin costo de cobro de envio");
+					systemOut.println("Sin costo de cobro de envio");
 					//carga.setValorCobro(0D);
 				}
 				Double iva = 0D;

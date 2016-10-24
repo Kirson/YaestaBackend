@@ -10,6 +10,7 @@ import org.springframework.ws.soap.client.core.SoapActionCallback;
 import com.yaesta.app.persistence.entity.Product;
 import com.yaesta.app.persistence.service.BrandService;
 import com.yaesta.app.persistence.service.CategoryService;
+import com.yaesta.app.service.SystemOutService;
 import com.yaesta.integration.vitex.service.base.BaseVitexService;
 import com.yaesta.integration.vitex.wsdl.ProductGet;
 import com.yaesta.integration.vitex.wsdl.ProductGetResponse;
@@ -35,14 +36,17 @@ public class ProductVitexService extends BaseVitexService  {
 	@Autowired
 	CategoryService categoryService;
 	
+	@Autowired
+	SystemOutService systemOut;
+	
 	public ProductVitexService() throws Exception{}
 	
 	public ProductDTO findById(Integer productId){
 		ProductGet query = objectFactory.createProductGet();
 		query.setIdProduct(productId);
-		//System.out.println("==>>A");
+		//systemOut.println("==>>A");
 		ProductGetResponse response = (ProductGetResponse)webServiceTemplate.marshalSendAndReceive(query,new SoapActionCallback("http://tempuri.org/IService/ProductGet"));
-		//System.out.println("==>>B");
+		//systemOut.println("==>>B");
 		return response.getProductGetResult().getValue();
 		
 	}
@@ -89,10 +93,10 @@ public class ProductVitexService extends BaseVitexService  {
 		dto.setRefId(objectFactory.createString(product.getId()+""));
 		
 		if(product.getCategory()!=null){
-			System.out.println("==>>>"+product.getCategory().getVitexId());
+			systemOut.println("==>>>"+product.getCategory().getVitexId());
 			dto.setCategoryId(objectFactory.createInt(new Integer(product.getCategory().getVitexId())));
 			dto.setDepartmentId(objectFactory.createInt(new Integer(product.getCategory().getVitexId())));
-			System.out.println("++>>>"+dto.getCategoryId().getValue());
+			systemOut.println("++>>>"+dto.getCategoryId().getValue());
 		}
 		if(product.getSupplier()!=null){
 			dto.setSupplierId(objectFactory.createInt(new Integer(product.getSupplier().getVitexId())));
@@ -103,8 +107,8 @@ public class ProductVitexService extends BaseVitexService  {
 		
 		//piu.setProductVO(objectFactory.createProductInsertUpdateProductVO(dto));
 		piu.setProductVO(objectFactory.createProductInsertUpdateProductVO(dto));
-		System.out.println("****>>>"+ piu.getProductVO().getValue().getCategoryId().getValue());
-		System.out.println("****>>>"+ piu.getProductVO().getValue().getName().getValue());
+		systemOut.println("****>>>"+ piu.getProductVO().getValue().getCategoryId().getValue());
+		systemOut.println("****>>>"+ piu.getProductVO().getValue().getName().getValue());
 		//piu.wait(1000);
 		
 		ProductInsertUpdateResponse piuResponse = (ProductInsertUpdateResponse)webServiceTemplate.marshalSendAndReceive(piu,new SoapActionCallback("http://tempuri.org/IService/ProductInsertUpdate"));

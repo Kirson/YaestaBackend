@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.soap.client.core.SoapActionCallback;
 
+import com.yaesta.app.service.SystemOutService;
 import com.yaesta.integration.vitex.service.base.BaseVitexService;
 import com.yaesta.integration.vitex.wsdl.StockKeepingUnitGet;
 import com.yaesta.integration.vitex.wsdl.StockKeepingUnitGetResponse;
@@ -17,6 +18,9 @@ public class SKUService extends BaseVitexService  {
 	 * 
 	 */
 	private static final long serialVersionUID = 439824194151573612L;
+	
+	@Autowired
+	SystemOutService systemOut;
 	
 	public SKUService() throws Exception {
 		super();
@@ -31,9 +35,9 @@ public class SKUService extends BaseVitexService  {
 	public StockKeepingUnitDTO  findById(Integer skuId){
 		StockKeepingUnitGet query = objectFactory.createStockKeepingUnitGet();
 		query.setId(skuId);
-		//System.out.println("==>>A");
+		//systemOut.println("==>>A");
 		StockKeepingUnitGetResponse response = (StockKeepingUnitGetResponse)webServiceTemplate.marshalSendAndReceive(query,new SoapActionCallback("http://tempuri.org/IService/StockKeepingUnitGet"));
-		//System.out.println("==>>B");
+		//systemOut.println("==>>B");
 		return response.getStockKeepingUnitGetResult().getValue();
 		
 	}

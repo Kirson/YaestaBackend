@@ -33,6 +33,7 @@ import com.yaesta.app.persistence.service.GuideService;
 import com.yaesta.app.persistence.service.OrderService;
 import com.yaesta.app.persistence.service.TableSequenceService;
 import com.yaesta.app.persistence.service.YaEstaLogService;
+import com.yaesta.app.service.SystemOutService;
 import com.yaesta.app.util.SupplierUtil;
 import com.yaesta.app.util.UtilDate;
 import com.yaesta.integration.base.util.BaseUtil;
@@ -92,6 +93,9 @@ public class DatilService implements Serializable{
 	
 	@Autowired
 	YaEstaLogService logService;
+	
+	@Autowired
+	SystemOutService systemOut;
 
 	private @Value("${mail.smtp.to}") String mailSmtpTo;
 	private @Value("${datil.api.key}") String datilApiKey;
@@ -155,7 +159,7 @@ public class DatilService implements Serializable{
 		
 		String restUrl = datilWebServiceUrl + "/invoices/issue";
 		
-		System.out.println("URL" + restUrl);
+		systemOut.println("URL" + restUrl);
 		
 		client = ClientBuilder.newClient();
 		target = client.target(restUrl);
@@ -164,11 +168,11 @@ public class DatilService implements Serializable{
 		
 		String json = gson.toJson(input);
 		
-		System.out.println("Factura:"+json);
+		systemOut.println("Factura:"+json);
 		
 		if(datilDoInvoice.equals("Y")){
 			String responseJson = target.request(MediaType.APPLICATION_JSON_TYPE).headers(buildHeaders()).post(Entity.json(json), String.class);
-			System.out.println("==>>"+responseJson);
+			systemOut.println("==>>"+responseJson);
 			
 			YaEstaLog yaestaLog = new YaEstaLog();
 			yaestaLog.setLogDate(new Date());
@@ -188,7 +192,7 @@ public class DatilService implements Serializable{
 		
 		String restUrl = datilWebServiceUrl + "/waybills/issue";
 		
-		System.out.println("URL" + restUrl);
+		systemOut.println("URL" + restUrl);
 		
 		client = ClientBuilder.newClient();
 		target = client.target(restUrl);
@@ -197,9 +201,9 @@ public class DatilService implements Serializable{
 		
 		String json = gson.toJson(input);
 		
-		System.out.println("Guia de Remision:"+json);
+		systemOut.println("Guia de Remision:"+json);
 		String responseJson = target.request(MediaType.APPLICATION_JSON_TYPE).headers(buildHeaders()).post(Entity.json(json), String.class);
-		System.out.println("==>>"+responseJson);
+		systemOut.println("==>>"+responseJson);
 		
 		response = gson.fromJson(responseJson, GuiaRemisionRespuesta.class);
 		return response;
@@ -217,12 +221,12 @@ public class DatilService implements Serializable{
 		
 		String json = gson.toJson(input);
 		
-		System.out.println("Nota de Credito:"+json);
+		systemOut.println("Nota de Credito:"+json);
 		try{
 			
 			String responseJson = target.request(MediaType.APPLICATION_JSON_TYPE).headers(buildHeaders()).post(Entity.json(json), String.class);
 		
-			System.out.println("1==>>"+responseJson);
+			systemOut.println("1==>>"+responseJson);
 			
 			YaEstaLog yaestaLog = new YaEstaLog();
 			yaestaLog.setLogDate(new Date());
@@ -233,7 +237,7 @@ public class DatilService implements Serializable{
 		
 			response = gson.fromJson(responseJson, NotaCreditoRespuesta.class);
 		}catch(Exception e){
-			System.out.println("2==>>"+e.getMessage());
+			systemOut.println("2==>>"+e.getMessage());
 			String responseJson = target.request(MediaType.APPLICATION_JSON_TYPE).headers(buildHeaders()).post(Entity.json(json), String.class);
 			ResponseError responseError = gson.fromJson(responseJson, ResponseError.class);
 			response.setErrors(responseError.getErrors());
@@ -454,7 +458,7 @@ public class DatilService implements Serializable{
 						Pago pago = new Pago();
 						pago.setTotal(py.getValue());
 						
-						System.out.println("SystemPaymentname "+py.getPaymentSystemName());
+						systemOut.println("SystemPaymentname "+py.getPaymentSystemName());
 						if(py.getPaymentSystemName().equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName())){
 							pago.setMedio(PagoEnum.EFECTIVO.getCodigoDatil());
 						}else if(py.getPaymentSystemName().equals(PaymentEnum.SAFETYPAY.getPaymentSystemName())){
@@ -479,7 +483,7 @@ public class DatilService implements Serializable{
 							pago.setMedio(PagoEnum.TARJETA_CREDITO_INTERNACIONAL.getCodigoDatil());
 						}
 						
-						System.out.println("Medio " +pago.getMedio());
+						systemOut.println("Medio " +pago.getMedio());
 						pagos.add(pago);
 					}//fin for
 					
@@ -536,14 +540,14 @@ public class DatilService implements Serializable{
 		
 		Order order = orderService.findByVitexId(creditNoteBean.getOrderComplete().getOrderId());
 		
-		System.out.println("Obtiene orden "+order.getId());
+		systemOut.println("Obtiene orden "+order.getId());
 		
 		Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
 		
 		
 		FacturaRespuestaSRI fr = gson.fromJson(order.getInvoice(), FacturaRespuestaSRI.class);
 	
-		System.out.println("Obtiene factura "+fr.getId());
+		systemOut.println("Obtiene factura "+fr.getId());
 		
 		creditNoteBean.setInvoiceNumber(formatInvoiceNumber(fr.getSecuencial()+""));
 		creditNoteBean.setInvoiceDate(fr.getFechaEmision());
@@ -991,7 +995,7 @@ public WayBillSchema processWayBill(OrderComplete orderComplete, Catalog deliver
 				if(tr.getPayments()!=null && !tr.getPayments().isEmpty()){
 					for(Payment py:tr.getPayments()){
 						informacionAdicional.setFormaPago(py.getPaymentSystemName());
-						System.out.println("SystemPaymentname "+py.getPaymentSystemName());
+						systemOut.println("SystemPaymentname "+py.getPaymentSystemName());
 						if(py.getPaymentSystemName().equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName())){
 							informacionAdicional.setValorACobrar(orderComplete.getValue().doubleValue()+"");
 						}

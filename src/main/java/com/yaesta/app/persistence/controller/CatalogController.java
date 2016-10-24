@@ -67,6 +67,17 @@ public class CatalogController {
 		return new ResponseEntity<Catalog>(response,HttpStatus.OK);
 	}
 	
+	@RequestMapping(value = "/removeDetail", method = RequestMethod.POST)
+	public ResponseEntity<CatalogVO> removeDetail(@RequestBody CatalogVO catalogVO){
+		CatalogVO response = new CatalogVO();
+		
+		String result = catalogService.removeCatalogDetail(catalogVO.getDetail());
+		
+		response.setResponse(result);
+		
+		return new ResponseEntity<CatalogVO>(response,HttpStatus.OK);
+	}
+	
 	@RequestMapping(value = "/getCatalogByNemonic{nemonic}", method = RequestMethod.GET)
 	public ResponseEntity<Catalog> getCatalogByNemonic(@PathVariable("nemonic")String nemonic){
 		

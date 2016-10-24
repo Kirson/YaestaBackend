@@ -37,6 +37,7 @@ import com.yaesta.app.persistence.vo.GuideSearchVO;
 import com.yaesta.app.persistence.vo.GuideVO;
 import com.yaesta.app.persistence.vo.TrackingContainerVO;
 import com.yaesta.app.persistence.vo.TrackingVO;
+import com.yaesta.app.service.SystemOutService;
 import com.yaesta.app.util.GuideUtil;
 import com.yaesta.app.util.TrackingUtil;
 import com.yaesta.app.util.UtilDate;
@@ -74,6 +75,9 @@ public class GuideService {
 	
 	@Autowired
 	private YaEstaLogService logService;
+	
+	@Autowired
+	SystemOutService systemOut;
 	
 	private @Value("${mail.smtp.from}") String mailFrom;
 	private @Value("${mail.smtp.to}") String mailTo;
@@ -199,7 +203,7 @@ public class GuideService {
 		
 		Guide guide = guideRepository.getOne(idGuide);
 		if(guide!=null){
-			System.out.println("Guide "+guide.getId());
+			systemOut.println("Guide "+guide.getId());
 		
 			if(deliveryId.equals("TRAMACO")){
 				GuideDTO guideInfo = new GuideDTO();

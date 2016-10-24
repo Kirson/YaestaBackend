@@ -23,6 +23,7 @@ import org.springframework.ws.soap.SoapMessage;
 
 import com.google.gson.Gson;
 import com.yaesta.app.persistence.entity.Category;
+import com.yaesta.app.service.SystemOutService;
 import com.yaesta.integration.vitex.json.bean.CategoryVtex;
 import com.yaesta.integration.vitex.service.base.BaseVitexService;
 import com.yaesta.integration.vitex.util.CategoryVtexUtil;
@@ -40,6 +41,9 @@ public class CategoryVitexService extends BaseVitexService  {
 	 * Serial version
 	 */
 	private static final long serialVersionUID = -5122684341580125548L;
+	
+	@Autowired
+	SystemOutService systemOut;
 	
 	@Autowired
     private WebServiceTemplate webServiceTemplate;
@@ -69,7 +73,7 @@ public class CategoryVitexService extends BaseVitexService  {
 	    
 		CategoryInsertUpdate ciu = objectFactory.createCategoryInsertUpdate();
 		ciu.setCategory(objectFactory.createCategoryInsertUpdateCategory(dto));
-		//System.out.println("==>>  "+ciu.getCategory().getValue().getName().getValue());
+		//systemOut.println("==>>  "+ciu.getCategory().getValue().getName().getValue());
 		
 		CategoryInsertUpdateResponse ciuResponse =  (CategoryInsertUpdateResponse)webServiceTemplate.marshalSendAndReceive(ciu,new WebServiceMessageCallback() {
 			@Override
@@ -97,7 +101,7 @@ public class CategoryVitexService extends BaseVitexService  {
 		myHeaders.add(vitexRestTokenName, vitexRestToken);
 		String json = target.request(MediaType.TEXT_PLAIN).headers(myHeaders).get(String.class);
 
-		System.out.println("json category "+json );
+		systemOut.println("json category "+json );
 		
 		
 		
@@ -109,18 +113,18 @@ public class CategoryVitexService extends BaseVitexService  {
 	public CategoryVtex getCategoryFromPath(String path){
 		
 		String [] paths = path.split("/");
-		System.out.println("path  "+path);
+		systemOut.println("path  "+path);
 		int index = paths.length-1;
-		System.out.println("index  "+index);
+		systemOut.println("index  "+index);
 		
 		return getCategoryFromId(new Integer(paths[index]));
 		
 	}
 	
 	public CategoryVtex getCategoryFromPath2(String path){
-		System.out.println("path  "+path);
+		systemOut.println("path  "+path);
 		int lastIndex = path.lastIndexOf("/");
-		System.out.println("lastIndex  "+lastIndex);
+		systemOut.println("lastIndex  "+lastIndex);
 		String strLast = path.substring(lastIndex+1,path.length());
 		
 		return getCategoryFromId(new Integer(strLast));

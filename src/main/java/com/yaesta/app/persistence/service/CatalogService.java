@@ -10,12 +10,16 @@ import org.springframework.stereotype.Service;
 
 import com.yaesta.app.persistence.entity.Catalog;
 import com.yaesta.app.persistence.repository.CatalogRepository;
+import com.yaesta.app.service.SystemOutService;
 
 @Service
 public class CatalogService {
 
 	@Autowired
 	private CatalogRepository catalogRepository;
+	
+	@Autowired
+	SystemOutService systemOut;
 	
 	public List<Catalog> getAll(){
 		return catalogRepository.findAll();
@@ -78,6 +82,24 @@ public class CatalogService {
 		}
 		
 		return catalog;
+	}
+	
+	public String removeCatalogDetail(Catalog detail){
+		String result = "OK";
+		
+		try{
+			if(detail!=null){
+			    Catalog remove = catalogRepository.findOne(detail.getId());
+			    if(remove!=null){
+			    	catalogRepository.delete(remove);
+			    }
+			}
+		}catch(Exception e){
+			systemOut.println("Error eliminando detalle de catalogo");
+			result="ERROR";
+		}
+		
+		return result;
 	}
 	
 	public Catalog findByNemonic(String nemonic){

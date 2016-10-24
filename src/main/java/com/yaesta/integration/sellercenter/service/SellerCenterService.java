@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.yaesta.app.rest.RestTemplateJSON;
 import com.yaesta.app.rest.RestTemplateTEXTPLAIN;
+import com.yaesta.app.service.SystemOutService;
 import com.yaesta.integration.sellercenter.json.bean.SellerUser;
 import com.yaesta.integration.sellercenter.json.bean.UserBean;
 import com.yaesta.integration.sellercenter.json.bean.UserResponseContainer;
@@ -37,6 +38,9 @@ public class SellerCenterService {
 	private Client client;
 	private WebTarget target;
 	
+	@Autowired
+	SystemOutService systemOut;
+	
 	
 
 	@SuppressWarnings("unchecked")
@@ -48,10 +52,10 @@ public class SellerCenterService {
 		RestTemplateTEXTPLAIN restTemplate = new RestTemplateTEXTPLAIN();		
 		String resultText = restTemplate.getForObject(restUrl, String.class);
 		int index =resultText.indexOf("[");
-		System.out.println(resultText);
-		System.out.println(index);
+		systemOut.println(resultText);
+		systemOut.println("index "+index);
 		resultText = resultText.substring(index, resultText.length());
-		System.out.println(resultText);
+		systemOut.println(resultText);
 		
 		result = new Gson().fromJson(resultText, List.class);
 		
@@ -66,22 +70,22 @@ public class SellerCenterService {
 		Gson gson =  new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY).create();
 		
 		String json = gson.toJson(sellerUser);
-		System.out.println(json);
+		systemOut.println(json);
 		
 		client = ClientBuilder.newClient();
 		target = client.target(restUrl);
 		
 		
-		System.out.println("Usuario:"+json);
+		systemOut.println("Usuario:"+json);
 		String responseJson = target.request(MediaType.APPLICATION_JSON_TYPE).post(Entity.json(json), String.class);
 		responseJson = responseJson.trim();
-		System.out.println("==>>"+responseJson);
+		systemOut.println("==>>"+responseJson);
 		
 		String respJ[] = responseJson.split("\\{");
 		
 		String jsonObj = "{"+respJ[1] +"{"+respJ[2];
 		
-		System.out.println("jsonObj "+jsonObj);
+		systemOut.println("jsonObj "+jsonObj);
 		
 		if(!responseJson.contains("error")){
 		
@@ -110,11 +114,11 @@ public class SellerCenterService {
 		Gson gson =  new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY).create();
 		
 		String json = gson.toJson(sellerUser);
-		System.out.println(json);
+		systemOut.println(json);
 		
 		String responseJson = restTemplate.postForObject(restUrl, json, String.class);
 		
-		System.out.println(responseJson);
+		systemOut.println(responseJson);
 		
 		response = gson.fromJson(responseJson, UserResponseContainer.class);
 		return response;

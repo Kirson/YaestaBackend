@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.yaesta.app.service.SystemOutService;
 import com.yaesta.integration.datil.json.bean.FacturaRespuestaSRI;
 import com.yaesta.integration.datil.json.bean.NotaCreditoRespuesta;
 import com.yaesta.integration.datil.service.DatilService;
@@ -59,12 +60,15 @@ public class VitexIntegrationController {
 	@Autowired
 	DatilService datilService;
 	
+	@Autowired
+	SystemOutService systemOut;
+	
 	@RequestMapping(value = "/getProductById/{id}", method = RequestMethod.GET)
 	public ResponseEntity<ProductDTO> getProductById(@PathVariable("id") Integer id) {	  		 		
-		System.out.println("==>>1<<===");
+		systemOut.println("==>>1<<===");
 		
 		ProductDTO product = productVitexService.findById(id);	
-		System.out.println("==>>2<<===");
+		systemOut.println("==>>2<<===");
 		return new ResponseEntity<ProductDTO>(product, HttpStatus.OK);
 	}
 	
@@ -92,10 +96,10 @@ public class VitexIntegrationController {
 	
 	@RequestMapping(value = "/getOrderById{id}", method = RequestMethod.GET)
 	public ResponseEntity<OrderDTO> getOrderById(@PathVariable("id") String id) {	  		 		
-		//System.out.println("==>>1<<===");
+		//systemOut.println("==>>1<<===");
 		
 		OrderDTO order = orderVitexService.findOrderById(id);
-		//System.out.println("==>>2<<===");
+		//systemOut.println("==>>2<<===");
 		return new ResponseEntity<OrderDTO>(order, HttpStatus.OK);
 	}
 	
@@ -129,7 +133,7 @@ public class VitexIntegrationController {
 	
 	@RequestMapping(value = "/getOrdersRestStatus{status}", method = RequestMethod.GET)
 	public ResponseEntity<OrderSchema> getOrdersRestStatus(@PathVariable("status") String status) {	  		 		
-		System.out.println("status::"+status);
+		systemOut.println("status::"+status);
 		OrderSchema json = orderVitexService.getOrdersRest(status);
 		return new ResponseEntity<OrderSchema>(json, HttpStatus.OK);
 	}
@@ -164,8 +168,8 @@ public class VitexIntegrationController {
 			oc.setMotiveCancelText(orderCompleteBean.getMotiveCancelText());
 		}
 		
-		//System.out.println("1>"+oc.getMotiveCancelId());
-		//System.out.println("2>"+oc.getMotiveCancelText());
+		//systemOut.println("1>"+oc.getMotiveCancelId());
+		//systemOut.println("2>"+oc.getMotiveCancelText());
 		
 		OrderCancel json = orderVitexService.cancelOrder(oc);
 		return new ResponseEntity<OrderCancel>(json, HttpStatus.OK);
@@ -194,7 +198,7 @@ public class VitexIntegrationController {
 		
 		/*
 		for(GuideDTO guide:response.getGuides()){
-			System.out.println("==>" + guide.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().size());
+			systemOut.println("==>" + guide.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().size());
 		    for(EntityGuia eg:guide.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias()){
 		    	response.getGuideIdList().add(eg.getId()+"%"+eg.getGuia());
 		    }
