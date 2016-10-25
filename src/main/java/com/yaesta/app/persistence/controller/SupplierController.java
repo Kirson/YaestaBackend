@@ -48,6 +48,18 @@ public class SupplierController {
 	    }
 	}
 	
+	@RequestMapping(value = "/findById/{id}", method = RequestMethod.GET)
+	public  ResponseEntity<Supplier> findById(@PathVariable("id")Long id){
+		
+		Supplier found = supplierService.findById(id);
+	
+	    if(found!=null ){
+	    	return new ResponseEntity<Supplier>(found, HttpStatus.OK);
+	    }else{
+	    	return new ResponseEntity<Supplier>(new Supplier(),HttpStatus.OK);
+	    }
+	}
+	
 	@RequestMapping(value = "/getAllVO", method = RequestMethod.GET)
 	public  ResponseEntity<List<SupplierBeanVO>> getAllVO(){
 		

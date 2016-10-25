@@ -9,6 +9,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -16,6 +17,7 @@ import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Entity
 @Table(name = "supplier",schema="yaesta")
@@ -87,6 +89,7 @@ public class Supplier implements Serializable{
 	private Date dateUpd;
 	
 	@JsonBackReference(value="supplier-country")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	@JoinColumn(name = "country_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
 	private Catalog country;
@@ -123,16 +126,19 @@ public class Supplier implements Serializable{
 	private Boolean found;
 	
 	@JsonBackReference(value="supplier-category")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	@JoinColumn(name = "category_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
 	private Catalog category;
 	
 	@JsonBackReference(value="supplier-bank")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	@JoinColumn(name = "bank_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
 	private Catalog bank;
 	
 	@JsonBackReference(value="supplier-accountType")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	@JoinColumn(name = "account_type_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
 	private Catalog accountType;
@@ -150,21 +156,25 @@ public class Supplier implements Serializable{
 	private Boolean isNew;
 	
 	@JsonBackReference(value="supplier-productListStatus")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	@JoinColumn(name = "product_list_status_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
 	private Catalog productListStatus;
 	
 	@JsonBackReference(value="supplier-status")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	@JoinColumn(name = "supplier_status_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
 	private Catalog supplierStatus;
 	
 	@JsonBackReference(value="supplier-priority")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	@JoinColumn(name = "priority_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
 	private Catalog priority;
 	
 	@JsonBackReference(value="supplier-supplierType")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	@JoinColumn(name = "supplier_type_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
 	private Catalog supplierType;
@@ -186,6 +196,27 @@ public class Supplier implements Serializable{
 	
 	@Transient
 	private String shippingAddress;
+	
+	@Transient
+	private Catalog catCategory;
+	
+	@Transient
+	private Catalog catBank;
+	
+	@Transient
+	private Catalog catAccountType;
+	
+	@Transient
+	private Catalog catProductListStatus;
+	
+	@Transient
+	private Catalog catSupplierStatus;
+	
+	@Transient
+	private Catalog catPriority;
+	
+	@Transient
+	private Catalog catSupplierType;
 	
 	public Supplier(){
 		isNew = Boolean.TRUE;
@@ -605,6 +636,77 @@ public class Supplier implements Serializable{
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	
+	
+
+	public Catalog getCatCategory() {
+		return catCategory;
+	}
+
+	public void setCatCategory(Catalog catCategory) {
+		this.catCategory = catCategory;
+	}
+	
+	
+	
+	public Catalog getCatBank() {
+		return catBank;
+	}
+
+	public void setCatBank(Catalog catBank) {
+		this.catBank = catBank;
+	}
+
+	public Catalog getCatAccountType() {
+		return catAccountType;
+	}
+
+	public void setCatAccountType(Catalog catAccountType) {
+		this.catAccountType = catAccountType;
+	}
+
+	public Catalog getCatProductListStatus() {
+		return catProductListStatus;
+	}
+
+	public void setCatProductListStatus(Catalog catProductListStatus) {
+		this.catProductListStatus = catProductListStatus;
+	}
+
+	public Catalog getCatSupplierStatus() {
+		return catSupplierStatus;
+	}
+
+	public void setCatSupplierStatus(Catalog catSupplierStatus) {
+		this.catSupplierStatus = catSupplierStatus;
+	}
+
+	public Catalog getCatPriority() {
+		return catPriority;
+	}
+
+	public void setCatPriority(Catalog catPriority) {
+		this.catPriority = catPriority;
+	}
+
+	public Catalog getCatSupplierType() {
+		return catSupplierType;
+	}
+
+	public void setCatSupplierType(Catalog catSupplierType) {
+		this.catSupplierType = catSupplierType;
+	}
+
+	@PostLoad
+	public void postLoad(){
+		this.catCategory=this.category;
+		this.catAccountType=this.accountType;
+		this.catBank=this.bank;
+		this.catPriority=this.priority;
+		this.catProductListStatus=this.productListStatus;
+		this.catSupplierStatus=this.supplierStatus;
+		this.catSupplierType=this.supplierType;
 	}
 
 	@Override

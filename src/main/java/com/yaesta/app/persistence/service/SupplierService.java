@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -221,7 +222,22 @@ public class SupplierService implements Serializable {
 	}
 	
 	public List<Supplier> getSuppliers(){
-		return supplierRepository.findAll();
+		List<Supplier>  found = supplierRepository.findAll();
+		
+		/*
+		for(Supplier s:found){
+			Hibernate.initialize(s.getCategory());
+			Hibernate.initialize(s.getAccountType());
+			Hibernate.initialize(s.getBank());
+			Hibernate.initialize(s.getCountry());
+			Hibernate.initialize(s.getPriority());
+			Hibernate.initialize(s.getProductListStatus());
+			Hibernate.initialize(s.getSupplierStatus());
+			Hibernate.initialize(s.getSupplierType());
+		}
+		*/
+		
+		return found;
 	}
 	
 	public List<SupplierBeanVO> getSuppliersVO(){

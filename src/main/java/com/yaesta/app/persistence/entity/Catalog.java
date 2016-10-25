@@ -58,6 +58,8 @@ public class Catalog implements Serializable{
 	@JsonManagedReference
 	private List<Catalog> details;
 	
+	
+	
 	public Catalog(){
 		details = new ArrayList<Catalog>();
 	}
