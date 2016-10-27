@@ -970,6 +970,30 @@ public WayBillSchema processWayBill(OrderComplete orderComplete, Catalog deliver
 		GuiaRemision guiaRemision = new GuiaRemision();
 		InformacionAdicional informacionAdicional = new InformacionAdicional();
 		
+		
+		Double shippingValue = 0D;
+		Double partialShipping = 0D;
+		Double ivaPartial = 0D;
+		
+		for(Total vtot: orderComplete.getTotals()){
+			
+			if(vtot.getId().equals("Shipping")){
+				shippingValue = shippingValue+vtot.getValue();
+			}
+		}
+		
+		if(shippingValue>0){
+			
+			if(orderComplete.getSupplierDeliveryInfoList()!=null && !orderComplete.getSupplierDeliveryInfoList().isEmpty()){
+				
+				partialShipping=shippingValue/orderComplete.getSupplierDeliveryInfoList().size();
+				partialShipping = BaseUtil.roundValue(partialShipping);
+				ivaPartial=BaseUtil.calculateIVA(partialShipping,new Integer(datilIvaValue),datilIvaPercentValue);
+				partialShipping = partialShipping+ivaPartial;
+				partialShipping = BaseUtil.roundValue(partialShipping);
+			}
+		}
+		
 		//Preparar informacion de la Guia de Remision
 		guiaRemision.setSecuencial(tableSequenceService.getNextValue(sequenceName).intValue());
 		guiaRemision.setTipoEmision(new Integer(datilEmissionType).intValue());
@@ -1012,23 +1036,103 @@ public WayBillSchema processWayBill(OrderComplete orderComplete, Catalog deliver
 		
 		List<ItemGuiaRemision> items = new ArrayList<ItemGuiaRemision>();
 		
-		String auxMotive = "[Forma de Pago: " + informacionAdicional.getFormaPago() + "] [Valor a Cobrar: "+informacionAdicional.getValorACobrar()+"]"; 
 		
-		destinatario.setMotivoTraslado(datilCarrierMotive + ": " + auxMotive);
-		
+		Double itemValue =0D;
+		Double deliveryCost=0D;
+		Double totalValue = 0D;
+		Double totalAsegurado = 0D;
 		for(ItemComplete ic:sdi.getItems()){
+			itemValue =0D;
 			ItemGuiaRemision item = new ItemGuiaRemision();
 			item.setCantidad(new Double(ic.getQuantity()));
 			item.setCodigoPrincipal(ic.getId());
 			item.setCodigoAuxiliar(ic.getEan());
 			item.setDescripcion(ic.getName());
+			
 			DetallesAdicionales da = new DetallesAdicionales();
 			da.setNumero(ic.getId());
 			da.setSerie(ic.getProductId());
 			item.setDetallesAdicionales(da);
 			items.add(item);
+			
+			itemValue = itemValue+ic.getPrice()*ic.getQuantity();
+			itemValue = (double) Math.round(itemValue * 100) / 100;
+			//systemOut.println("1> "+itemValue+ " "+totalValue);
+			Double discount=0D;
+			Boolean hasTax = Boolean.FALSE;
+			if(ic.getPriceTags()!=null && !ic.getPriceTags().isEmpty()){
+				for(PriceTag pt:ic.getPriceTags()){
+					if(pt.getName().contains("discount@price")){
+						Double val= pt.getValue();
+						if(val<0){
+							val = val* (-1);
+						}
+					    val = (double) Math.round(val * 100) / 100;
+					    discount=discount+Math.abs(val);
+						//break;
+					}
+					if(pt.getName().contains("DISCOUNT@MARKETPLACE"))
+					{
+						Double val= pt.getValue();
+						if(val<0){
+							val = val* (-1);
+						}
+					    val = (double) Math.round(val * 100) / 100;
+					    discount=discount+Math.abs(val);
+					}
+					if(pt.getName().contains("tax@price")){
+						hasTax=Boolean.TRUE;
+					}
+				}
+			}else{
+				discount=0D;
+			}
+			
+			if(ic.getShippingPrice()!=null){
+				systemOut.println("shippingPrice "+ ic.getShippingPrice());
+				deliveryCost = deliveryCost+ic.getShippingPrice();
+			}else{
+				systemOut.println("Sin costo de cobro de envio");
+			}
+			
+			Double iva = 0D;
+			totalAsegurado = totalAsegurado + itemValue;
+			totalAsegurado = (double) Math.round(totalAsegurado * 100) / 100;
+			itemValue = itemValue - discount;
+			itemValue = (double) Math.round(itemValue * 100) / 100;
+			
+			//systemOut.println("2> "+itemValue+ " "+totalValue);
+			
+			if(ic.getTax()>0){
+				iva=ic.getTax();
+			}else{
+				if(hasTax){
+					iva=BaseUtil.calculateIVA(itemValue,new Integer(datilIvaValue),datilIvaPercentValue);
+				}
+			}
+			if(itemValue>0){
+				itemValue = itemValue + iva;
+			}
+			itemValue = (double) Math.round(itemValue * 100) / 100;
+			
+			//systemOut.println("3> "+itemValue+ " "+totalValue);
+			totalValue = totalValue+itemValue+partialShipping;
+			totalValue = (double) Math.round(totalValue * 100) / 100;
+
+			
+		}//fin de items
+		
+		String auxMotive = "";
+		
+		if(totalValue>0){
+			informacionAdicional.setValorACobrar(totalValue+"");
+			auxMotive = "[Forma de Pago: " + informacionAdicional.getFormaPago() + "] [Valor a Cobrar: "+informacionAdicional.getValorACobrar()+"]";
+		}else{
+			auxMotive = "[Forma de Pago: " + informacionAdicional.getFormaPago() + "] ";
 		}
 		
+		
+		destinatario.setMotivoTraslado(datilCarrierMotive + ": " + auxMotive);
 		
 		
 		guiaRemision.setInformacionAdicional(informacionAdicional);

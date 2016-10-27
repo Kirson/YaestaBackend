@@ -11,4 +11,10 @@ public class BaseUtil {
 		
 		return iva;
 	}
+	
+	public static Double roundValue(Double value){
+        Double val = (double) Math.round(value * 100) / 100;
+		
+		return val;
+	}
 }
