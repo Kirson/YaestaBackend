@@ -563,4 +563,22 @@ public class GuideService {
 			}
 		}
 	}
+	
+	@Transactional
+	public void saveGuideDetails(Guide guide, List<GuideDetail> details){
+		if(guide!=null){
+			
+			if(details!=null && !details.isEmpty()){
+				for(GuideDetail gd:details){
+					gd.setGuide(guide);
+					guideDetailRepository.save(gd);
+				}
+			}
+		}
+	}
+	
+	public List<GuideDetail> getGuideDetails(Guide guide)
+	{
+		return guideDetailRepository.findByGuide(guide);
+	}
 }

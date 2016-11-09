@@ -44,6 +44,7 @@ import com.yaesta.app.pdf.bean.ItemData;
 import com.yaesta.app.persistence.entity.Catalog;
 import com.yaesta.app.persistence.entity.Customer;
 import com.yaesta.app.persistence.entity.Guide;
+import com.yaesta.app.persistence.entity.GuideDetail;
 import com.yaesta.app.persistence.entity.Order;
 import com.yaesta.app.persistence.entity.OrderItem;
 import com.yaesta.app.persistence.entity.Supplier;
@@ -76,6 +77,7 @@ import com.yaesta.integration.tramaco.dto.GuideDTO;
 import com.yaesta.integration.tramaco.service.TramacoService;
 import com.yaesta.integration.vitex.bean.GuideContainerBean;
 import com.yaesta.integration.vitex.bean.GuideInfoBean;
+import com.yaesta.integration.vitex.bean.GuideRemisionContainer;
 import com.yaesta.integration.vitex.bean.InvoiceSchemaBean;
 import com.yaesta.integration.vitex.bean.OrderResponseBean;
 import com.yaesta.integration.vitex.bean.OrderSchemaContainerBean;
@@ -686,7 +688,7 @@ public class OrderVitexService extends BaseVitexService {
 		} else {
 			// order.setCreateDate(orderComplete.getCreationDate());
 			order.setCreateDate(new Date());
-			orderComplete.setAppStatus("registered");
+			orderComplete.setAppStatus("invoice_pending");
 		}
 
 		if(status!=null){
@@ -860,6 +862,12 @@ public class OrderVitexService extends BaseVitexService {
 				guideService.saveGuide(guide);
 				gbd.setGuide(guide);
 				guideInfoList.add(gbd);
+				
+				List<GuideDetail> details = gbd.getDetails();
+				//Guardar los detalles de la guia
+				if(details!=null && !details.isEmpty()){
+					guideService.saveGuideDetail(guide, details);
+				}
 			}
 			
 			guideDTO.setGuideBeanList(guideInfoList);
@@ -1138,7 +1146,8 @@ public class OrderVitexService extends BaseVitexService {
 		orderService.saveOrder(order);
 		if(wayBill!=null){
 			List<GuideBeanDTO> guideInfoBeanList = new ArrayList<GuideBeanDTO>();
-			for(GuiaRemisionRespuesta grr:wayBill.getGuideList()){
+			for(GuideRemisionContainer grc:wayBill.getGuideContainerList()){
+				GuiaRemisionRespuesta grr=grc.getGuiaRemisionRespuesta();
 				GuideBeanDTO gbd = new GuideBeanDTO();
 				Guide guide = new Guide();
 				guide.setCreateDate(new Date());
@@ -1257,6 +1266,14 @@ public class OrderVitexService extends BaseVitexService {
 				
 				gdb= BuildGuidePDF.generateGuidePDF(gdb);
 				guideInfoBeanList.add(gbd);
+				
+				
+				List<GuideDetail> details = grc.getDetailList();
+				
+				if(details!=null && !details.isEmpty()){
+					guideService.saveGuideDetail(guide, details);
+				}
+				
 			}//fin for
 			
 			orderService.saveOrder(order);

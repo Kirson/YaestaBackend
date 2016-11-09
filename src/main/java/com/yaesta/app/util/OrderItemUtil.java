@@ -30,8 +30,8 @@ public class OrderItemUtil {
 		obj.setValueReceivables(item.getValueReceivables());
 		obj.setVitexId(item.getVitexId());
 		obj.setWayToPay(item.getWayToPay());
-		obj.setInvoiceNumber(item.getInvoiceNumber());
-		obj.setGuideNumber(item.getGuideNumber());
+		obj.setInvoiceNumber("'"+item.getInvoiceNumber());
+		obj.setGuideNumber("'"+item.getGuideNumber());
 		return obj;
 	}
 	

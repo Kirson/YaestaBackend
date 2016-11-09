@@ -53,6 +53,9 @@ public class GuideDetail implements Serializable {
 	@JoinColumn(name = "guide_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
 	private Guide guide;
+	
+	@Column(name="item_name")
+	private String itemName;
 
 	public Long getId() {
 		return id;
@@ -116,6 +119,14 @@ public class GuideDetail implements Serializable {
 
 	public void setOrderVitexId(String orderVitexId) {
 		this.orderVitexId = orderVitexId;
+	}
+
+	public String getItemName() {
+		return itemName;
+	}
+
+	public void setItemName(String itemName) {
+		this.itemName = itemName;
 	}
 	
 	

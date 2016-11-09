@@ -86,6 +86,7 @@ com/yaesta/integration/vitex/json/bean/Facets.class
 com/yaesta/integration/datil/json/bean/Impuesto_.class
 com/yaesta/integration/vitex/wsdl/dto/ArrayOfGiftListMemberDTO.class
 com/yaesta/app/persistence/controller/CategoryController.class
+com/yaesta/integration/vitex/bean/GuideRemisionContainer.class
 com/yaesta/app/persistence/controller/CatalogController.class
 com/yaesta/integration/vitex/wsdl/ProductEspecificationTextInsertByFieldIdResponse.class
 com/yaesta/integration/vitex/wsdl/dto/ArrayOfStockKeepingUnitServiceDTO.class
@@ -106,7 +107,6 @@ com/yaesta/integration/vitex/json/bean/ItemAttachment.class
 com/yaesta/integration/vitex/service/base/ProductBaseService.class
 com/yaesta/app/util/UtilDate.class
 com/yaesta/integration/vitex/wsdl/StockKeepingUnitGetAllFromUpdatedDateAndIdResponse.class
-com/yaesta/VitexSoapClient.class
 com/yaesta/integration/vitex/wsdl/dto/ImageDTO.class
 com/yaesta/integration/vitex/wsdl/IntegrationLogEventResponse.class
 com/yaesta/integration/datil/json/bean/Retencione.class
@@ -334,7 +334,6 @@ com/yaesta/integration/vitex/json/bean/LogisticsInfo.class
 com/yaesta/integration/vitex/wsdl/IntegrationLogErrorResponse.class
 com/yaesta/app/mail/ItemInfo.class
 com/yaesta/integration/vitex/wsdl/GiftListMemberInsertUpdate.class
-com/yaesta/app/persistence/entity/Client.class
 com/yaesta/integration/datil/json/bean/CorreosEnviado.class
 com/yaesta/integration/vitex/wsdl/dto/StockKeepingUnitComplementDTOComplementTypeEnum.class
 com/yaesta/integration/vitex/service/CategoryVitexService$1.class
@@ -492,7 +491,6 @@ com/yaesta/integration/vitex/wsdl/dto/ArrayOfFreightScheduledDateOptionDTO.class
 com/yaesta/integration/bpm/activiti/service/ActivitiService.class
 com/yaesta/integration/vitex/json/bean/AdditionalInfo.class
 com/yaesta/integration/vitex/wsdl/GiftListGetAllFromCreatedDateAndId.class
-com/yaesta/integration/vitex/wsdl/vo/GuideVO.class
 com/yaesta/integration/vitex/wsdl/StockKeepingUnitServiceGet.class
 com/yaesta/integration/vitex/json/bean/Paging.class
 com/yaesta/integration/vitex/wsdl/GiftListGetByCreatedDateResponse.class

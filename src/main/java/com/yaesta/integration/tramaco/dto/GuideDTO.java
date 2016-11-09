@@ -7,6 +7,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.yaesta.app.persistence.entity.Catalog;
+import com.yaesta.app.persistence.entity.GuideDetail;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
 
 
@@ -30,12 +31,14 @@ public class GuideDTO implements Serializable{
 	private String latitude;
 	private String longitude;
 	private Catalog deliverySelected;
+	private List<GuideDetail> details;
 	
 	
 	public GuideDTO(){
 		packages = 1;
 		errorList = new ArrayList<String>();
 		guideBeanList = new ArrayList<GuideBeanDTO>();
+		details = new ArrayList<GuideDetail>();
 	}
 
 	
@@ -145,6 +148,16 @@ public class GuideDTO implements Serializable{
 
 	public void setDeliverySelected(Catalog deliverySelected) {
 		this.deliverySelected = deliverySelected;
+	}
+
+
+	public List<GuideDetail> getDetails() {
+		return details;
+	}
+
+
+	public void setDetails(List<GuideDetail> details) {
+		this.details = details;
 	}
 
 	

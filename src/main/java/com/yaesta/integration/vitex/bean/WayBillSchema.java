@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.yaesta.integration.datil.json.bean.GuiaRemisionRespuesta;
 
-public class WayBillSchema implements Serializable{
+public class WayBillSchema implements Serializable {
 
 	/**
 	 * Serial Version
@@ -15,32 +15,45 @@ public class WayBillSchema implements Serializable{
 	private List<GuiaRemisionRespuesta> guideList;
 	private String errorCode;
 	private List<String> errorList;
-	
-	public WayBillSchema(){
+	private List<GuideRemisionContainer> guideContainerList;
+
+	public WayBillSchema() {
 		guideList = new ArrayList<GuiaRemisionRespuesta>();
 		errorCode = "OK";
 		errorList = new ArrayList<String>();
+		guideContainerList = new ArrayList<GuideRemisionContainer>();
 	}
-	
+
 	public List<GuiaRemisionRespuesta> getGuideList() {
 		return guideList;
 	}
+
 	public void setGuideList(List<GuiaRemisionRespuesta> guideList) {
 		this.guideList = guideList;
 	}
+
 	public String getErrorCode() {
 		return errorCode;
 	}
+
 	public void setErrorCode(String errorCode) {
 		this.errorCode = errorCode;
 	}
+
 	public List<String> getErrorList() {
 		return errorList;
 	}
+
 	public void setErrorList(List<String> errorList) {
 		this.errorList = errorList;
 	}
-	
-	
-	
+
+	public List<GuideRemisionContainer> getGuideContainerList() {
+		return guideContainerList;
+	}
+
+	public void setGuideContainerList(List<GuideRemisionContainer> guideContainerList) {
+		this.guideContainerList = guideContainerList;
+	}
+
 }
