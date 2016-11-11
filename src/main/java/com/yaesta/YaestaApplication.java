@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.yaesta.app.auth.JwtFilter;
 import com.yaesta.app.controller.AppErrorController;
@@ -18,6 +19,7 @@ import com.yaesta.app.controller.AppErrorController;
 @EnableScheduling
 @SpringBootApplication
 @EnableAutoConfiguration
+@EnableTransactionManagement
 @ComponentScan(basePackages = {"com.yaesta","it.ozimov.springboot"})
 @Configuration
 public class YaestaApplication extends YaestaSoapClient {

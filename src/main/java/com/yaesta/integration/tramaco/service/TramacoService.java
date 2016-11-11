@@ -536,7 +536,7 @@ public class TramacoService implements Serializable {
 								discount = 0D;
 							}
 
-							if (ic.getShippingPrice() != null) {
+							if (ic.getShippingPrice() != null && hasAdjunto) {
 								systemOut.println("shippingPrice " + ic.getShippingPrice());
 								carga.setValorCobro(ic.getShippingPrice());
 								deliveryCost = deliveryCost + ic.getShippingPrice();

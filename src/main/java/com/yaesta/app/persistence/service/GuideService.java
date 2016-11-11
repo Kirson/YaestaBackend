@@ -276,6 +276,8 @@ public class GuideService {
 		if(found!=null && !found.isEmpty()){
 			for(Guide g:found){
 				GuideVO gvo = GuideUtil.fromGuideToGuideVO(g);
+				List<GuideDetail> details = this.getGuideDetails(g);
+				gvo.setDetails(details);
 				resultList.add(gvo);
 			}
 		}

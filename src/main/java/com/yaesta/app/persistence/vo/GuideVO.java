@@ -1,7 +1,11 @@
 package com.yaesta.app.persistence.vo;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
+import com.yaesta.app.persistence.entity.GuideDetail;
 
 import javax.annotation.Generated;
 
@@ -22,7 +26,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 	"deliveryDate",
 	"orderId",
 	"supplierId",
-	"supplierName"
+	"supplierName",
+	"details"
 })
 public class GuideVO implements Serializable {
 	
@@ -42,8 +47,11 @@ public class GuideVO implements Serializable {
 	private String orderId;
 	private Long supplierId;
 	private String supplierName;
+	private List<GuideDetail> details;
 	
-	
+	public GuideVO(){
+		details = new ArrayList<GuideDetail>();
+	}
 	
 	public Long getId() {
 		return id;
@@ -116,6 +124,14 @@ public class GuideVO implements Serializable {
 	}
 	public void setOrderDate(Date orderDate) {
 		this.orderDate = orderDate;
+	}
+
+	public List<GuideDetail> getDetails() {
+		return details;
+	}
+
+	public void setDetails(List<GuideDetail> details) {
+		this.details = details;
 	}
 	
 	
