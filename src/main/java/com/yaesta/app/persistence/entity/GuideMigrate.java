@@ -13,7 +13,7 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@Table(name = "guide",schema="yaesta")
+@Table(name = "guide_migrate",schema="yaesta")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class GuideMigrate implements Serializable{
 

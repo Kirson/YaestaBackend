@@ -19,6 +19,7 @@ import com.yaesta.app.persistence.repository.GuideRepository;
 import com.yaesta.app.persistence.repository.OrderItemRepository;
 import com.yaesta.app.persistence.repository.OrderRepository;
 import com.yaesta.app.persistence.vo.DateRangeVO;
+import com.yaesta.app.persistence.vo.GfkVO;
 import com.yaesta.app.persistence.vo.OrderItemBeanVO;
 import com.yaesta.app.persistence.vo.WarehouseVO;
 import com.yaesta.app.util.OrderItemUtil;
@@ -224,5 +225,13 @@ public class OrderService implements Serializable {
 			found = orderRepository.findByPendingInvoice(Boolean.FALSE);
 		}
 		return found;
+	}
+	
+	
+	public List<GfkVO> buildGfk(String periode){
+		List<GfkVO> result = new ArrayList<GfkVO>();
+		
+		return result;
+		
 	}
 }
