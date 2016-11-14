@@ -30,7 +30,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.soap.client.core.SoapActionCallback;
 
-
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -133,9 +132,9 @@ public class OrderVitexService extends BaseVitexService {
 
 	@Autowired
 	private ProductVitexService productVitexService;
-	
+
 	@Autowired
-	private CategoryVitexService categoryVitexService; 
+	private CategoryVitexService categoryVitexService;
 
 	@Autowired
 	private OrderService orderService;
@@ -145,37 +144,37 @@ public class OrderVitexService extends BaseVitexService {
 
 	@Autowired
 	private SupplierService supplierService;
-	
+
 	@Autowired
 	private SupplierContactRepository supplierContactRepository;
-	
+
 	@Autowired
 	private TramacoService tramacoService;
-	
+
 	@Autowired
 	TccService tccService;
-	
+
 	@Autowired
 	private MailService mailService;
-	
+
 	@Autowired
 	private DatilService datilService;
-	
+
 	@Autowired
 	private CatalogService catalogService;
-	
+
 	@Autowired
 	private ClientService clientService;
-	
+
 	@Autowired
 	private YaEstaLogService logService;
-	
+
 	@Autowired
 	SystemOutService systemOut;
 
 	private Client client;
 	private WebTarget target;
-	
+
 	private @Value("${mail.smtp.from}") String mailFrom;
 	private @Value("${mail.smtp.to}") String mailTo;
 	private @Value("${mail.smtp.to.name}") String mailToName;
@@ -216,14 +215,13 @@ public class OrderVitexService extends BaseVitexService {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	
-	@Bean( name = "propertyConfigurer" )
-    public static PropertySourcesPlaceholderConfigurer propertyConfigurer() {
-        PropertySourcesPlaceholderConfigurer configurer = 
-                new PropertySourcesPlaceholderConfigurer();
 
-        return configurer;
-    }
+	@Bean(name = "propertyConfigurer")
+	public static PropertySourcesPlaceholderConfigurer propertyConfigurer() {
+		PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
+
+		return configurer;
+	}
 
 	public ArrayOfOrderDTO getOrders(Integer sequence) {
 
@@ -398,132 +396,143 @@ public class OrderVitexService extends BaseVitexService {
 
 	public OrderSchema getOrdersRest(String status) {
 
+		OrderSchema response = null;
+
 		client = ClientBuilder.newClient();
 
 		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/?per_page=100";
-		
-		if(status!=null){
-			restUrl = restUrl + "&filter=status:"+status;
-		}
-		
-		systemOut.println("restUrl::"+restUrl);
-		
-		target = client.target(restUrl);
-		
-		MultivaluedMap<String, Object> myHeaders = new MultivaluedHashMap<String, Object>();
-		myHeaders.add(vitexRestAppkeyName, vitexRestAppkey);
-		myHeaders.add(vitexRestTokenName, vitexRestToken);
-		String json = target.request(MediaType.TEXT_PLAIN).headers(myHeaders).get(String.class);
 
-		OrderSchema response = new Gson().fromJson(json, OrderSchema.class);
-		
+		if (status != null) {
+			restUrl = restUrl + "&filter=status:" + status;
+		}
+
+		systemOut.println("restUrl::" + restUrl);
+
 		try {
-			
+
+			target = client.target(restUrl);
+
+			MultivaluedMap<String, Object> myHeaders = new MultivaluedHashMap<String, Object>();
+			myHeaders.add(vitexRestAppkeyName, vitexRestAppkey);
+			myHeaders.add(vitexRestTokenName, vitexRestToken);
+			String json = target.request(MediaType.TEXT_PLAIN).headers(myHeaders).get(String.class);
+
+			response = new Gson().fromJson(json, OrderSchema.class);
+
 			ObjectMapper mapper = new ObjectMapper();
-		
+
 			mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			Object oJson = mapper.readValue(json, OrderSchema.class);
 			String indented = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(oJson);
-			String fileName = yaestaLogPath+yaestaPrefix+(new Date()).getTime()+".txt";
+			String fileName = yaestaLogPath + yaestaPrefix + (new Date()).getTime() + ".txt";
 			FileUtils.writeStringToFile(new File(fileName), indented);
-			
+
 		} catch (IOException e) {
-			
+
 			YaEstaLog yaestalog = new YaEstaLog();
 			yaestalog.setLogDate(new Date());
 			yaestalog.setProcessName("ORDER_FEED-QUERY");
-			yaestalog.setTextinfo("Error consulta VTEX ordenes");
-			//yaestalog.setXmlInfo(json);
+			yaestalog.setTextinfo("Error IO consulta VTEX ordenes " + e.getMessage());
+			// yaestalog.setXmlInfo(json);
 			logService.save(yaestalog);
-			
+
+			e.printStackTrace();
+		} catch (Exception e) {
+
+			YaEstaLog yaestalog = new YaEstaLog();
+			yaestalog.setLogDate(new Date());
+			yaestalog.setProcessName("ORDER_FEED-QUERY");
+			yaestalog.setTextinfo("Error general consulta VTEX ordenes " + e.getMessage());
+			// yaestalog.setXmlInfo(json);
+			logService.save(yaestalog);
+
 			e.printStackTrace();
 		}
-		
-		if(response.getList()!=null && !response.getList().isEmpty()){
+
+		if (response!=null && response.getList() != null && !response.getList().isEmpty()) {
 			List<OrderBean> list = new ArrayList<OrderBean>();
-			for(OrderBean ob:response.getList()){
+			for (OrderBean ob : response.getList()) {
 				OrderBean obean = OrderVtexUtil.setRealValuesToOrderBean(ob);
 				list.add(obean);
 			}
 			response.setList(list);
 		}
-		
+
 		return response;
 	}
-	
+
 	public OrderSchema getOrdersRestPage(String status, Long page) {
 
 		client = ClientBuilder.newClient();
 
-		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/?per_page=100&page="+page;
-		
-		if(status!=null){
-			restUrl = restUrl + "&filter=status:"+status;
+		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/?per_page=100&page=" + page;
+
+		if (status != null) {
+			restUrl = restUrl + "&filter=status:" + status;
 		}
-		
-		systemOut.println("restUrl::"+restUrl);
-		
+
+		systemOut.println("restUrl::" + restUrl);
+
 		target = client.target(restUrl);
-		
+
 		MultivaluedMap<String, Object> myHeaders = new MultivaluedHashMap<String, Object>();
 		myHeaders.add(vitexRestAppkeyName, vitexRestAppkey);
 		myHeaders.add(vitexRestTokenName, vitexRestToken);
 		String json = target.request(MediaType.TEXT_PLAIN).headers(myHeaders).get(String.class);
 
 		OrderSchema response = new Gson().fromJson(json, OrderSchema.class);
-		
+
 		try {
-			
+
 			ObjectMapper mapper = new ObjectMapper();
-		
+
 			mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			Object oJson = mapper.readValue(json, OrderSchema.class);
 			String indented = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(oJson);
-			String fileName = yaestaLogPath+yaestaPrefix+(new Date()).getTime()+".txt";
+			String fileName = yaestaLogPath + yaestaPrefix + (new Date()).getTime() + ".txt";
 			FileUtils.writeStringToFile(new File(fileName), indented);
-			
+
 		} catch (IOException e) {
-			
+
 			YaEstaLog yaestalog = new YaEstaLog();
 			yaestalog.setLogDate(new Date());
 			yaestalog.setProcessName("ORDER_FEED-QUERY");
 			yaestalog.setTextinfo("Error consulta VTEX ordenes");
-			//yaestalog.setXmlInfo(json);
+			// yaestalog.setXmlInfo(json);
 			logService.save(yaestalog);
-			
+
 			e.printStackTrace();
 		}
-		
-		if(response.getList()!=null && !response.getList().isEmpty()){
+
+		if (response.getList() != null && !response.getList().isEmpty()) {
 			List<OrderBean> list = new ArrayList<OrderBean>();
-			for(OrderBean ob:response.getList()){
+			for (OrderBean ob : response.getList()) {
 				OrderBean obean = OrderVtexUtil.setRealValuesToOrderBean(ob);
 				list.add(obean);
 			}
 			response.setList(list);
 		}
-		
+
 		return response;
 	}
-	
-	
+
 	public OrderSchema getOrdersRestPaging() {
 
 		client = ClientBuilder.newClient();
 
 		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/";
-		
+
 		OrderSchema input = new OrderSchema();
 		Paging paging = new Paging();
 		paging.setPerPage(50);
 		input.setPaging(paging);
-		
+
 		Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
 		String jsonInput = gson.toJson(input);
-		restUrl=restUrl+"["+jsonInput+"]";
-		systemOut.println("rest"+restUrl);
+		restUrl = restUrl + "[" + jsonInput + "]";
+		systemOut.println("rest" + restUrl);
 		target = client.target(restUrl);
-		
+
 		MultivaluedMap<String, Object> myHeaders = new MultivaluedHashMap<String, Object>();
 		myHeaders.add(vitexRestAppkeyName, vitexRestAppkey);
 		myHeaders.add(vitexRestTokenName, vitexRestToken);
@@ -544,14 +553,14 @@ public class OrderVitexService extends BaseVitexService {
 		myHeaders.add(vitexRestAppkeyName, vitexRestAppkey);
 		myHeaders.add(vitexRestTokenName, vitexRestToken);
 		String json = target.request(MediaType.TEXT_PLAIN).headers(myHeaders).get(String.class);
-		
-
 
 		OrderComplete responseOri = new Gson().fromJson(json, OrderComplete.class);
-		//Los precios en VTex vienen en string se considera que los dos ultimos son posiciones
-		//decimales por lo cual esta conversion los transformara en el valor real de la orden
+		// Los precios en VTex vienen en string se considera que los dos ultimos
+		// son posiciones
+		// decimales por lo cual esta conversion los transformara en el valor
+		// real de la orden
 		OrderComplete response = OrderVtexUtil.setRealValuesToOrderComplete(responseOri);
-				
+
 		List<Total> updateTotals = new ArrayList<Total>();
 		BigDecimal totalPrice = new BigDecimal(0);
 		BigDecimal totalDiscounts = new BigDecimal(0);
@@ -578,66 +587,66 @@ public class OrderVitexService extends BaseVitexService {
 		}
 		response.setTotalPrice(totalPrice);
 		response.setTotals(updateTotals);
-		
+
 		List<ItemComplete> icList = new ArrayList<ItemComplete>();
-		
-		
-		
-		if(response.getItems()!=null && !response.getItems().isEmpty()){
-			
-			BigDecimal partialSellerPrice = totalShipping.divide(new BigDecimal(response.getItems().size()), 2,RoundingMode.CEILING);
-			BigDecimal partialDiscount = totalDiscounts.divide(new BigDecimal(response.getItems().size()), 2, RoundingMode.CEILING);
-			
-			for(ItemComplete ic:response.getItems()){
+
+		if (response.getItems() != null && !response.getItems().isEmpty()) {
+
+			BigDecimal partialSellerPrice = totalShipping.divide(new BigDecimal(response.getItems().size()), 2,
+					RoundingMode.CEILING);
+			BigDecimal partialDiscount = totalDiscounts.divide(new BigDecimal(response.getItems().size()), 2,
+					RoundingMode.CEILING);
+
+			for (ItemComplete ic : response.getItems()) {
 				ItemComplete itc = ic;
-				try{
-					String refId = (String)ic.getRefId();
+				try {
+					String refId = (String) ic.getRefId();
 					String[] supplierCode = SupplierUtil.returnSupplierCode(refId);
 					Supplier sp = new Supplier();
-					try{
-					 sp = supplierService.findById(new Long(supplierCode[0]));
-					}catch(EntityNotFoundException e){
+					try {
+						sp = supplierService.findById(new Long(supplierCode[0]));
+					} catch (EntityNotFoundException e) {
 						YaEstaLog yaestalog = new YaEstaLog();
 						yaestalog.setLogDate(new Date());
 						yaestalog.setProcessName("SUPPLIER-QUERY");
-						yaestalog.setTextinfo("NO existe proveedor con ID"+supplierCode[0]);
+						yaestalog.setTextinfo("NO existe proveedor con ID" + supplierCode[0]);
 						yaestalog.setOrderId(orderId);
 						logService.save(yaestalog);
 					}
 					itc.setSupplierName(sp.getName());
-				}catch(Exception e){
-					//Nothing TODO.
+				} catch (Exception e) {
+					// Nothing TODO.
 				}
 				itc.setDiscount(partialDiscount.doubleValue());
 				itc.setSellingPrice(partialSellerPrice.doubleValue());
 				icList.add(itc);
 			}
-			
+
 			response.setItems(icList);
 		}
 
 		List<SupplierDeliveryInfo> sdiList = buildSupplierDeliveryInfo(response);
 		response.setSupplierDeliveryInfoList(sdiList);
-		
+
 		OrderConversation orderConversation = getOrderConversation(orderId);
-		if(!orderConversation.getCustomerEmail().equals("")){
+		if (!orderConversation.getCustomerEmail().equals("")) {
 			response.getClientProfileData().setEmail(orderConversation.getCustomerEmail());
 		}
-		response = persistOrder(response,null);
+		response = persistOrder(response, null);
 
 		try {
 			generateOrderItem(response);
-			
+
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		// generateGuides(response);
 		return response;
 	}
-	
-	public OrderConversation getOrderConversation(String orderId){
+
+	public OrderConversation getOrderConversation(String orderId) {
 		client = ClientBuilder.newClient();
 
 		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/" + orderId + "/conversation-message";
@@ -648,26 +657,25 @@ public class OrderVitexService extends BaseVitexService {
 		myHeaders.add(vitexRestTokenName, vitexRestToken);
 		String json = target.request(MediaType.TEXT_PLAIN).headers(myHeaders).get(String.class);
 		String email = "";
-		try{
-			if(json!=null){
-				json = json.substring(1,json.length());
-				json = json.substring(0,json.length()-1);
-				systemOut.println("json "+ json);
-				String [] partZero = json.split("\"to\":");
-				String [] partOne = partZero[1].split("\"email\":");
-				String [] emailData = partOne[1].split(",");
+		try {
+			if (json != null) {
+				json = json.substring(1, json.length());
+				json = json.substring(0, json.length() - 1);
+				systemOut.println("json " + json);
+				String[] partZero = json.split("\"to\":");
+				String[] partOne = partZero[1].split("\"email\":");
+				String[] emailData = partOne[1].split(",");
 				email = emailData[0];
 				email = email.replace("\"", "");
 				email = email.trim();
 			}
-		}catch(Exception e){
-			systemOut.println("Error obteniendo email enmascarado de cliente "+json);
+		} catch (Exception e) {
+			systemOut.println("Error obteniendo email enmascarado de cliente " + json);
 		}
 		OrderConversation ocon = new OrderConversation();
-		
+
 		ocon.setCustomerEmail(email);
-		
-		
+
 		return ocon;
 	}
 
@@ -676,7 +684,6 @@ public class OrderVitexService extends BaseVitexService {
 		Order found = orderService.findByVitexId(orderComplete.getOrderId());
 
 		Order order = new Order();
-        
 
 		if (found != null) {
 			order = found;
@@ -691,23 +698,22 @@ public class OrderVitexService extends BaseVitexService {
 			orderComplete.setAppStatus("invoice_pending");
 		}
 
-		if(status!=null){
-        	order.setStatus(status);
-        }
-        else{
-        	order.setStatus(orderComplete.getAppStatus());
-        }
-        order.setVitexStatus(orderComplete.getStatus());
+		if (status != null) {
+			order.setStatus(status);
+		} else {
+			order.setStatus(orderComplete.getAppStatus());
+		}
+		order.setVitexStatus(orderComplete.getStatus());
 		order.setVitexId(orderComplete.getOrderId());
 		order.setTotalPrice(orderComplete.getValue());
-		
+
 		String dateParts[] = UtilDate.dateParts(order.getCreateDate());
-		order.setPeriode(dateParts[0]+"-"+dateParts[1]);
-		
+		order.setPeriode(dateParts[0] + "-" + dateParts[1]);
+
 		GsonBuilder gBuilder = new GsonBuilder();
-		//gBuilder.registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
+		// gBuilder.registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY);
 		gBuilder.registerTypeAdapter(OrderComplete.class, new YaestaTypeAdapter<OrderComplete>());
-		
+
 		systemOut.println("Order Complete " + orderComplete.getOrderId());
 
 		Gson gson = gBuilder.create();
@@ -717,20 +723,23 @@ public class OrderVitexService extends BaseVitexService {
 		order.setOrderInfo(orderInfo);
 
 		orderService.saveOrder(order);
-		
-		Customer customer=clientService.updateCustomerInfo(orderComplete); //capturar informacion del cliente
 
-		if(order.getClient()==null){
+		Customer customer = clientService.updateCustomerInfo(orderComplete); // capturar
+																				// informacion
+																				// del
+																				// cliente
+
+		if (order.getClient() == null) {
 			order.setClient(customer);
 			orderService.saveOrder(order);
 		}
-		
+
 		List<Guide> guides = guideService.findByOrder(order);
-		
-		if(guides!=null && !guides.isEmpty()){
+
+		if (guides != null && !guides.isEmpty()) {
 			orderComplete.setGuides(guides);
 		}
-		
+
 		return orderComplete;
 
 	}
@@ -756,27 +765,27 @@ public class OrderVitexService extends BaseVitexService {
 
 		for (String sc : supplierCodes) {
 			if (sc != null && !sc.equals("")) {
-				
-				
+
 				Supplier supplier = new Supplier();
-				try{
-				 supplier = supplierService.findById(new Long(sc));
-				}catch(EntityNotFoundException e){
+				try {
+					supplier = supplierService.findById(new Long(sc));
+				} catch (EntityNotFoundException e) {
 					YaEstaLog yaestalog = new YaEstaLog();
 					yaestalog.setLogDate(new Date());
 					yaestalog.setProcessName("SUPPLIER-QUERY");
-					yaestalog.setTextinfo("NO existe proveedor con ID"+sc);
+					yaestalog.setTextinfo("NO existe proveedor con ID" + sc);
 					yaestalog.setOrderId(orderComplete.getOrderId());
 					logService.save(yaestalog);
 				}
-				
+
 				SupplierDeliveryInfo sdi = new SupplierDeliveryInfo();
 				sdi.setSupplier(supplier);
 				for (ItemComplete ic : orderComplete.getItems()) {
 					String refId = (String) ic.getRefId();
 					String[] supplierCode = SupplierUtil.returnSupplierCode(refId);
 					if (sc.equals(supplierCode[0])) {
-						if(!sdi.getItems().contains(ic)){ //prevenenir items duplicados
+						if (!sdi.getItems().contains(ic)) { // prevenenir items
+															// duplicados
 							sdi.getItems().add(ic);
 						}
 					}
@@ -787,55 +796,54 @@ public class OrderVitexService extends BaseVitexService {
 
 		return deliveryInfoList;
 	}
-	
-	
-	public GuideContainerBean generateGuides(GuideInfoBean guideInfoBean){
-		
-		if(guideInfoBean.getDeliverySelected().getNemonic().equals("TRAMACO")){
+
+	public GuideContainerBean generateGuides(GuideInfoBean guideInfoBean) {
+
+		if (guideInfoBean.getDeliverySelected().getNemonic().equals("TRAMACO")) {
 			return generateGuidesTramaco(guideInfoBean);
-		}else if(guideInfoBean.getDeliverySelected().getNemonic().equals("TCC")){
-		    return generateGuidesTcc(guideInfoBean);	
-		}else if(guideInfoBean.getDeliverySelected().getNemonic().equals("MOTO_EXPRESS")  || 
-				 guideInfoBean.getDeliverySelected().getNemonic().equals("DESPACHO_INTERNO") ||
-				 guideInfoBean.getDeliverySelected().getNemonic().equals("CICLISTA")){
-		    return generateGuideStandar(guideInfoBean);	
-		}
-		else{
+		} else if (guideInfoBean.getDeliverySelected().getNemonic().equals("TCC")) {
+			return generateGuidesTcc(guideInfoBean);
+		} else if (guideInfoBean.getDeliverySelected().getNemonic().equals("MOTO_EXPRESS")
+				|| guideInfoBean.getDeliverySelected().getNemonic().equals("DESPACHO_INTERNO")
+				|| guideInfoBean.getDeliverySelected().getNemonic().equals("CICLISTA")) {
+			return generateGuideStandar(guideInfoBean);
+		} else {
 			return new GuideContainerBean();
 		}
 	}
-	
-	private GuideContainerBean generateGuidesTramaco(GuideInfoBean guideInfoBean){
-		GuideContainerBean result = new GuideContainerBean(); 
+
+	private GuideContainerBean generateGuidesTramaco(GuideInfoBean guideInfoBean) {
+		GuideContainerBean result = new GuideContainerBean();
 		GuideInfoBean response = guideInfoBean;
 		List<GuideDTO> responseList = new ArrayList<GuideDTO>();
-		
+
 		OrderComplete orderComplete = guideInfoBean.getOrderComplete();
-		
+
 		Order order = orderService.findByVitexId(orderComplete.getOrderId());
-		
+
 		order.setDeliveryName("TRAMACO");
 		orderService.saveOrder(order);
-		
+
 		List<SupplierDeliveryInfo> supplierDeliveryInfoList = guideInfoBean.getSupplierDeliveryInfoList();
-		
+
 		orderComplete.setSupplierDeliveryInfoList(supplierDeliveryInfoList);
 		GuideDTO guideDTO = new GuideDTO();
 		guideDTO.setOrderComplete(orderComplete);
 		guideDTO.setCustomerAdditionalInfo(guideInfoBean.getCustomerAdditionalInfo());
 		guideDTO.setDeliverySelected(guideInfoBean.getDeliverySelected());
-		
+
 		GuideDTO resultGuideInfo = tramacoService.generateGuides(guideDTO);
-		
+
 		List<GuideBeanDTO> guideInfoBeanList = resultGuideInfo.getGuideBeanList();
 		List<GuideBeanDTO> guideInfoList = new ArrayList<GuideBeanDTO>();
-		
-		if(guideInfoBeanList!=null && !guideInfoBeanList.isEmpty()){
-			for(GuideBeanDTO gbd:guideInfoBeanList){
+
+		if (guideInfoBeanList != null && !guideInfoBeanList.isEmpty()) {
+			for (GuideBeanDTO gbd : guideInfoBeanList) {
 				Guide guide = new Guide();
 				guide.setCreateDate(new Date());
 				guide.setOrderVitexId(orderComplete.getOrderId());
-				guide.setVitexDispatcherId(gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getId()+"%"+gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getGuia());
+				guide.setVitexDispatcherId(gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getId()
+						+ "%" + gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getGuia());
 				guide.setGuideInfo(new Gson().toJson(gbd));
 				guide.setOrder(order);
 				guide.setDeliveryCost(gbd.getDeliveryCost());
@@ -847,10 +855,10 @@ public class OrderVitexService extends BaseVitexService {
 				guide.setCustomerPhone(orderComplete.getClientProfileData().getPhone());
 				guide.setGuideNumber(gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getGuia());
 				guide.setSerial(orderComplete.getSequence());
-				
+
 				String dateParts[] = UtilDate.dateParts(order.getCreateDate());
-				guide.setPeriode(dateParts[0]+"-"+dateParts[1]);
-				
+				guide.setPeriode(dateParts[0] + "-" + dateParts[1]);
+
 				try {
 					guide.setOrderDate(UtilDate.fromIsoToDateTime(orderComplete.getCreationDate()));
 				} catch (ParseException e) {
@@ -858,25 +866,25 @@ public class OrderVitexService extends BaseVitexService {
 					e.printStackTrace();
 				}
 				guide.setOrderStatus(orderComplete.getStatus());
-				
+
 				guideService.saveGuide(guide);
 				gbd.setGuide(guide);
 				guideInfoList.add(gbd);
-				
+
 				List<GuideDetail> details = gbd.getDetails();
-				//Guardar los detalles de la guia
-				if(details!=null && !details.isEmpty()){
+				// Guardar los detalles de la guia
+				if (details != null && !details.isEmpty()) {
 					guideService.saveGuideDetail(guide, details);
 				}
 			}
-			
+
 			guideDTO.setGuideBeanList(guideInfoList);
-			//LLamar ahora al servicio de pdfs
+			// LLamar ahora al servicio de pdfs
 			resultGuideInfo = tramacoService.generateGuidesPDF(guideDTO);
 			guideInfoBeanList = resultGuideInfo.getGuideBeanList();
-			//Realizar segunda iteracion para las guias
+			// Realizar segunda iteracion para las guias
 			List<Guide> guides = new ArrayList<Guide>();
-			for(GuideBeanDTO gbd:guideInfoBeanList){
+			for (GuideBeanDTO gbd : guideInfoBeanList) {
 				Guide guide = gbd.getGuide();
 				guide.setStatus("GENERATED-PDF");
 				guide.setDocumentUrl(gbd.getPdfUrl());
@@ -886,64 +894,66 @@ public class OrderVitexService extends BaseVitexService {
 				guides.add(guide);
 				response.getPdfPathList().add(gbd.getPdfUrl());
 			}
-			
+
 			orderService.saveOrder(order);
 			responseList.add(resultGuideInfo);
-			guideDTO=resultGuideInfo;
+			guideDTO = resultGuideInfo;
 		}
-		
+
 		result.setGuideInfoBean(response);
-		
+
 		result.setGuides(responseList);
-		
-		List<MailInfo> mailInfoList= prepareMailOrder(orderComplete,supplierDeliveryInfoList,guideInfoBean.getDeliverySelected());
-		
-		for(MailInfo mailInfo:mailInfoList){
-			for(GuideBeanDTO gDto:guideDTO.getGuideBeanList()){
-				if(gDto.getSupplier().getId()==mailInfo.getRefId()){
+
+		List<MailInfo> mailInfoList = prepareMailOrder(orderComplete, supplierDeliveryInfoList,
+				guideInfoBean.getDeliverySelected());
+
+		for (MailInfo mailInfo : mailInfoList) {
+			for (GuideBeanDTO gDto : guideDTO.getGuideBeanList()) {
+				if (gDto.getSupplier().getId() == mailInfo.getRefId()) {
 					mailInfo.getAttachmentList().add(gDto.getPdfUrl());
 				}
 			}
-			mailService.sendMailTemplate(mailInfo, "guideNotification.vm");	
+			mailService.sendMailTemplate(mailInfo, "guideNotification.vm");
 		}
-		
+
 		sendGuideMailCustomer(orderComplete);
-		
+
 		return result;
 	}
-	
-	private GuideContainerBean generateGuidesTcc(GuideInfoBean guideInfoBean){
-		
+
+	private GuideContainerBean generateGuidesTcc(GuideInfoBean guideInfoBean) {
+
 		systemOut.println("Inicio guias TCC");
-		GuideContainerBean result = new GuideContainerBean(); 
+		GuideContainerBean result = new GuideContainerBean();
 		GuideInfoBean response = guideInfoBean;
 		List<GuideDTO> responseList = new ArrayList<GuideDTO>();
-		
+
 		OrderComplete orderComplete = guideInfoBean.getOrderComplete();
-		
+
 		Order order = orderService.findByVitexId(orderComplete.getOrderId());
 		order.setDeliveryName("TCC");
 		orderService.saveOrder(order);
-		
+
 		List<SupplierDeliveryInfo> supplierDeliveryInfoList = guideInfoBean.getSupplierDeliveryInfoList();
-		
+
 		orderComplete.setSupplierDeliveryInfoList(supplierDeliveryInfoList);
 		GuideDTO guideDTO = new GuideDTO();
 		guideDTO.setOrderComplete(orderComplete);
 		guideDTO.setCustomerAdditionalInfo(guideInfoBean.getCustomerAdditionalInfo());
 		guideDTO.setDeliverySelected(guideInfoBean.getDeliverySelected());
-		
+
 		GuideDTO resultGuideInfo = tccService.generateGuides(guideDTO);
-		
+
 		List<GuideBeanDTO> guideInfoBeanList = resultGuideInfo.getGuideBeanList();
 		List<GuideBeanDTO> guideInfoList = new ArrayList<GuideBeanDTO>();
-		
-		if(guideInfoBeanList!=null && !guideInfoBeanList.isEmpty()){
-			for(GuideBeanDTO gbd:guideInfoBeanList){
+
+		if (guideInfoBeanList != null && !guideInfoBeanList.isEmpty()) {
+			for (GuideBeanDTO gbd : guideInfoBeanList) {
 				Guide guide = new Guide();
 				guide.setCreateDate(new Date());
 				guide.setOrderVitexId(orderComplete.getOrderId());
-				guide.setVitexDispatcherId(gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getId()+"%"+gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getGuia());
+				guide.setVitexDispatcherId(gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getId()
+						+ "%" + gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getGuia());
 				guide.setGuideInfo(new Gson().toJson(gbd));
 				guide.setOrder(order);
 				guide.setDeliveryCost(gbd.getDeliveryCost());
@@ -963,53 +973,47 @@ public class OrderVitexService extends BaseVitexService {
 				gbd.setGuide(guide);
 				guideInfoList.add(gbd);
 			}
-			
+
 			guideDTO.setGuideBeanList(guideInfoList);
-			//LLamar ahora al servicio de pdfs
+			// LLamar ahora al servicio de pdfs
 			/*
-			resultGuideInfo = tccService.generateGuidesPDF(guideDTO);
-			guideInfoBeanList = resultGuideInfo.getGuideBeanList();
-			List<Guide> guides = new ArrayList<Guide>();
-			for(GuideBeanDTO gbd:guideInfoBeanList){
-				Guide guide = gbd.getGuide();
-				guide.setStatus("GENERATED-PDF");
-				guide.setDocumentUrl(gbd.getPdfUrl());
-				guide.setDeliveryName("TRAMACO");
-				guideService.saveGuide(guide);
-				guides.add(guide);
-				response.getPdfPathList().add(gbd.getPdfUrl());
-			}
-			
-			responseList.add(resultGuideInfo);
-			guideDTO=resultGuideInfo;
-			*/
+			 * resultGuideInfo = tccService.generateGuidesPDF(guideDTO);
+			 * guideInfoBeanList = resultGuideInfo.getGuideBeanList();
+			 * List<Guide> guides = new ArrayList<Guide>(); for(GuideBeanDTO
+			 * gbd:guideInfoBeanList){ Guide guide = gbd.getGuide();
+			 * guide.setStatus("GENERATED-PDF");
+			 * guide.setDocumentUrl(gbd.getPdfUrl());
+			 * guide.setDeliveryName("TRAMACO"); guideService.saveGuide(guide);
+			 * guides.add(guide);
+			 * response.getPdfPathList().add(gbd.getPdfUrl()); }
+			 * 
+			 * responseList.add(resultGuideInfo); guideDTO=resultGuideInfo;
+			 */
 			orderService.saveOrder(order);
 		}
-		
+
 		result.setGuideInfoBean(response);
-		
+
 		result.setGuides(responseList);
 		/*
-		List<MailInfo> mailInfoList= prepareMailOrder(orderComplete,supplierDeliveryInfoList,guideInfoBean.getDeliverySelected());
-		
-		for(MailInfo mailInfo:mailInfoList){
-			for(GuideBeanDTO gDto:guideDTO.getGuideBeanList()){
-				if(gDto.getSupplier().getId()==mailInfo.getRefId()){
-					mailInfo.getAttachmentList().add(gDto.getPdfUrl());
-				}
-			}
-			mailService.sendMailTemplate(mailInfo, "guideNotification.vm");	
-		}
-		*/
-		
+		 * List<MailInfo> mailInfoList=
+		 * prepareMailOrder(orderComplete,supplierDeliveryInfoList,guideInfoBean
+		 * .getDeliverySelected());
+		 * 
+		 * for(MailInfo mailInfo:mailInfoList){ for(GuideBeanDTO
+		 * gDto:guideDTO.getGuideBeanList()){
+		 * if(gDto.getSupplier().getId()==mailInfo.getRefId()){
+		 * mailInfo.getAttachmentList().add(gDto.getPdfUrl()); } }
+		 * mailService.sendMailTemplate(mailInfo, "guideNotification.vm"); }
+		 */
+
 		sendGuideMailCustomer(orderComplete);
-		
+
 		return result;
 	}
 
-	
-	public OrderCancel cancelOrder(OrderComplete orderComplete){
-		
+	public OrderCancel cancelOrder(OrderComplete orderComplete) {
+
 		client = ClientBuilder.newClient();
 
 		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/" + orderComplete.getOrderId() + "/cancel";
@@ -1018,63 +1022,60 @@ public class OrderVitexService extends BaseVitexService {
 		MultivaluedMap<String, Object> myHeaders = new MultivaluedHashMap<String, Object>();
 		myHeaders.add(vitexRestAppkeyName, vitexRestAppkey);
 		myHeaders.add(vitexRestTokenName, vitexRestToken);
-		String json = target.request(MediaType.TEXT_PLAIN).headers(myHeaders).post(Entity.json(orderComplete.getOrderId()), String.class);
-
+		String json = target.request(MediaType.TEXT_PLAIN).headers(myHeaders)
+				.post(Entity.json(orderComplete.getOrderId()), String.class);
 
 		OrderCancel response = new Gson().fromJson(json, OrderCancel.class);
-		
+
 		Order order = orderService.findByVitexId(orderComplete.getOrderId());
 		order.setMotiveCancelText(orderComplete.getMotiveCancelText());
-		
+
 		Catalog motiveCancel = catalogService.findById(orderComplete.getMotiveCancelId());
 		order.setMotiveCancel(motiveCancel);
 		order.setStatus("canceled");
 		order.setCancelDate(new Date());
-		
+
 		orderService.saveOrder(order);
-		
+
 		return response;
 	}
-	
-	
+
 	public OrderComplete changeStatus(OrderComplete orderComplete, String action) {
 
-		
 		if (orderComplete != null) {
 			orderComplete.setError("OK");
 			systemOut.println("====>>>>1)");
-			try{
-			if(action==null){
-				action = orderComplete.getAppStatus();
-			}else{
-				orderComplete.setAppStatus(action);
+			try {
+				if (action == null) {
+					action = orderComplete.getAppStatus();
+				} else {
+					orderComplete.setAppStatus(action);
+				}
+
+				if (action.equals("cancel")) {
+					OrderComplete cancelOrder = changeVitexOrder(orderComplete.getOrderId(), "/" + action);
+					orderComplete = cancelOrder;
+				}
+
+				if (action.equals("invoice")) {
+					OrderComplete invoiceOrder = changeVitexOrder(orderComplete.getOrderId(), "/" + action);
+					orderComplete = invoiceOrder;
+				}
+
+				if (action.equals("approved")) {
+
+					List<SupplierDeliveryInfo> sdiList = buildSupplierDeliveryInfo(orderComplete);
+					orderComplete.setSupplierDeliveryInfoList(sdiList);
+				}
+
+				orderComplete = persistOrder(orderComplete, action);
+			} catch (Exception e) {
+				orderComplete.setError("ERROR:" + e.getMessage());
 			}
-			
 
-			if (action.equals("cancel")) {
-				OrderComplete cancelOrder = changeVitexOrder(orderComplete.getOrderId(), "/" + action);
-				orderComplete = cancelOrder;
-			}
-
-			if (action.equals("invoice")) {
-				OrderComplete invoiceOrder = changeVitexOrder(orderComplete.getOrderId(), "/" + action);
-				orderComplete = invoiceOrder;
-			}
-
-			if (action.equals("approved")) {
-
-				List<SupplierDeliveryInfo> sdiList = buildSupplierDeliveryInfo(orderComplete);
-				orderComplete.setSupplierDeliveryInfoList(sdiList);
-			}
-
-			orderComplete = persistOrder(orderComplete,action);
-			}catch(Exception e){
-				orderComplete.setError("ERROR:"+e.getMessage());
-			}
-
-		}else{
+		} else {
 			systemOut.println("====>>>>2)");
-			
+
 		}
 		return orderComplete;
 	}
@@ -1082,7 +1083,7 @@ public class OrderVitexService extends BaseVitexService {
 	private OrderComplete changeVitexOrder(String orderId, String action) {
 		client = ClientBuilder.newClient();
 
-		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/" + orderId + "/changestatus/"+action;
+		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/" + orderId + "/changestatus/" + action;
 		target = client.target(restUrl);
 
 		MultivaluedMap<String, Object> myHeaders = new MultivaluedHashMap<String, Object>();
@@ -1094,60 +1095,67 @@ public class OrderVitexService extends BaseVitexService {
 
 		return response;
 	}
-	
-	private GuideContainerBean generateGuideStandar(GuideInfoBean guideInfoBean){
+
+	private GuideContainerBean generateGuideStandar(GuideInfoBean guideInfoBean) {
 		GuideContainerBean result = new GuideContainerBean();
-		
-		if(guideInfoBean.getDeliverySelected().getNemonic().equals("MOTO_EXPRESS")){
+
+		if (guideInfoBean.getDeliverySelected().getNemonic().equals("MOTO_EXPRESS")) {
 			return generateGuideMotoExpress(guideInfoBean);
-		}else if(guideInfoBean.getDeliverySelected().getNemonic().equals("DESPACHO_INTERNO")){
+		} else if (guideInfoBean.getDeliverySelected().getNemonic().equals("DESPACHO_INTERNO")) {
 			return generateGuideMotoInternal(guideInfoBean);
-		}else if(guideInfoBean.getDeliverySelected().getNemonic().equals("CICLISTA")){
+		} else if (guideInfoBean.getDeliverySelected().getNemonic().equals("CICLISTA")) {
 			return generateGuideCyclist(guideInfoBean);
 		}
-		
-		
-		
+
 		return result;
 	}
-	
-	private GuideContainerBean generateGuideCyclist(GuideInfoBean guideInfoBean){
+
+	private GuideContainerBean generateGuideCyclist(GuideInfoBean guideInfoBean) {
 		GuideContainerBean result = new GuideContainerBean();
-		WayBillSchema response = datilService.processWayBill(guideInfoBean.getOrderComplete(), guideInfoBean.getDeliverySelected(), "SEQ_WAYBILL");
-		result = processStandarGuide(response, guideInfoBean.getOrderComplete(),guideInfoBean.getDeliverySelected(),guideInfoBean.getSupplierDeliveryInfoList());
+		WayBillSchema response = datilService.processWayBill(guideInfoBean.getOrderComplete(),
+				guideInfoBean.getDeliverySelected(), "SEQ_WAYBILL");
+		result = processStandarGuide(response, guideInfoBean.getOrderComplete(), guideInfoBean.getDeliverySelected(),
+				guideInfoBean.getSupplierDeliveryInfoList());
 		sendGuideMailCustomer(guideInfoBean.getOrderComplete());
 		return result;
 	}
-	
-	private GuideContainerBean generateGuideMotoExpress(GuideInfoBean guideInfoBean){
+
+	private GuideContainerBean generateGuideMotoExpress(GuideInfoBean guideInfoBean) {
 		GuideContainerBean result = new GuideContainerBean();
-		WayBillSchema response = datilService.processWayBill(guideInfoBean.getOrderComplete(), guideInfoBean.getDeliverySelected(), "SEQ_WAYBILL");
-		result = processStandarGuide(response, guideInfoBean.getOrderComplete(),guideInfoBean.getDeliverySelected(),guideInfoBean.getSupplierDeliveryInfoList());
-		
+		WayBillSchema response = datilService.processWayBill(guideInfoBean.getOrderComplete(),
+				guideInfoBean.getDeliverySelected(), "SEQ_WAYBILL");
+		result = processStandarGuide(response, guideInfoBean.getOrderComplete(), guideInfoBean.getDeliverySelected(),
+				guideInfoBean.getSupplierDeliveryInfoList());
+
 		sendGuideMailCustomer(guideInfoBean.getOrderComplete());
 		return result;
 	}
-	
-	private GuideContainerBean generateGuideMotoInternal(GuideInfoBean guideInfoBean){
+
+	private GuideContainerBean generateGuideMotoInternal(GuideInfoBean guideInfoBean) {
 		GuideContainerBean result = new GuideContainerBean();
-		//WayBillSchema response = datilService.processWayBill(guideInfoBean.getOrderComplete(), guideInfoBean.getDeliverySelected(), "SEQ_WAYBILL_INTERNAL");
-		WayBillSchema response = datilService.processWayBill(guideInfoBean.getOrderComplete(), guideInfoBean.getDeliverySelected(), "SEQ_WAYBILL");
-		result = processStandarGuide(response, guideInfoBean.getOrderComplete(),guideInfoBean.getDeliverySelected(),guideInfoBean.getSupplierDeliveryInfoList());
+		// WayBillSchema response =
+		// datilService.processWayBill(guideInfoBean.getOrderComplete(),
+		// guideInfoBean.getDeliverySelected(), "SEQ_WAYBILL_INTERNAL");
+		WayBillSchema response = datilService.processWayBill(guideInfoBean.getOrderComplete(),
+				guideInfoBean.getDeliverySelected(), "SEQ_WAYBILL");
+		result = processStandarGuide(response, guideInfoBean.getOrderComplete(), guideInfoBean.getDeliverySelected(),
+				guideInfoBean.getSupplierDeliveryInfoList());
 		sendGuideMailCustomer(guideInfoBean.getOrderComplete());
 		return result;
 	}
-	
-	private GuideContainerBean processStandarGuide(WayBillSchema wayBill, OrderComplete orderComplete, Catalog delivery, List<SupplierDeliveryInfo> supplierDeliveryInfoList){
+
+	private GuideContainerBean processStandarGuide(WayBillSchema wayBill, OrderComplete orderComplete, Catalog delivery,
+			List<SupplierDeliveryInfo> supplierDeliveryInfoList) {
 		GuideContainerBean result = new GuideContainerBean();
-		
+
 		Order order = orderService.findByVitexId(orderComplete.getOrderId());
-		
+
 		order.setDeliveryName(delivery.getNemonic());
 		orderService.saveOrder(order);
-		if(wayBill!=null){
+		if (wayBill != null) {
 			List<GuideBeanDTO> guideInfoBeanList = new ArrayList<GuideBeanDTO>();
-			for(GuideRemisionContainer grc:wayBill.getGuideContainerList()){
-				GuiaRemisionRespuesta grr=grc.getGuiaRemisionRespuesta();
+			for (GuideRemisionContainer grc : wayBill.getGuideContainerList()) {
+				GuiaRemisionRespuesta grr = grc.getGuiaRemisionRespuesta();
 				GuideBeanDTO gbd = new GuideBeanDTO();
 				Guide guide = new Guide();
 				guide.setCreateDate(new Date());
@@ -1160,33 +1168,33 @@ public class OrderVitexService extends BaseVitexService {
 				guide.setDeliveryStatus("GENERATED-PDF");
 				guide.setStatus("GENERATED-PDF");
 				guide.setOrderStatus(orderComplete.getStatus());
-				guide.setAccessCode(grr.getClaveAcceso());;
-				guide.setSerial(grr.getSecuencial()+"");
+				guide.setAccessCode(grr.getClaveAcceso());
+				;
+				guide.setSerial(grr.getSecuencial() + "");
 				guide.setCustomerPhone(orderComplete.getClientProfileData().getPhone());
-				guide.setGuideNumber(formatGuideNumber(grr.getSecuencial()+""));
-				
+				guide.setGuideNumber(formatGuideNumber(grr.getSecuencial() + ""));
+
 				String dateParts[] = UtilDate.dateParts(order.getCreateDate());
-				guide.setPeriode(dateParts[0]+"-"+dateParts[1]);
-				
-				try{
+				guide.setPeriode(dateParts[0] + "-" + dateParts[1]);
+
+				try {
 					Long idSup = new Long(grr.getInformacionAdicional().getIdProveedor());
-					
+
 					Supplier supp = new Supplier();
-					try{
+					try {
 						supp = supplierService.findById(idSup);
-					}catch(EntityNotFoundException e){
+					} catch (EntityNotFoundException e) {
 						YaEstaLog yaestalog = new YaEstaLog();
 						yaestalog.setLogDate(new Date());
 						yaestalog.setProcessName("SUPPLIER-QUERY");
-						yaestalog.setTextinfo("NO existe proveedor con ID"+idSup);
+						yaestalog.setTextinfo("NO existe proveedor con ID" + idSup);
 						yaestalog.setOrderId(orderComplete.getOrderId());
 						logService.save(yaestalog);
 					}
-				
+
 					guide.setSupplier(supp);
 					gbd.setSupplier(supp);
-				}catch(Exception e)
-				{
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				guide.setCustomerName(orderComplete.getCustomerName());
@@ -1196,572 +1204,569 @@ public class OrderVitexService extends BaseVitexService {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+
 				String pdfURL = "";
-				
-				if(delivery.getNemonic().equals("MOTO_EXPRESS")){
+
+				if (delivery.getNemonic().equals("MOTO_EXPRESS")) {
 					pdfURL = motoExpressPdfPath;
-				}else if(delivery.getNemonic().equals("DESPACHO_INTERNO")){
+				} else if (delivery.getNemonic().equals("DESPACHO_INTERNO")) {
 					pdfURL = internalPdfPath;
-				}else if(delivery.getNemonic().equals("CICLISTA")){
+				} else if (delivery.getNemonic().equals("CICLISTA")) {
 					pdfURL = cyclistPdfPath;
 				}
-				
+
 				GuideDataBean gdb = new GuideDataBean();
-				pdfURL = pdfURL+guidePrefix+ delivery.getNemonic() +"_"+grr.getSecuencial()+"_"+".pdf";
+				pdfURL = pdfURL + guidePrefix + delivery.getNemonic() + "_" + grr.getSecuencial() + "_" + ".pdf";
 				gdb.setPdfPath(pdfURL);
 				gbd.setPdfUrl(pdfURL);
 				gdb.setLogoPath(logoPath);
 				gdb.setOrderId(orderComplete.getOrderId());
 				guide.setDocumentUrl(pdfURL);
 				List<ItemData> itemDataList = new ArrayList<ItemData>();
-				for(Destinatario des:grr.getDestinatarios()){
-					for(ItemGuiaRemision igr: des.getItems()){
+				for (Destinatario des : grr.getDestinatarios()) {
+					for (ItemGuiaRemision igr : des.getItems()) {
 						ItemData id = new ItemData();
 						id.setCode(igr.getCodigoPrincipal());
 						id.setName(igr.getDescripcion());
-						id.setQuantity(igr.getCantidad()+"");
+						id.setQuantity(igr.getCantidad() + "");
 						itemDataList.add(id);
 					}
 				}
 				gdb.setItemDataList(itemDataList);
 				List<String> strList = new ArrayList<String>();
 				strList.add(" ");
-				String str = "Guia # "+ formatGuideNumber(grr.getSecuencial()+"");
+				String str = "Guia # " + formatGuideNumber(grr.getSecuencial() + "");
 				strList.add(str);
-				String courier = "Courier "+delivery.getName();
+				String courier = "Courier " + delivery.getName();
 				strList.add(courier);
-				String strPaymentForm = "Forma de pago: "+ grr.getInformacionAdicional().getFormaPago();
+				String strPaymentForm = "Forma de pago: " + grr.getInformacionAdicional().getFormaPago();
 				strList.add(strPaymentForm);
-				String strPayment = "Valor a cobrar: "+grr.getInformacionAdicional().getValorACobrar();
+				String strPayment = "Valor a cobrar: " + grr.getInformacionAdicional().getValorACobrar();
 				strList.add(strPayment);
 				strList.add("______________________________________________");
 				strList.add(" ");
-				
-				String supplierName = "Origen [Proveedor]: "+gbd.getSupplier().getName() + " ";  
+
+				String supplierName = "Origen [Proveedor]: " + gbd.getSupplier().getName() + " ";
 				strList.add(supplierName);
-				String supplierAddress = "Direccion: "+gbd.getSupplier().getAddress();
+				String supplierAddress = "Direccion: " + gbd.getSupplier().getAddress();
 				strList.add(supplierAddress);
-				String supplierContact = "Contacto: "+gbd.getSupplier().getContactName() + " " + gbd.getSupplier().getContactLastName();
+				String supplierContact = "Contacto: " + gbd.getSupplier().getContactName() + " "
+						+ gbd.getSupplier().getContactLastName();
 				strList.add(supplierContact);
 				String supplierAux = "Email: " + gbd.getSupplier().getContactEmail();
 				strList.add(supplierAux);
 				strList.add("______________________________________________");
 				strList.add(" ");
-				
+
 				String customer = "Destinatario [Cliente]:" + orderComplete.getCustomerName();
 				strList.add(customer);
-				String customerAddress = "Direccion: "+orderComplete.getShippingData().getAddress().getState() + " " + orderComplete.getShippingData().getAddress().getCity();
+				String customerAddress = "Direccion: " + orderComplete.getShippingData().getAddress().getState() + " "
+						+ orderComplete.getShippingData().getAddress().getCity();
 				customerAddress = customerAddress + " " + orderComplete.getShippingData().getAddress().getStreet();
 				customerAddress = customerAddress + " " + orderComplete.getShippingData().getAddress().getReference();
 				strList.add(customerAddress);
 				String email = "Email: " + orderComplete.getClientProfileData().getEmail();
 				strList.add(email);
-				String phone = "Telefono: "+ orderComplete.getClientProfileData().getPhone();
+				String phone = "Telefono: " + orderComplete.getClientProfileData().getPhone();
 				strList.add(phone);
 				strList.add("______________________________________________");
 				strList.add(" ");
 				gdb.setParagraphs(strList);
 				guideService.saveGuide(guide);
-				
-				gdb= BuildGuidePDF.generateGuidePDF(gdb);
+
+				gdb = BuildGuidePDF.generateGuidePDF(gdb);
 				guideInfoBeanList.add(gbd);
-				
-				
+
 				List<GuideDetail> details = grc.getDetailList();
-				
-				if(details!=null && !details.isEmpty()){
+
+				if (details != null && !details.isEmpty()) {
 					guideService.saveGuideDetail(guide, details);
 				}
-				
-			}//fin for
-			
+
+			} // fin for
+
 			orderService.saveOrder(order);
-			
-			List<MailInfo> mailInfoList= prepareMailOrder(orderComplete,supplierDeliveryInfoList,delivery);
-			
-			for(MailInfo mailInfo:mailInfoList){
-				for(GuideBeanDTO gDto:guideInfoBeanList){
-					if(gDto.getSupplier().getId().longValue()==mailInfo.getRefId().longValue()){
-						//systemOut.println("A "+gDto.getSupplier().getId());
-						//systemOut.println("A1 "+gDto.getPdfUrl());
+
+			List<MailInfo> mailInfoList = prepareMailOrder(orderComplete, supplierDeliveryInfoList, delivery);
+
+			for (MailInfo mailInfo : mailInfoList) {
+				for (GuideBeanDTO gDto : guideInfoBeanList) {
+					if (gDto.getSupplier().getId().longValue() == mailInfo.getRefId().longValue()) {
+						// systemOut.println("A "+gDto.getSupplier().getId());
+						// systemOut.println("A1 "+gDto.getPdfUrl());
 						mailInfo.getAttachmentList().add(gDto.getPdfUrl());
-					}else{
-						systemOut.println("B "+gDto.getSupplier().getId());
+					} else {
+						systemOut.println("B " + gDto.getSupplier().getId());
 					}
 				}
-				mailService.sendMailTemplate(mailInfo, "guideNotification.vm");	
+				mailService.sendMailTemplate(mailInfo, "guideNotification.vm");
 			}
 		}
-		
+
 		return result;
 	}
-	
-	
-	private List<MailInfo> prepareMailOrder(OrderComplete orderComplete,List<SupplierDeliveryInfo> supplierDeliveryInfoList, Catalog delivery){
-		
-		List<MailInfo> mailInfoList= new ArrayList<MailInfo>();
-		
-		for(SupplierDeliveryInfo sdi:supplierDeliveryInfoList){
-		
-			if(sdi.getSelected()){
-			MailInfo mailInfo = new MailInfo();
-			
-			MailParticipant sender = new MailParticipant();
-			sender.setName("YaEsta.com");
-			sender.setEmail(mailFrom);
-			mailInfo.setMailSender(sender);
-			
-			MailParticipant receiver = new MailParticipant();
-			receiver.setName(mailToName);
-			receiver.setEmail(mailTo);
-			mailInfo.setMailReceiver(receiver);
-			
-			List<MailParticipant> receiverTotal = new ArrayList<MailParticipant>();
-			
-			MailParticipant mpCc = new MailParticipant();
-			mpCc.setEmail(mailCc);
-			mpCc.setName(mailCcName);
-			receiverTotal.add(mpCc);
-			
-			//if( sdi.getDelivery()!=null && sdi.getDelivery().getNemonic().equals(DeliveryEnum.TRAMACO.getNemonic())){
-			if( delivery!=null && delivery.getNemonic().equals(DeliveryEnum.TRAMACO.getNemonic())){
-				String[] contactsCourierNames = tramacoContactsNames.split("%");
-				String[] contactsCourierEmails = tramacoContacts.split("%");
-			
-				for(int j=0;j<contactsCourierNames.length;j++){
-					MailParticipant mpCourier = new MailParticipant();
-					mpCourier.setEmail(contactsCourierEmails[j]);
-					mpCourier.setName(contactsCourierNames[j]);
-					receiverTotal.add(mpCourier);
-				}
-			}
-			
-			List<MailParticipant> recSupplierList = new ArrayList<MailParticipant>();
-			Supplier supplier = sdi.getSupplier();
-			List<SupplierContact> supplierContactList = supplierContactRepository.findBySupplier(supplier);
-			if(supplierContactList!=null && !supplierContactList.isEmpty()){
-				for(SupplierContact sc:supplierContactList){
-					if(sc.getEmail()!=null){
-						MailParticipant mp = new MailParticipant();
-						mp.setEmail(sc.getEmail());
-						mp.setName(supplier.getName());
-						recSupplierList.add(mp);
+
+	private List<MailInfo> prepareMailOrder(OrderComplete orderComplete,
+			List<SupplierDeliveryInfo> supplierDeliveryInfoList, Catalog delivery) {
+
+		List<MailInfo> mailInfoList = new ArrayList<MailInfo>();
+
+		for (SupplierDeliveryInfo sdi : supplierDeliveryInfoList) {
+
+			if (sdi.getSelected()) {
+				MailInfo mailInfo = new MailInfo();
+
+				MailParticipant sender = new MailParticipant();
+				sender.setName("YaEsta.com");
+				sender.setEmail(mailFrom);
+				mailInfo.setMailSender(sender);
+
+				MailParticipant receiver = new MailParticipant();
+				receiver.setName(mailToName);
+				receiver.setEmail(mailTo);
+				mailInfo.setMailReceiver(receiver);
+
+				List<MailParticipant> receiverTotal = new ArrayList<MailParticipant>();
+
+				MailParticipant mpCc = new MailParticipant();
+				mpCc.setEmail(mailCc);
+				mpCc.setName(mailCcName);
+				receiverTotal.add(mpCc);
+
+				// if( sdi.getDelivery()!=null &&
+				// sdi.getDelivery().getNemonic().equals(DeliveryEnum.TRAMACO.getNemonic())){
+				if (delivery != null && delivery.getNemonic().equals(DeliveryEnum.TRAMACO.getNemonic())) {
+					String[] contactsCourierNames = tramacoContactsNames.split("%");
+					String[] contactsCourierEmails = tramacoContacts.split("%");
+
+					for (int j = 0; j < contactsCourierNames.length; j++) {
+						MailParticipant mpCourier = new MailParticipant();
+						mpCourier.setEmail(contactsCourierEmails[j]);
+						mpCourier.setName(contactsCourierNames[j]);
+						receiverTotal.add(mpCourier);
 					}
 				}
-			}
-			if(supplier.getContactEmail()!=null){
-				MailParticipant mp = new MailParticipant();
-				mp.setEmail(supplier.getContactEmail());
-				mp.setName(supplier.getName());
-				recSupplierList.add(mp);
-			}
-			
-			
-			
-			
-			List<ItemComplete> icSupplierList = sdi.getItems();
-			if(icSupplierList!=null && !icSupplierList.isEmpty()){
-				for(ItemComplete ic:icSupplierList){
-					ItemInfo iInfo = new ItemInfo();
-					iInfo.setSupplierName(sdi.getSupplier().getName());
-					iInfo.setName(ic.getName());
-					iInfo.setPrice(ic.getPrice());
-					iInfo.setUrl(mailImagePrefix+ic.getImageUrl());
-					if(ic.getRefId()!=null){
-						iInfo.setRefCode((String)ic.getRefId());
+
+				List<MailParticipant> recSupplierList = new ArrayList<MailParticipant>();
+				Supplier supplier = sdi.getSupplier();
+				List<SupplierContact> supplierContactList = supplierContactRepository.findBySupplier(supplier);
+				if (supplierContactList != null && !supplierContactList.isEmpty()) {
+					for (SupplierContact sc : supplierContactList) {
+						if (sc.getEmail() != null) {
+							MailParticipant mp = new MailParticipant();
+							mp.setEmail(sc.getEmail());
+							mp.setName(supplier.getName());
+							recSupplierList.add(mp);
+						}
 					}
-					iInfo.setQuantity(ic.getQuantity());
-					mailInfo.getItemInfoList().add(iInfo);
 				}
+				if (supplier.getContactEmail() != null) {
+					MailParticipant mp = new MailParticipant();
+					mp.setEmail(supplier.getContactEmail());
+					mp.setName(supplier.getName());
+					recSupplierList.add(mp);
+				}
+
+				List<ItemComplete> icSupplierList = sdi.getItems();
+				if (icSupplierList != null && !icSupplierList.isEmpty()) {
+					for (ItemComplete ic : icSupplierList) {
+						ItemInfo iInfo = new ItemInfo();
+						iInfo.setSupplierName(sdi.getSupplier().getName());
+						iInfo.setName(ic.getName());
+						iInfo.setPrice(ic.getPrice());
+						iInfo.setUrl(mailImagePrefix + ic.getImageUrl());
+						if (ic.getRefId() != null) {
+							iInfo.setRefCode((String) ic.getRefId());
+						}
+						iInfo.setQuantity(ic.getQuantity());
+						mailInfo.getItemInfoList().add(iInfo);
+					}
+				}
+
+				String subject = "Notificación de pedido " + " - Orden: " + orderComplete.getOrderId()
+						+ " - Proveedor: " + supplier.getName();
+				receiverTotal.addAll(recSupplierList);
+				mailInfo.setReceivers(receiverTotal);
+				String strMailTextGuide = mailTextGuide;
+				strMailTextGuide = strMailTextGuide.replace(mailTextGuideToken, determineDeliveryName(delivery));
+				mailInfo.setGeneralText(strMailTextGuide);
+				mailInfo.setRefId(supplier.getId());
+				mailInfo.setRefVtexId(orderComplete.getOrderId());
+				mailInfo.setSubject(subject);
+
+				// Agregar textos de guia
+				mailInfo.getTextList().add(mailTextGuide2);
+				String codeText = mailTextGuide3;
+				codeText = codeText.replace(mailTextGuideToken, orderComplete.getOrderId());
+				mailInfo.getTextList().add(codeText);
+				mailInfo.getTextList().add(mailTextGuide4);
+				mailInfo.getTextList().add(mailTextGuide5);
+				mailInfo.getTextList().add(mailTextGuide6);
+				mailInfo.getTextList().add(mailTextGuide7);
+				mailInfo.getTextList().add(mailTextGuide8);
+
+				mailInfoList.add(mailInfo);
+
 			}
-			
-		    String subject = "Notificación de pedido " + " - Orden: "+orderComplete.getOrderId() + " - Proveedor: "+supplier.getName();
-			receiverTotal.addAll(recSupplierList);	
-			mailInfo.setReceivers(receiverTotal);
-			String strMailTextGuide = mailTextGuide;
-			strMailTextGuide = strMailTextGuide.replace(mailTextGuideToken, determineDeliveryName(delivery));
-			mailInfo.setGeneralText(strMailTextGuide);
-			mailInfo.setRefId(supplier.getId());
-			mailInfo.setRefVtexId(orderComplete.getOrderId());
-			mailInfo.setSubject(subject);
-			
-			//Agregar textos de guia
-			mailInfo.getTextList().add(mailTextGuide2);
-			String codeText = mailTextGuide3;
-			codeText = codeText.replace(mailTextGuideToken, orderComplete.getOrderId());
-			mailInfo.getTextList().add(codeText);
-			mailInfo.getTextList().add(mailTextGuide4);
-			mailInfo.getTextList().add(mailTextGuide5);
-			mailInfo.getTextList().add(mailTextGuide6);
-			mailInfo.getTextList().add(mailTextGuide7);
-			mailInfo.getTextList().add(mailTextGuide8);
-			
-			mailInfoList.add(mailInfo);
-		
-			}
-		}//fin del for
-		
-		
-		
+		} // fin del for
+
 		return mailInfoList;
 	}
-	
-	public MultivaluedMap<String, Object> buildHeaders(){
-	
+
+	public MultivaluedMap<String, Object> buildHeaders() {
+
 		MultivaluedMap<String, Object> myHeaders = new MultivaluedHashMap<String, Object>();
 		myHeaders.add(vitexRestAppkeyName, vitexRestAppkey);
 		myHeaders.add(vitexRestTokenName, vitexRestToken);
 		return myHeaders;
 	}
-	
-	public InvoiceResponse prepareVitexInvoice(OrderComplete orderComplete){
+
+	public InvoiceResponse prepareVitexInvoice(OrderComplete orderComplete) {
 		InvoiceResponse response = new InvoiceResponse();
 		Order order = orderService.findByVitexId(orderComplete.getOrderId());
-		
+
 		InvoiceSchemaBean isb = new InvoiceSchemaBean();
 		isb.setOrderComplete(orderComplete);
 		InvoiceSchema is = new InvoiceSchema();
 		is.setType("OUTPUT");
-		
-		
-		if(order.getInvoiceReference()!=null){
+
+		if (order.getInvoiceReference() != null) {
 			FacturaConsulta fc = datilService.findInvoice(order.getInvoiceReference());
-			
+
 			List<Guide> guides = guideService.findByOrder(order);
-			if(guides!=null && !guides.isEmpty()){
-				for(Guide g:guides){
+			if (guides != null && !guides.isEmpty()) {
+				for (Guide g : guides) {
 					is.setTrackingNumber(g.getGuideNumber());
 				}
 			}
-			
-			if(fc!=null){
-			       is.setInvoiceNumber(fc.getAutorizacion().getNumero());
-			       is.setIssuanceDate(fc.getFechaEmision());
-			       is.setCourier(order.getDeliveryName());
-			       is.setInvoiceValue(order.getTotalPrice().doubleValue());
-			       List<ItemInvoice> itemInvoiceList = new ArrayList<ItemInvoice>();
-			       for(ItemComplete ic:orderComplete.getItems()){
-			    	   ItemInvoice ii = new ItemInvoice();
-			    	   ii.setId(ic.getId());
-			    	   ii.setPrice(ic.getPrice());
-			    	   ii.setQuantity(ic.getQuantity());
-			    	   itemInvoiceList.add(ii);
-			       }
-			       is.setItems(itemInvoiceList);
+
+			if (fc != null) {
+				is.setInvoiceNumber(fc.getAutorizacion().getNumero());
+				is.setIssuanceDate(fc.getFechaEmision());
+				is.setCourier(order.getDeliveryName());
+				is.setInvoiceValue(order.getTotalPrice().doubleValue());
+				List<ItemInvoice> itemInvoiceList = new ArrayList<ItemInvoice>();
+				for (ItemComplete ic : orderComplete.getItems()) {
+					ItemInvoice ii = new ItemInvoice();
+					ii.setId(ic.getId());
+					ii.setPrice(ic.getPrice());
+					ii.setQuantity(ic.getQuantity());
+					itemInvoiceList.add(ii);
 				}
-				isb.setInvoiceSchema(is);
-			  response = prepareInvoiceVitexOrder(isb);
-		}
-		else if(order.getInvoice()!=null){
-			Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
-			FacturaRespuestaSRI facturaRespuestaSRI = gson.fromJson(order.getInvoice(),FacturaRespuestaSRI.class);
-		    String trackNumber =  "";
-			List<Guide> guides = guideService.findByOrder(order);
-			if(guides!=null && !guides.isEmpty()){
-			   String vitexDispatcherId = guides.get(0).getVitexDispatcherId();
-			   String[] codes = vitexDispatcherId.split("%");
-			   if(codes.length>0){
-				   trackNumber = codes[1];
-			   }
-			}
-			
-			is.setTrackingNumber(trackNumber);
-			
-			FacturaConsulta fc = datilService.findInvoice(facturaRespuestaSRI.getId());
-			if(fc!=null){
-		       is.setInvoiceNumber(fc.getAutorizacion().getNumero());
-		       is.setIssuanceDate(fc.getFechaEmision());
-		       is.setCourier("");
-		       is.setInvoiceValue(facturaRespuestaSRI.getTotales().getImporteTotal());
-		       List<ItemInvoice> itemInvoiceList = new ArrayList<ItemInvoice>();
-		       for(ItemComplete ic:orderComplete.getItems()){
-		    	   ItemInvoice ii = new ItemInvoice();
-		    	   ii.setId(ic.getId());
-		    	   ii.setPrice(ic.getPrice());
-		    	   ii.setQuantity(ic.getQuantity());
-		    	   itemInvoiceList.add(ii);
-		       }
-		       is.setItems(itemInvoiceList);
+				is.setItems(itemInvoiceList);
 			}
 			isb.setInvoiceSchema(is);
-		  response = prepareInvoiceVitexOrder(isb);
+			response = prepareInvoiceVitexOrder(isb);
+		} else if (order.getInvoice() != null) {
+			Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+			FacturaRespuestaSRI facturaRespuestaSRI = gson.fromJson(order.getInvoice(), FacturaRespuestaSRI.class);
+			String trackNumber = "";
+			List<Guide> guides = guideService.findByOrder(order);
+			if (guides != null && !guides.isEmpty()) {
+				String vitexDispatcherId = guides.get(0).getVitexDispatcherId();
+				String[] codes = vitexDispatcherId.split("%");
+				if (codes.length > 0) {
+					trackNumber = codes[1];
+				}
+			}
+
+			is.setTrackingNumber(trackNumber);
+
+			FacturaConsulta fc = datilService.findInvoice(facturaRespuestaSRI.getId());
+			if (fc != null) {
+				is.setInvoiceNumber(fc.getAutorizacion().getNumero());
+				is.setIssuanceDate(fc.getFechaEmision());
+				is.setCourier("");
+				is.setInvoiceValue(facturaRespuestaSRI.getTotales().getImporteTotal());
+				List<ItemInvoice> itemInvoiceList = new ArrayList<ItemInvoice>();
+				for (ItemComplete ic : orderComplete.getItems()) {
+					ItemInvoice ii = new ItemInvoice();
+					ii.setId(ic.getId());
+					ii.setPrice(ic.getPrice());
+					ii.setQuantity(ic.getQuantity());
+					itemInvoiceList.add(ii);
+				}
+				is.setItems(itemInvoiceList);
+			}
+			isb.setInvoiceSchema(is);
+			response = prepareInvoiceVitexOrder(isb);
 		}
-		
+
 		return response;
 	}
-	
-	
-	
-	private InvoiceResponse prepareInvoiceVitexOrder(InvoiceSchemaBean invoiceSchemaBean){
+
+	private InvoiceResponse prepareInvoiceVitexOrder(InvoiceSchemaBean invoiceSchemaBean) {
 		InvoiceResponse response = new InvoiceResponse();
-		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/" + invoiceSchemaBean.getOrderComplete().getOrderId() + "/invoice";
-		
+		String restUrl = this.vitexRestUrl + "/api/oms/pvt/orders/" + invoiceSchemaBean.getOrderComplete().getOrderId()
+				+ "/invoice";
+
 		systemOut.println("URL" + restUrl);
-		
+
 		client = ClientBuilder.newClient();
 		target = client.target(restUrl);
-		
+
 		Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
-		
+
 		String json = gson.toJson(invoiceSchemaBean.getInvoiceSchema());
-		
-		systemOut.println("VTEXT INVOICE:"+json);
-		
-		
-		
-		String responseJson = target.request(MediaType.APPLICATION_JSON_TYPE).headers(buildHeaders()).post(Entity.json(json), String.class);
-		
-		systemOut.println("==>>"+responseJson);
-		
+
+		systemOut.println("VTEXT INVOICE:" + json);
+
+		String responseJson = target.request(MediaType.APPLICATION_JSON_TYPE).headers(buildHeaders())
+				.post(Entity.json(json), String.class);
+
+		systemOut.println("==>>" + responseJson);
+
 		response = gson.fromJson(responseJson, InvoiceResponse.class);
-		
+
 		return response;
 	}
-	
+
 	@SuppressWarnings("unused")
-	public OrderComplete changeStatus(String orderId,String status) {
+	public OrderComplete changeStatus(String orderId, String status) {
 		OrderComplete oc = this.getOrderComplete(orderId);
 		OrderChangeStatus query = objectFactory.createOrderChangeStatus();
 		query.setIdOrder(new Integer(oc.getSequence()));
 		query.setStatusOrder(objectFactory.createString(status));
-		
 
 		OrderChangeStatusResponse response = (OrderChangeStatusResponse) webServiceTemplate.marshalSendAndReceive(query,
 				new SoapActionCallback("http://tempuri.org/IService/OrderChangeStatus"));
 		return this.getOrderComplete(orderId);
 	}
-	
-	
+
 	@Transactional
-	public synchronized  String loadOrderItem(){
+	public synchronized String loadOrderItem() {
 		String response = "OK";
-		try{
-		OrderSchemaContainerBean oscb = this.getVitexOrders(new Long(this.vitexRestMaxPages));
-		
-		if(oscb!=null){
-			for(OrderBean ob:oscb.getOrderBeanList()){
-				OrderComplete oc = getOrderComplete(ob.getOrderId());
-				systemOut.println("Orden completa "+oc.getOrderId());
-				Order order = orderService.findByVitexId(oc.getOrderId());
-				if(order!=null && order.getInvoiceReference()!=null){
-					FacturaConsulta fc = datilService.findInvoice(order.getInvoiceReference());
-					if(fc!=null) {
-						order.setInvoiceNumber(fc.getAutorizacion().getNumero());
-						orderService.saveOrder(order);
+		try {
+			OrderSchemaContainerBean oscb = this.getVitexOrders(new Long(this.vitexRestMaxPages));
+
+			if (oscb != null) {
+				for (OrderBean ob : oscb.getOrderBeanList()) {
+					OrderComplete oc = getOrderComplete(ob.getOrderId());
+					systemOut.println("Orden completa " + oc.getOrderId());
+					Order order = orderService.findByVitexId(oc.getOrderId());
+					if (order != null && order.getInvoiceReference() != null) {
+						FacturaConsulta fc = datilService.findInvoice(order.getInvoiceReference());
+						if (fc != null) {
+							order.setInvoiceNumber(fc.getAutorizacion().getNumero());
+							orderService.saveOrder(order);
+						}
 					}
 				}
+
 			}
-			
-		}
-		}catch(Exception e){
-			response="ERROR";
-			systemOut.println("Error en "+e.getMessage());
+		} catch (Exception e) {
+			response = "ERROR";
+			systemOut.println("Error en " + e.getMessage());
 			e.printStackTrace();
 		}
 		return response;
 	}
-	
-	private void generateOrderItem(OrderComplete oc) throws ParseException{
-		
-        Order order = orderService.findByVitexId(oc.getOrderId());
-        
-        if(order.getHasItems().equals("0")){
-		
-		String formaPago = "N/A";
-		if(oc.getPaymentData().getTransactions()!=null && !oc.getPaymentData().getTransactions().isEmpty()){
-			for(Transaction tr:oc.getPaymentData().getTransactions()){
-				if(tr.getPayments()!=null && !tr.getPayments().isEmpty()){
-					for(Payment py:tr.getPayments()){
-						formaPago = py.getPaymentSystemName();
-						if(py.getPaymentSystemName().equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName())){
-							formaPago = formaPago + ": " + PagoEnum.EFECTIVO.getDescripcionSRI();
-						}else if(py.getPaymentSystemName().equals(PaymentEnum.SAFETYPAY.getPaymentSystemName())){
-							formaPago = formaPago + ": " + PagoEnum.TRANSFER_OTRO_BANCO.getDescripcionSRI();
-						}else if(py.getPaymentSystemName().equals(PaymentEnum.TRANSFERENCIA_BANCARIA_OTRAS_ENTIDADES.getPaymentSystemName())){
-							formaPago = formaPago + ": " + PagoEnum.TRANSFER_OTRO_BANCO.getDescripcionSRI();
-						}
-						else if(py.getPaymentSystemName().equals(PaymentEnum.PAYCLUB.getPaymentSystemName())){
-							formaPago = formaPago + ": " +PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
-						}else if(py.getPaymentSystemName().equals(PaymentEnum.TARJETA_ALIA.getPaymentSystemName())){
-							formaPago = formaPago + ": " +PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
-						}else if(py.getPaymentSystemName().equals(PaymentEnum.TARJETA_CREDITO.getPaymentSystemName())){
-							formaPago = formaPago + ": " +PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
-						}
-						else if(py.getPaymentSystemName().equals(PaymentEnum.PAYPAL.getPaymentSystemName())){
-							formaPago = formaPago + ": " +PagoEnum.TARJETA_CREDITO_INTERNACIONAL.getDescripcionSRI();
-						}
-						
-					}//fin for
-					
-				}//
+
+	private void generateOrderItem(OrderComplete oc) throws ParseException {
+
+		Order order = orderService.findByVitexId(oc.getOrderId());
+
+		if (order.getHasItems().equals("0")) {
+
+			String formaPago = "N/A";
+			if (oc.getPaymentData().getTransactions() != null && !oc.getPaymentData().getTransactions().isEmpty()) {
+				for (Transaction tr : oc.getPaymentData().getTransactions()) {
+					if (tr.getPayments() != null && !tr.getPayments().isEmpty()) {
+						for (Payment py : tr.getPayments()) {
+							formaPago = py.getPaymentSystemName();
+							if (py.getPaymentSystemName()
+									.equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName())) {
+								formaPago = formaPago + ": " + PagoEnum.EFECTIVO.getDescripcionSRI();
+							} else if (py.getPaymentSystemName().equals(PaymentEnum.SAFETYPAY.getPaymentSystemName())) {
+								formaPago = formaPago + ": " + PagoEnum.TRANSFER_OTRO_BANCO.getDescripcionSRI();
+							} else if (py.getPaymentSystemName().equals(
+									PaymentEnum.TRANSFERENCIA_BANCARIA_OTRAS_ENTIDADES.getPaymentSystemName())) {
+								formaPago = formaPago + ": " + PagoEnum.TRANSFER_OTRO_BANCO.getDescripcionSRI();
+							} else if (py.getPaymentSystemName().equals(PaymentEnum.PAYCLUB.getPaymentSystemName())) {
+								formaPago = formaPago + ": " + PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
+							} else if (py.getPaymentSystemName()
+									.equals(PaymentEnum.TARJETA_ALIA.getPaymentSystemName())) {
+								formaPago = formaPago + ": " + PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
+							} else if (py.getPaymentSystemName()
+									.equals(PaymentEnum.TARJETA_CREDITO.getPaymentSystemName())) {
+								formaPago = formaPago + ": " + PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
+							} else if (py.getPaymentSystemName().equals(PaymentEnum.PAYPAL.getPaymentSystemName())) {
+								formaPago = formaPago + ": "
+										+ PagoEnum.TARJETA_CREDITO_INTERNACIONAL.getDescripcionSRI();
+							}
+
+						} // fin for
+
+					} //
+				}
 			}
-		}
-		
-		for(SupplierDeliveryInfo sdi:oc.getSupplierDeliveryInfoList()){
-			for(ItemComplete ic:sdi.getItems()){
-				OrderItem oi = new OrderItem();
-				oi.setOrder(order);
-				oi.setCustomerName(oc.getCustomerName());
-				oi.setCustomerDocument(oc.getClientProfileData().getDocument());
-				oi.setCustomerPhone(oc.getClientProfileData().getPhone());
-				oi.setCustomerState(oc.getShippingData().getAddress().getState());
-				oi.setCustomerCanton(oc.getShippingData().getAddress().getCity());
-				String address = oc.getShippingData().getAddress().getStreet() + " " + oc.getShippingData().getAddress().getNumber() + " " + oc.getShippingData().getAddress().getComplement(); 
-				Double deliveryPayment = 0D;
-				Boolean hasAdjunto = false;
-				if(oc.getPaymentData().getTransactions()!=null && !oc.getPaymentData().getTransactions().isEmpty()){
-					for(Transaction tr:oc.getPaymentData().getTransactions()){
-						if(tr.getPayments()!=null && !tr.getPayments().isEmpty()){
-							for(Payment py:tr.getPayments()){
-								if(py.getPaymentSystemName().trim().toLowerCase().equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName().toLowerCase())){
-									hasAdjunto = true; 
-									deliveryPayment = deliveryPayment+py.getValue();
+
+			for (SupplierDeliveryInfo sdi : oc.getSupplierDeliveryInfoList()) {
+				for (ItemComplete ic : sdi.getItems()) {
+					OrderItem oi = new OrderItem();
+					oi.setOrder(order);
+					oi.setCustomerName(oc.getCustomerName());
+					oi.setCustomerDocument(oc.getClientProfileData().getDocument());
+					oi.setCustomerPhone(oc.getClientProfileData().getPhone());
+					oi.setCustomerState(oc.getShippingData().getAddress().getState());
+					oi.setCustomerCanton(oc.getShippingData().getAddress().getCity());
+					String address = oc.getShippingData().getAddress().getStreet() + " "
+							+ oc.getShippingData().getAddress().getNumber() + " "
+							+ oc.getShippingData().getAddress().getComplement();
+					Double deliveryPayment = 0D;
+					Boolean hasAdjunto = false;
+					if (oc.getPaymentData().getTransactions() != null
+							&& !oc.getPaymentData().getTransactions().isEmpty()) {
+						for (Transaction tr : oc.getPaymentData().getTransactions()) {
+							if (tr.getPayments() != null && !tr.getPayments().isEmpty()) {
+								for (Payment py : tr.getPayments()) {
+									if (py.getPaymentSystemName().trim().toLowerCase().equals(
+											PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName().toLowerCase())) {
+										hasAdjunto = true;
+										deliveryPayment = deliveryPayment + py.getValue();
+									}
+								} // fin for
+
+							} //
+						}
+					}
+
+					Double itemValue = 0D;
+
+					itemValue = itemValue + ic.getPrice() * ic.getQuantity();
+					itemValue = (double) Math.round(itemValue * 100) / 100;
+
+					Double discount = 0D;
+					Boolean hasTax = Boolean.FALSE;
+					if (ic.getPriceTags() != null && !ic.getPriceTags().isEmpty()) {
+						for (PriceTag pt : ic.getPriceTags()) {
+							if (pt.getName().contains("discount@price")) {
+								Double val = pt.getValue();
+								if (val.intValue() < 0) {
+									val = val * (-1);
 								}
-							}//fin for
-							
-						}//
-					}
-				}
-				
-				Double itemValue = 0D;
-				
-				itemValue = itemValue+ic.getPrice()*ic.getQuantity();
-				itemValue = (double) Math.round(itemValue * 100) / 100;
-				
-				
-				Double discount=0D;
-				Boolean hasTax = Boolean.FALSE;
-				if(ic.getPriceTags()!=null && !ic.getPriceTags().isEmpty()){
-					for(PriceTag pt:ic.getPriceTags()){
-						if(pt.getName().contains("discount@price")){
-							Double val= pt.getValue();
-							if(val.intValue()<0){
-								val = val* (-1);
+								val = (double) Math.round(val * 100) / 100;
+								discount = val;
+								// break;
 							}
-						    val = (double) Math.round(val * 100) / 100;
-						    discount=val;
-							//break;
-						}
-						if(pt.getName().contains("tax@price")){
-							hasTax=Boolean.TRUE;
-						}
-						if(pt.getName().contains("discount@price")){
-							Double val= pt.getValue();
-							if(val<0){
-								val = val* (-1);
+							if (pt.getName().contains("tax@price")) {
+								hasTax = Boolean.TRUE;
 							}
-						    val = (double) Math.round(val * 100) / 100;
-						    discount = val;
+							if (pt.getName().contains("discount@price")) {
+								Double val = pt.getValue();
+								if (val < 0) {
+									val = val * (-1);
+								}
+								val = (double) Math.round(val * 100) / 100;
+								discount = val;
+							}
+						}
+					} else {
+						discount = 0D;
+					}
+
+					if (ic.getShippingPrice() != null) {
+						systemOut.println("shippingPrice " + ic.getShippingPrice());
+					} else {
+						systemOut.println("Sin costo de cobro de envio");
+						// carga.setValorCobro(0D);
+					}
+					Double iva = 0D;
+					itemValue = itemValue - discount;
+					if (ic.getTax().intValue() > 0) {
+						iva = ic.getTax();
+					} else {
+						if (hasTax) {
+							iva = BaseUtil.calculateIVA(itemValue, new Integer(datilIvaValue), datilIvaPercentValue);
 						}
 					}
-				}else{
-					discount=0D;
-				}
-				
-				if(ic.getShippingPrice()!=null){
-					systemOut.println("shippingPrice "+ ic.getShippingPrice());
-				}else{
-					systemOut.println("Sin costo de cobro de envio");
-					//carga.setValorCobro(0D);
-				}
-				Double iva = 0D;
-				itemValue = itemValue - discount;
-				if(ic.getTax().intValue()>0){
-					iva=ic.getTax();
-				}else{
-					if(hasTax){
-						iva=BaseUtil.calculateIVA(itemValue,new Integer(datilIvaValue),datilIvaPercentValue);
+					itemValue = itemValue + iva;
+
+					oi.setCustomerAddress(address);
+					try {
+						oi.setSupplierName(sdi.getSupplier().getName());
+						oi.setSupplier(sdi.getSupplier());
+						oi.setIsWarehouse(sdi.getSupplier().getIsWarehouse());
+					} catch (EntityNotFoundException e) {
+						YaEstaLog yaestalog = new YaEstaLog();
+						yaestalog.setLogDate(new Date());
+						yaestalog.setProcessName("WAYBILL-PDF-TRAMACO");
+						yaestalog.setProcessName("SUPPLIER-QUERY");
+						yaestalog.setTextinfo("NO existe proveedor " + sdi.getSupplierId());
+						yaestalog.setOrderId(oc.getOrderId());
+						logService.save(yaestalog);
 					}
-				}
-				itemValue = itemValue + iva;
-				
-				
-				oi.setCustomerAddress(address);
-				try{
-					oi.setSupplierName(sdi.getSupplier().getName());
-					oi.setSupplier(sdi.getSupplier());
-					oi.setIsWarehouse(sdi.getSupplier().getIsWarehouse());
-				}catch(EntityNotFoundException e){
-					YaEstaLog yaestalog = new YaEstaLog();
-					yaestalog.setLogDate(new Date());
-					yaestalog.setProcessName("WAYBILL-PDF-TRAMACO");
-					yaestalog.setProcessName("SUPPLIER-QUERY");
-					yaestalog.setTextinfo("NO existe proveedor "+sdi.getSupplierId());
-					yaestalog.setOrderId(oc.getOrderId());
-					logService.save(yaestalog);
-				}
-				oi.setVitexId(oc.getOrderId());
-				oi.setUnitPrice(ic.getPrice());
-				oi.setDiscount(discount);
-				oi.setPrice(ic.getPrice()*ic.getQuantity());
-				oi.setCustomerValue(itemValue);
-				oi.setQuantity(new Long(ic.getQuantity()));
-				oi.setProductDescription(ic.getName());
-				String[] productKey = SupplierUtil.returnSupplierCode((String)ic.getRefId());
-				oi.setProductKey(productKey[2]);
-				oi.setOrderSequence(oc.getSequence());
-				oi.setOrderDate(UtilDate.fromIsoToDateTime(oc.getCreationDate()));
-				oi.setWayToPay(formaPago);
-				oi.setOrderStatus(oc.getStatus());
-				oi.setStatusDescription(oc.getStatusDescription());
-				oi.setCustomerName(oc.getCustomerName());
-				oi.setSkuId(ic.getSellerSku());
-				oi.setItemVTexId(ic.getId());
-				if(hasAdjunto){
-					oi.setValueReceivables(itemValue);
-				}else{
-					oi.setValueReceivables(0D);
-				}
-				
-				if(ic.getAdditionalInfo()!=null){
-					oi.setBrandName(ic.getAdditionalInfo().getBrandName());
-					CategoryVtex cvt = categoryVitexService.getCategoryFromPath(ic.getAdditionalInfo().getCategoriesIds());
-					if(cvt!=null){
-						oi.setCategoryName(cvt.getName());
+					oi.setVitexId(oc.getOrderId());
+					oi.setUnitPrice(ic.getPrice());
+					oi.setDiscount(discount);
+					oi.setPrice(ic.getPrice() * ic.getQuantity());
+					oi.setCustomerValue(itemValue);
+					oi.setQuantity(new Long(ic.getQuantity()));
+					oi.setProductDescription(ic.getName());
+					String[] productKey = SupplierUtil.returnSupplierCode((String) ic.getRefId());
+					oi.setProductKey(productKey[2]);
+					oi.setOrderSequence(oc.getSequence());
+					oi.setOrderDate(UtilDate.fromIsoToDateTime(oc.getCreationDate()));
+					oi.setWayToPay(formaPago);
+					oi.setOrderStatus(oc.getStatus());
+					oi.setStatusDescription(oc.getStatusDescription());
+					oi.setCustomerName(oc.getCustomerName());
+					oi.setSkuId(ic.getSellerSku());
+					oi.setItemVTexId(ic.getId());
+					if (hasAdjunto) {
+						oi.setValueReceivables(itemValue);
+					} else {
+						oi.setValueReceivables(0D);
 					}
+
+					if (ic.getAdditionalInfo() != null) {
+						oi.setBrandName(ic.getAdditionalInfo().getBrandName());
+						CategoryVtex cvt = categoryVitexService
+								.getCategoryFromPath(ic.getAdditionalInfo().getCategoriesIds());
+						if (cvt != null) {
+							oi.setCategoryName(cvt.getName());
+						}
+					}
+
+					orderService.saveOrderItem(oi);
 				}
-				
-				orderService.saveOrderItem(oi);
 			}
+			order.setHasItems("1");
 		}
-          order.setHasItems("1");
-        }
 		orderService.saveOrder(order);
 	}
-   
 
-	private String determineDeliveryName(Catalog delivery){
+	private String determineDeliveryName(Catalog delivery) {
 		String result = "";
-		if(delivery!=null){
-			for(DeliveryEnum de:DeliveryEnum.values()){
-				if(de.getNemonic().equals(delivery.getNemonic())){
-					result=delivery.getName();
+		if (delivery != null) {
+			for (DeliveryEnum de : DeliveryEnum.values()) {
+				if (de.getNemonic().equals(delivery.getNemonic())) {
+					result = delivery.getName();
 					break;
 				}
 			}
 		}
 		return result;
 	}
-	
-	private String formatGuideNumber(String sequence){
-		while(sequence.length()<9){
-			sequence="0"+sequence;
+
+	private String formatGuideNumber(String sequence) {
+		while (sequence.length() < 9) {
+			sequence = "0" + sequence;
 		}
-		
-		sequence=datilEstablishmentCode+"-"+datilEmissionCode+"-"+sequence;
-		
+
+		sequence = datilEstablishmentCode + "-" + datilEmissionCode + "-" + sequence;
+
 		return sequence;
 	}
-	
-	public OrderResponseBean processPendingOrder(OrderComplete orderComplete){
-		
+
+	public OrderResponseBean processPendingOrder(OrderComplete orderComplete) {
+
 		OrderResponseBean orb = new OrderResponseBean();
 		orb.setResponse("OK");
-		try{
+		try {
 			Order order = orderService.findByVitexId(orderComplete.getOrderId());
-			
-			if(order!=null){
+
+			if (order != null) {
 				order.setPending(orderComplete.getPending());
 				order.setMotivePending(orderComplete.getMotivePendingText());
 				order.setPendingSolution(orderComplete.getPendingSolutionText());
@@ -1771,20 +1776,20 @@ public class OrderVitexService extends BaseVitexService {
 				orb.setOrderId(order.getId());
 				orb.setOrderIdVtex(orderComplete.getOrderId());
 			}
-		
-		}catch(Exception e){
+
+		} catch (Exception e) {
 			orb.setResponse("Error procesando pendiente orden");
 			orb.setOrderIdVtex(orderComplete.getOrderId());
 		}
 		return orb;
 	}
-	
-	public List<OrderComplete> getPendingOrders(){
+
+	public List<OrderComplete> getPendingOrders() {
 		List<OrderComplete> result = new ArrayList<OrderComplete>();
-		
+
 		List<Order> found = orderService.getPendingOrders();
-		if(found!=null && !found.isEmpty()){
-			for(Order o:found){
+		if (found != null && !found.isEmpty()) {
+			for (Order o : found) {
 				OrderComplete oc = this.getOrderComplete(o.getVitexId());
 				oc.setPending(o.getPending());
 				oc.setMotivePendingText(o.getMotivePending());
@@ -1794,119 +1799,137 @@ public class OrderVitexService extends BaseVitexService {
 		}
 		return result;
 	}
-	
-	
-	private void sendGuideMailCustomer(OrderComplete orderComplete){
-		
+
+	public List<OrderComplete> getPendingInvoiceOrders(String flag) {
+		List<OrderComplete> result = new ArrayList<OrderComplete>();
+
+		List<Order> found = orderService.getPendingInvoiceOrders(flag);
+		if (found != null && !found.isEmpty()) {
+			for (Order o : found) {
+				OrderComplete oc = this.getOrderComplete(o.getVitexId());
+				oc.setPending(o.getPending());
+				oc.setMotivePendingText(o.getMotivePending());
+				oc.setPendingSolutionText(o.getPendingSolution());
+				result.add(oc);
+			}
+		}
+		return result;
+	}
+
+	private void sendGuideMailCustomer(OrderComplete orderComplete) {
+
 		MailInfo mailInfo = new MailInfo();
-		
+
 		MailParticipant sender = new MailParticipant();
 		sender.setName("YaEsta.com");
 		sender.setEmail(mailFrom);
 		mailInfo.setMailSender(sender);
-		
+
 		MailParticipant receiver = new MailParticipant();
 		receiver.setName(orderComplete.getCustomerName());
 		receiver.setEmail(orderComplete.getClientProfileData().getEmail());
 		mailInfo.setMailReceiver(receiver);
-		
+
 		String delivery = "";
 		List<Guide> guides = guideService.findByOrderId(orderComplete.getOrderId());
 		List<String> guideFiles = new ArrayList<String>();
-		if(guides!=null && !guides.isEmpty()){
-			for(Guide g:guides){
+		if (guides != null && !guides.isEmpty()) {
+			for (Guide g : guides) {
 				guideFiles.add(g.getDocumentUrl());
-				delivery=g.getDeliveryName();
+				delivery = g.getDeliveryName();
 			}
-			
+
 		}
-		
-		String subject = "Notificación de inicio de despacho de pedido " + " - Orden: "+orderComplete.getOrderId();
+
+		String subject = "Notificación de inicio de despacho de pedido " + " - Orden: " + orderComplete.getOrderId();
 		mailInfo.setSubject(subject);
-		
+
 		String mailText = mailTextGuideCustomer.replace(mailTextGuideToken, orderComplete.getCustomerName());
 		mailInfo.setGeneralText(mailText);
-		
+
 		List<String> texts = new ArrayList<String>();
-		
+
 		String text2 = mailTextGuideCustomer2;
 		String text3 = mailTextGuideCustomer3;
 		String text4 = mailTextGuideCustomer4;
 		String text5 = mailTextGuideCustomer5;
-		
-		if(delivery.equals("TRAMACO")){
+
+		if (delivery.equals("TRAMACO")) {
 			text2 = mailTextGuideCustomer2.replace(mailTextGuideToken, tramacoTrackingUrl);
 		}
-		
+
 		texts.add(text2);
 		texts.add(text3);
 		texts.add(text4);
 		texts.add(text5);
-		
+
 		mailInfo.setTextList(texts);
-		
+
 		mailInfo.setAttachmentList(guideFiles);
-		
-		mailService.sendMailTemplate(mailInfo, "guideCustomerNotification.vm");	
-		
+
+		mailService.sendMailTemplate(mailInfo, "guideCustomerNotification.vm");
+
 	}
-	
-	
-	public OrderSchemaContainerBean getVitexOrders(Long maxPages){
+
+	public OrderSchemaContainerBean getVitexOrders(Long maxPages) {
 		OrderSchemaContainerBean oscb = new OrderSchemaContainerBean();
 		OrderSchema os = getOrdersRest(null);
-		
-		oscb.getSchemaList().add(os);
-		oscb.setTotalPages(new Long(os.getPaging().getPages()));
-		
-		if(maxPages==null){
-			maxPages = new Long(vitexRestMaxPages);
+
+		if (os != null) {
+			oscb.getSchemaList().add(os);
+			oscb.setTotalPages(new Long(os.getPaging().getPages()));
+
+			if (maxPages == null) {
+				maxPages = new Long(vitexRestMaxPages);
+			}
+
+			oscb.getSearchPages().add(1L);
+
+			if (os.getList() != null && !os.getList().isEmpty()) {
+				oscb.getOrderBeanList().addAll(os.getList());
+			}
+
+			Long count = 2L;
+
+			while (count <= maxPages) {
+
+				OrderSchema ordSc = getOrdersRestPage(null, count);
+				if (ordSc != null) {
+					oscb.getOrderBeanList().addAll(ordSc.getList());
+					oscb.getSchemaList().add(ordSc);
+					oscb.getSearchPages().add(count);
+
+				}
+				count++;
+			}
+
 		}
-		
-		oscb.getSearchPages().add(1L);
-		
-		
-		if(os.getList()!=null && !os.getList().isEmpty()){
-			oscb.getOrderBeanList().addAll(os.getList());
-		}
-		
-		Long count = 2L;
-		
-		while(count<=maxPages){
-			
-			OrderSchema ordSc = getOrdersRestPage(null,count);
-			oscb.getOrderBeanList().addAll(ordSc.getList());
-			oscb.getSchemaList().add(ordSc);
-			oscb.getSearchPages().add(count);
-			count++;
-		}
-		
+
 		try {
-			
+
 			ObjectMapper mapper = new ObjectMapper();
-			
+
 			String json = new Gson().toJson(oscb);
-		
+
 			mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			Object oJson = mapper.readValue(json, OrderSchemaContainerBean.class);
 			String indented = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(oJson);
-			String fileName = yaestaLogPath+yaestaPrefix+"PAGING"+(new Date()).getTime()+".txt";
+			String fileName = yaestaLogPath + yaestaPrefix + "PAGING" + (new Date()).getTime() + ".txt";
 			FileUtils.writeStringToFile(new File(fileName), indented);
-			
+
 		} catch (IOException e) {
-			
+
 			YaEstaLog yaestalog = new YaEstaLog();
 			yaestalog.setLogDate(new Date());
 			yaestalog.setProcessName("ORDER_FEED-QUERYPAGE");
 			yaestalog.setTextinfo("Error consulta VTEX ordenes");
-			//yaestalog.setXmlInfo(json);
+			// yaestalog.setXmlInfo(json);
 			logService.save(yaestalog);
-			
+
 			e.printStackTrace();
 		}
-		
+
 		return oscb;
 	}
-	
-  
+
 }

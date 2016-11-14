@@ -229,4 +229,10 @@ public class GuideController implements Serializable {
 		return new ResponseEntity<String>(result,HttpStatus.OK);
 		
 	}
+	
+	@RequestMapping(value = "/processMigrate", method = RequestMethod.GET)
+	public ResponseEntity<String> processMigrate(){
+		String result = guideService.processMigrate();
+		return new ResponseEntity<String>(result,HttpStatus.OK);
+	}
 }

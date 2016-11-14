@@ -119,10 +119,14 @@ public class Order implements Serializable{
 	@Column(name="delivery_name")
 	private String deliveryName;
 	
+	@Column(name="pending_invoice")
+	private Boolean pendingInvoice;
+	
 	public Order(){
 		this.status = "registered";
 		this.hasItems = "0";
 		this.pending = Boolean.FALSE;
+		this.pendingInvoice = Boolean.TRUE;
 	}
 
 	public Long getId() {
@@ -334,6 +338,16 @@ public class Order implements Serializable{
 
 	public void setInvoiceReference(String invoiceReference) {
 		this.invoiceReference = invoiceReference;
+	}
+	
+	
+
+	public Boolean getPendingInvoice() {
+		return pendingInvoice;
+	}
+
+	public void setPendingInvoice(Boolean pendingInvoice) {
+		this.pendingInvoice = pendingInvoice;
 	}
 
 	@Override

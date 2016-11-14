@@ -496,6 +496,7 @@ public class DatilService implements Serializable {
 		order.setInvoiceReference(response.getId());
 		// Marcar como facturada la orden
 		order.setStatus("invoiced");
+		order.setPendingInvoice(Boolean.FALSE);
 
 		orderService.saveOrder(order);
 
@@ -1149,7 +1150,7 @@ public class DatilService implements Serializable {
 			 */
 			response.getGuideList().add(grr);
 			response.getGuideContainerList().add(grc);
-		}//fin de suppliers
+		} // fin de suppliers
 		return response;
 	}
 

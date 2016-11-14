@@ -214,4 +214,15 @@ public class OrderService implements Serializable {
 		
 		return found;
 	}
+	
+	public List<Order> getPendingInvoiceOrders(String flag){
+		
+		List<Order> found = new ArrayList<Order>();
+		if(flag.equals("S")){
+			found = orderRepository.findByPendingInvoice(Boolean.TRUE);
+		}else{
+			found = orderRepository.findByPendingInvoice(Boolean.FALSE);
+		}
+		return found;
+	}
 }

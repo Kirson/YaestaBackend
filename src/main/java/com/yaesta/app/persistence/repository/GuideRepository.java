@@ -31,4 +31,6 @@ public interface GuideRepository extends JpaRepository<Guide, Long>{
 	@Query("Select gui from Guide gui " +
 	         "where gui.orderDate between ?1 and ?2 and gui.status = ?3")
 	public List<Guide> findByOrderDateBetweenAndStatus(Date start, Date finish, String status);
+	
+	public List<Guide> findByGuideNumber(String guideNumber);
 }

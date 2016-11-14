@@ -13,4 +13,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 	public List<Order> findByStatus(String status);
 	public List<Order> findByClient(Customer client);
 	public List<Order> findByPending(Boolean pending);
+	public List<Order> findByPendingInvoice(Boolean pendingInvoice);
 }

@@ -1,6 +1,5 @@
 package com.yaesta.integration.vitex.controller;
 
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,212 +38,211 @@ import com.yaesta.integration.vitex.wsdl.dto.ProductDTO;
 import com.yaesta.integration.vitex.wsdl.vo.OrderStatusVO;
 import com.yaesta.integration.vitex.wsdl.vo.OrderVO;
 
-
-
 @RestController
 @RequestMapping(value = "/vitextIntegration")
 public class VitexIntegrationController {
 
 	@Autowired
 	ProductVitexService productVitexService;
-	
+
 	@Autowired
 	CategoryVitexService categoryVitexService;
-	
+
 	@Autowired
 	OrderVitexService orderVitexService;
-	
+
 	@Autowired
 	OrderStatusVitexService orderStatusVitexService;
-	
+
 	@Autowired
 	DatilService datilService;
-	
+
 	@Autowired
 	SystemOutService systemOut;
-	
+
 	@RequestMapping(value = "/getProductById/{id}", method = RequestMethod.GET)
-	public ResponseEntity<ProductDTO> getProductById(@PathVariable("id") Integer id) {	  		 		
+	public ResponseEntity<ProductDTO> getProductById(@PathVariable("id") Integer id) {
 		systemOut.println("==>>1<<===");
-		
-		ProductDTO product = productVitexService.findById(id);	
+
+		ProductDTO product = productVitexService.findById(id);
 		systemOut.println("==>>2<<===");
 		return new ResponseEntity<ProductDTO>(product, HttpStatus.OK);
 	}
-	
-	
-	
-	
+
 	@RequestMapping(value = "/getOrdersNext50Vitex{sequence}", method = RequestMethod.GET)
-	public ResponseEntity<ArrayOfOrderDTO> getOrdersNext50Vitex(@PathVariable("sequence") Integer sequence) {	  		 		
+	public ResponseEntity<ArrayOfOrderDTO> getOrdersNext50Vitex(@PathVariable("sequence") Integer sequence) {
 		ArrayOfOrderDTO resultList = orderVitexService.getOrders(sequence);
 		return new ResponseEntity<ArrayOfOrderDTO>(resultList, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/getOrdersNext50{sequence}", method = RequestMethod.GET)
-	public ResponseEntity<List<OrderVO>> getOrdersNext50(@PathVariable("sequence") Integer sequence) {	  		 		
+	public ResponseEntity<List<OrderVO>> getOrdersNext50(@PathVariable("sequence") Integer sequence) {
 		List<OrderVO> resultList = orderVitexService.getOrdersNext50(sequence);
 		return new ResponseEntity<List<OrderVO>>(resultList, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/findOrderById{id}", method = RequestMethod.GET)
-	public ResponseEntity<OrderDTO> findOrderById(@PathVariable("id") Integer id) {	  		 		
-		
+	public ResponseEntity<OrderDTO> findOrderById(@PathVariable("id") Integer id) {
+
 		OrderDTO order = orderVitexService.findById(id);
 		return new ResponseEntity<OrderDTO>(order, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/getOrderById{id}", method = RequestMethod.GET)
-	public ResponseEntity<OrderDTO> getOrderById(@PathVariable("id") String id) {	  		 		
-		//systemOut.println("==>>1<<===");
-		
+	public ResponseEntity<OrderDTO> getOrderById(@PathVariable("id") String id) {
+		// systemOut.println("==>>1<<===");
+
 		OrderDTO order = orderVitexService.findOrderById(id);
-		//systemOut.println("==>>2<<===");
+		// systemOut.println("==>>2<<===");
 		return new ResponseEntity<OrderDTO>(order, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/getOrder{id}", method = RequestMethod.GET)
-	public ResponseEntity<OrderVO> getOrder(@PathVariable("id") String id) {	  		 		
-		
+	public ResponseEntity<OrderVO> getOrder(@PathVariable("id") String id) {
+
 		OrderVO order = orderVitexService.findOrder(id);
 		return new ResponseEntity<OrderVO>(order, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/getOrderStatus", method = RequestMethod.GET)
-	public ResponseEntity<List<OrderStatusVO>> getOrderStatus() {	  		 		
-		
+	public ResponseEntity<List<OrderStatusVO>> getOrderStatus() {
+
 		List<OrderStatusVO> orderStatusList = orderStatusVitexService.getOrderStatusList();
 		return new ResponseEntity<List<OrderStatusVO>>(orderStatusList, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/getOrdersRest", method = RequestMethod.GET)
-	public ResponseEntity<OrderSchema> getOrdersRest() {	  		 		
-		
+	public ResponseEntity<OrderSchema> getOrdersRest() {
+
 		OrderSchema json = orderVitexService.getOrdersRest(null);
 		return new ResponseEntity<OrderSchema>(json, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/getOrdersVitexRest", method = RequestMethod.GET)
-	public ResponseEntity<OrderSchemaContainerBean> getOrdersVitexRest() {	  		 		
-		
+	public ResponseEntity<OrderSchemaContainerBean> getOrdersVitexRest() {
+
 		OrderSchemaContainerBean json = orderVitexService.getVitexOrders(null);
 		return new ResponseEntity<OrderSchemaContainerBean>(json, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/getOrdersRestStatus{status}", method = RequestMethod.GET)
-	public ResponseEntity<OrderSchema> getOrdersRestStatus(@PathVariable("status") String status) {	  		 		
-		systemOut.println("status::"+status);
+	public ResponseEntity<OrderSchema> getOrdersRestStatus(@PathVariable("status") String status) {
+		systemOut.println("status::" + status);
 		OrderSchema json = orderVitexService.getOrdersRest(status);
 		return new ResponseEntity<OrderSchema>(json, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/getOrderComplete{orderId}", method = RequestMethod.GET)
-	public ResponseEntity<OrderComplete> getOrderComplete(@PathVariable("orderId") String orderId) {	  		 		
-		
+	public ResponseEntity<OrderComplete> getOrderComplete(@PathVariable("orderId") String orderId) {
+
 		OrderComplete json = orderVitexService.getOrderComplete(orderId);
 		return new ResponseEntity<OrderComplete>(json, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/getOrderConversation{orderId}", method = RequestMethod.GET)
-	public ResponseEntity<OrderConversation> getOrderConversation(@PathVariable("orderId") String orderId) {	  		 		
-		
+	public ResponseEntity<OrderConversation> getOrderConversation(@PathVariable("orderId") String orderId) {
+
 		OrderConversation json = orderVitexService.getOrderConversation(orderId);
 		return new ResponseEntity<OrderConversation>(json, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<OrderComplete> changeStatus(@RequestBody OrderCompleteBean orderCompleteBean) {	  		 		
-		
-		OrderComplete json = orderVitexService.changeStatus(orderCompleteBean.getOrder(),orderCompleteBean.getAction());
+	public ResponseEntity<OrderComplete> changeStatus(@RequestBody OrderCompleteBean orderCompleteBean) {
+
+		OrderComplete json = orderVitexService.changeStatus(orderCompleteBean.getOrder(),
+				orderCompleteBean.getAction());
 		return new ResponseEntity<OrderComplete>(json, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/cancelOrder", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<OrderCancel> cancelOrder(@RequestBody OrderCompleteBean orderCompleteBean) {	  		 		
-		
+	public ResponseEntity<OrderCancel> cancelOrder(@RequestBody OrderCompleteBean orderCompleteBean) {
+
 		OrderComplete oc = orderCompleteBean.getOrder();
-		if(oc.getMotiveCancelId()==null){
+		if (oc.getMotiveCancelId() == null) {
 			oc.setMotiveCancelId(orderCompleteBean.getMotiveCancelId());
 			oc.setMotiveCancelText(orderCompleteBean.getMotiveCancelText());
 		}
-		
-		//systemOut.println("1>"+oc.getMotiveCancelId());
-		//systemOut.println("2>"+oc.getMotiveCancelText());
-		
+
+		// systemOut.println("1>"+oc.getMotiveCancelId());
+		// systemOut.println("2>"+oc.getMotiveCancelText());
+
 		OrderCancel json = orderVitexService.cancelOrder(oc);
 		return new ResponseEntity<OrderCancel>(json, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/pendingOrder", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<OrderResponseBean> pendingOrder(@RequestBody OrderCompleteBean orderCompleteBean) {	  		 		
-		
+	public ResponseEntity<OrderResponseBean> pendingOrder(@RequestBody OrderCompleteBean orderCompleteBean) {
+
 		OrderComplete oc = orderCompleteBean.getOrder();
-		
+
 		OrderResponseBean json = orderVitexService.processPendingOrder(oc);
 		return new ResponseEntity<OrderResponseBean>(json, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/getPendingOrders", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<List<OrderComplete>> getPendingOrders(){
+	public ResponseEntity<List<OrderComplete>> getPendingOrders() {
 		List<OrderComplete> found = orderVitexService.getPendingOrders();
 		return new ResponseEntity<List<OrderComplete>>(found, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/generateGuide", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<GuideContainerBean> generateGuide(@RequestBody GuideInfoBean guideInfoBean){
-		
+	public ResponseEntity<GuideContainerBean> generateGuide(@RequestBody GuideInfoBean guideInfoBean) {
+
 		GuideContainerBean response = new GuideContainerBean();
 		response = orderVitexService.generateGuides(guideInfoBean);
-		
+
 		/*
-		for(GuideDTO guide:response.getGuides()){
-			systemOut.println("==>" + guide.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().size());
-		    for(EntityGuia eg:guide.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias()){
-		    	response.getGuideIdList().add(eg.getId()+"%"+eg.getGuia());
-		    }
-		}*/
-		
-		
+		 * for(GuideDTO guide:response.getGuides()){ systemOut.println("==>" +
+		 * guide.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().size(
+		 * )); for(EntityGuia
+		 * eg:guide.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias()){
+		 * response.getGuideIdList().add(eg.getId()+"%"+eg.getGuia()); } }
+		 */
+
 		return new ResponseEntity<GuideContainerBean>(response, HttpStatus.OK);
 	}
-	
-	
+
 	@RequestMapping(value = "/invoiceOrder", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<FacturaRespuestaSRI> invoiceOrder(@RequestBody OrderCompleteBean orderCompleteBean) {	  		 		
-		
+	public ResponseEntity<FacturaRespuestaSRI> invoiceOrder(@RequestBody OrderCompleteBean orderCompleteBean) {
+
 		OrderComplete oc = orderCompleteBean.getOrder();
-		FacturaRespuestaSRI response=datilService.processInvoiceOrder(oc);
-		
-		
+		FacturaRespuestaSRI response = datilService.processInvoiceOrder(oc);
+
 		return new ResponseEntity<FacturaRespuestaSRI>(response, HttpStatus.OK);
 	}
-	
-	@RequestMapping(value = "/invoiceOrderVtex", method = RequestMethod.POST , consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<InvoiceResponse> invoiceOrderVTex(@RequestBody OrderCompleteBean orderCompleteBean) {	  		 		
-		
+
+	@RequestMapping(value = "/invoiceOrderVtex", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<InvoiceResponse> invoiceOrderVTex(@RequestBody OrderCompleteBean orderCompleteBean) {
+
 		OrderComplete oc = orderCompleteBean.getOrder();
-		InvoiceResponse response=orderVitexService.prepareVitexInvoice(oc);
-		
-		
+		InvoiceResponse response = orderVitexService.prepareVitexInvoice(oc);
+
 		return new ResponseEntity<InvoiceResponse>(response, HttpStatus.OK);
 	}
-	
-	@RequestMapping(value = "/creditNoteOrder", method = RequestMethod.POST , consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<NotaCreditoRespuesta> creditNoteOrder(@RequestBody CreditNoteBean creditNoteBean) {	  		 		
-		
+
+	@RequestMapping(value = "/creditNoteOrder", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<NotaCreditoRespuesta> creditNoteOrder(@RequestBody CreditNoteBean creditNoteBean) {
+
 		NotaCreditoRespuesta response = datilService.processCreditNote(creditNoteBean);
 		return new ResponseEntity<NotaCreditoRespuesta>(response, HttpStatus.OK);
 	}
+
 	@RequestMapping(value = "/loadOrderItems", method = RequestMethod.GET)
-	public ResponseEntity<String> loadOrderItems(){
+	public ResponseEntity<String> loadOrderItems() {
 		String response = orderVitexService.loadOrderItem();
-		return new ResponseEntity<String>(response,HttpStatus.OK);
+		return new ResponseEntity<String>(response, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/getVtexCategories", method = RequestMethod.GET)
-	public ResponseEntity<List<CategoryVtex>> getVtexCategories() {	  		 		
-		
+	public ResponseEntity<List<CategoryVtex>> getVtexCategories() {
+
 		List<CategoryVtex> json = categoryVitexService.getCategories();
 		return new ResponseEntity<List<CategoryVtex>>(json, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/getPendingInvoiceOrders/{flag}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<OrderComplete>> getPendingInvoiceOrders(@PathVariable("flag") String flag) {
+		List<OrderComplete> found = orderVitexService.getPendingInvoiceOrders(flag);
+		return new ResponseEntity<List<OrderComplete>>(found, HttpStatus.OK);
 	}
 }

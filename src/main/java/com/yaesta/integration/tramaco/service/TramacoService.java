@@ -565,7 +565,7 @@ public class TramacoService implements Serializable {
 
 							totalValue = totalValue + itemValue + partialShipping;
 							totalValue = (double) Math.round(totalValue * 100) / 100;
-							if (hasAdjunto && itemValue > 0) {
+							if (hasAdjunto && itemValue > 0 || (hasAdjunto && partialShipping > 0)) {
 								carga.setAdjuntos(Boolean.TRUE);
 								TableSequenceResponseVO codigoAdjunto = getTramacoAdjCode();
 

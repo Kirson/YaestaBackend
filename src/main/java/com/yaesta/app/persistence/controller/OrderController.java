@@ -190,5 +190,12 @@ public class OrderController {
 		
 		return new ResponseEntity<List<Order>>(found,HttpStatus.OK);
 	}
+	
+	@RequestMapping(value = "/getPendingInvoiceOrders/{flag}", method = RequestMethod.GET)
+	public ResponseEntity<List<Order>> getPendingInvoiceOrders(@PathVariable("flag") String flag){
+		List<Order> found = orderService.getPendingInvoiceOrders(flag);
+		
+		return new ResponseEntity<List<Order>>(found,HttpStatus.OK);
+	}
 
 }
