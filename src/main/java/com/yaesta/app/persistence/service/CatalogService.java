@@ -68,6 +68,13 @@ public class CatalogService {
 		if(removeList!=null && !removeList.isEmpty()){
 			for(Catalog cm:removeList){
 				catalogRepository.delete(cm);
+				/*
+				if(details!=null && details.isEmpty()){
+					if(details.contains(cm)){
+						details.remove(cm);
+					}
+				}
+				*/
 			}
 		}
 		
@@ -80,6 +87,8 @@ public class CatalogService {
 				catalogRepository.save(c);
 			}
 		}
+		
+		catalog = catalogRepository.save(catalog);
 		
 		return catalog;
 	}

@@ -648,6 +648,13 @@ public class GuideService {
 
 		} catch (Exception e) {
 			result = "ERROR";
+			YaEstaLog yaestalog = new YaEstaLog();
+			yaestalog.setLogDate(new Date());
+			yaestalog.setProcessName("Guide Migrate");
+			yaestalog.setTextinfo("Error al procesar migracion de guias" + e.getMessage());
+			// yaestalog.setXmlInfo(json);
+			logService.save(yaestalog);
+			e.printStackTrace();
 		}
 		
 		return result;
