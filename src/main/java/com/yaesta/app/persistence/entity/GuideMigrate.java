@@ -26,6 +26,9 @@ public class GuideMigrate implements Serializable{
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "guide_migrate_seq_gen")
 	@SequenceGenerator(name = "guide_migrate_seq_gen", sequenceName = "guide_migrate_id_seq")
 	private Long id;
+	
+	@Column(name = "order_id")
+	private String orderId;
 
 	@Column(name = "guide_number")
 	private String guideNumber;
@@ -91,7 +94,15 @@ public class GuideMigrate implements Serializable{
 	public void setPod(String pod) {
 		this.pod = pod;
 	}
-	
+
+	public String getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
+	}
+
 	
 	
 }

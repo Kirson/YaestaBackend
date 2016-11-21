@@ -146,6 +146,9 @@ public class Guide implements Serializable{
 	@Column(name="tracking_url")
 	private String trackingUrl;
 	
+	@Column(name="payment_method")
+	private String paymentMethod;
+	
 	@Transient
 	private List<GuideDetail> details;
 	
@@ -469,6 +472,16 @@ public class Guide implements Serializable{
 
 	public void setTrackingUrl(String trackingUrl) {
 		this.trackingUrl = trackingUrl;
+	}
+	
+	
+
+	public String getPaymentMethod() {
+		return paymentMethod;
+	}
+
+	public void setPaymentMethod(String paymentMethod) {
+		this.paymentMethod = paymentMethod;
 	}
 
 	@Override

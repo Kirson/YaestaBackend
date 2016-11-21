@@ -32,6 +32,7 @@ public class GuideDTO implements Serializable{
 	private String longitude;
 	private Catalog deliverySelected;
 	private List<GuideDetail> details;
+	private String customerDocument;
 	
 	
 	public GuideDTO(){
@@ -158,6 +159,16 @@ public class GuideDTO implements Serializable{
 
 	public void setDetails(List<GuideDetail> details) {
 		this.details = details;
+	}
+
+
+	public String getCustomerDocument() {
+		return customerDocument;
+	}
+
+
+	public void setCustomerDocument(String customerDocument) {
+		this.customerDocument = customerDocument;
 	}
 
 	

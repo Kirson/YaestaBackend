@@ -80,6 +80,7 @@ import com.yaesta.integration.vitex.bean.GuideRemisionContainer;
 import com.yaesta.integration.vitex.bean.InvoiceSchemaBean;
 import com.yaesta.integration.vitex.bean.OrderResponseBean;
 import com.yaesta.integration.vitex.bean.OrderSchemaContainerBean;
+import com.yaesta.integration.vitex.bean.PaymentBean;
 import com.yaesta.integration.vitex.bean.SupplierDeliveryInfo;
 import com.yaesta.integration.vitex.bean.WayBillSchema;
 import com.yaesta.integration.vitex.json.bean.CategoryVtex;
@@ -449,7 +450,7 @@ public class OrderVitexService extends BaseVitexService {
 			e.printStackTrace();
 		}
 
-		if (response!=null && response.getList() != null && !response.getList().isEmpty()) {
+		if (response != null && response.getList() != null && !response.getList().isEmpty()) {
 			List<OrderBean> list = new ArrayList<OrderBean>();
 			for (OrderBean ob : response.getList()) {
 				OrderBean obean = OrderVtexUtil.setRealValuesToOrderBean(ob);
@@ -706,7 +707,10 @@ public class OrderVitexService extends BaseVitexService {
 		order.setVitexStatus(orderComplete.getStatus());
 		order.setVitexId(orderComplete.getOrderId());
 		order.setTotalPrice(orderComplete.getValue());
-
+		PaymentBean pb = OrderVtexUtil.getPaymentBean(orderComplete);
+		if (pb != null) {
+			order.setPaymentMethod(pb.getPaymentMethod());
+		}
 		String dateParts[] = UtilDate.dateParts(order.getCreateDate());
 		order.setPeriode(dateParts[0] + "-" + dateParts[1]);
 
@@ -831,6 +835,7 @@ public class OrderVitexService extends BaseVitexService {
 		guideDTO.setOrderComplete(orderComplete);
 		guideDTO.setCustomerAdditionalInfo(guideInfoBean.getCustomerAdditionalInfo());
 		guideDTO.setDeliverySelected(guideInfoBean.getDeliverySelected());
+		guideDTO.setCustomerDocument(guideInfoBean.getCustomerDocument());
 
 		GuideDTO resultGuideInfo = tramacoService.generateGuides(guideDTO);
 

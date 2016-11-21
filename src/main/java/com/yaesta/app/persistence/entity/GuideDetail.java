@@ -56,6 +56,9 @@ public class GuideDetail implements Serializable {
 	
 	@Column(name="item_name")
 	private String itemName;
+	
+	@Column(name="item_id")
+	private String itemId;
 
 	public Long getId() {
 		return id;
@@ -127,6 +130,14 @@ public class GuideDetail implements Serializable {
 
 	public void setItemName(String itemName) {
 		this.itemName = itemName;
+	}
+
+	public String getItemId() {
+		return itemId;
+	}
+
+	public void setItemId(String itemId) {
+		this.itemId = itemId;
 	}
 	
 	

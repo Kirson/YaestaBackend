@@ -122,6 +122,9 @@ public class Order implements Serializable{
 	@Column(name="pending_invoice")
 	private Boolean pendingInvoice;
 	
+	@Column(name="payment_method")
+	private String paymentMethod;
+	
 	public Order(){
 		this.status = "registered";
 		this.hasItems = "0";
@@ -348,6 +351,16 @@ public class Order implements Serializable{
 
 	public void setPendingInvoice(Boolean pendingInvoice) {
 		this.pendingInvoice = pendingInvoice;
+	}
+	
+	
+
+	public String getPaymentMethod() {
+		return paymentMethod;
+	}
+
+	public void setPaymentMethod(String paymentMethod) {
+		this.paymentMethod = paymentMethod;
 	}
 
 	@Override

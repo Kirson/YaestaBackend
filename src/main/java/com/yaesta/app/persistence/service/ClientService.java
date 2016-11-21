@@ -192,7 +192,7 @@ public class ClientService {
 						nCb.setFechaCreacion(new Date());
 						clienteBodegaRepository.save(nCb);
 					} else {
-						found.setNuevo("N");
+						//found.setNuevo("N");
 						clienteBodegaRepository.save(found);
 					}
 				}

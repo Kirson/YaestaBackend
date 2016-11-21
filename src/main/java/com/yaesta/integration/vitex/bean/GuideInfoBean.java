@@ -32,6 +32,7 @@ public class GuideInfoBean implements Serializable {
 	private Catalog motiveCancel;
 	private String motiveCancelText;
 	private Catalog deliverySelected;
+	private String customerDocument;
 	
 	public GuideInfoBean(){
 		error="OK";
@@ -126,6 +127,14 @@ public class GuideInfoBean implements Serializable {
 
 	public void setDeliverySelected(Catalog deliverySelected) {
 		this.deliverySelected = deliverySelected;
+	}
+
+	public String getCustomerDocument() {
+		return customerDocument;
+	}
+
+	public void setCustomerDocument(String customerDocument) {
+		this.customerDocument = customerDocument;
 	}
 	
 	

@@ -145,6 +145,17 @@ public class OrderItem implements Serializable{
 	
 	@Column(name="delivery_name")
 	private String deliveryName;
+	
+	@Column(name="str_guide_date")
+	private String strGuideDate;
+	
+	@Column(name="guide_date")
+	private Date guideDate;
+	
+	
+	public OrderItem(){
+		isWarehouse=Boolean.FALSE;
+	}
 
 	public Long getId() {
 		return id;
@@ -434,6 +445,22 @@ public class OrderItem implements Serializable{
 
 	public void setDeliveryName(String deliveryName) {
 		this.deliveryName = deliveryName;
+	}
+
+	public String getStrGuideDate() {
+		return strGuideDate;
+	}
+
+	public void setStrGuideDate(String strGuideDate) {
+		this.strGuideDate = strGuideDate;
+	}
+
+	public Date getGuideDate() {
+		return guideDate;
+	}
+
+	public void setGuideDate(Date guideDate) {
+		this.guideDate = guideDate;
 	}
 	
 	

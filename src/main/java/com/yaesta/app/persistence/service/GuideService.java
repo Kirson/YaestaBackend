@@ -640,6 +640,13 @@ public class GuideService {
 								order.setStatus("invoiced");
 								order.setPendingInvoice(Boolean.FALSE);
 								orderService.saveOrder(order);
+							}else{
+								order =orderService.findByVitexId(gm.getOrderId());
+								if(order!=null && gm.getPaymentAcepted()!=null && gm.getPaymentAcepted().equals("SI")){
+									order.setStatus("invoiced");
+									order.setPendingInvoice(Boolean.FALSE);
+									orderService.saveOrder(order);
+								}
 							}
 						}//fin for de guias
 					}
