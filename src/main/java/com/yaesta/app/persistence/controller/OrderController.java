@@ -162,6 +162,20 @@ public class OrderController {
 		}
 	}
 	
+	@RequestMapping(value = "/getItemsWarehouseByGuideDate/{guideDate}", method = RequestMethod.GET)
+	public ResponseEntity<List<WarehouseVO>> getItemsWarehouseByGuideDate(@PathVariable("guideDate") Date guideDate) throws ParseException{
+		
+		
+		
+		List<WarehouseVO> found = orderService.findByStrGuideDateIsWarehouse(guideDate, Boolean.TRUE);
+		
+		if(found!=null && !found.isEmpty()){
+			return new ResponseEntity<List<WarehouseVO>>(found,HttpStatus.OK);
+		}else{
+			return new ResponseEntity<List<WarehouseVO>>(new ArrayList<WarehouseVO>(),HttpStatus.OK);
+		}
+	}
+	
 	@RequestMapping(value = "/getItemsWarehouseByRangeDateStrVO/{startDate}/{finishDate}", method = RequestMethod.GET)
 	public ResponseEntity<List<WarehouseVO>> getItemsWarehouseByRangeDateStrVO(@PathVariable("startDate") String startDate,@PathVariable("finishDate") String finishDate) throws ParseException{
 		

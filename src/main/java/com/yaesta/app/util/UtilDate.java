@@ -129,14 +129,16 @@ public class UtilDate implements Serializable {
     public static String fromDateToString(Date date){
     	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     	String format = formatter.format(date);
-    	System.out.println(format);
+    	//System.out.println(format);
     	return format;
     }
     
     public static String fromDateToString(Date date, String dateFormat){
     	SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
     	String format = formatter.format(date);
-    	System.out.println(format);
+    	//System.out.println(format);
     	return format;
     }
+    
+   
 }

@@ -23,4 +23,8 @@ public interface OrderItemRepository  extends JpaRepository<OrderItem, Long>{
 	public List<OrderItem> findByOrderDateBetweenAndByIsWarehouse(Date start, Date finish, Boolean isWarehouse);
 	
 	public List<OrderItem> findByIsWarehouse(Boolean isWarehouse);
+	
+	@Query("Select oi from OrderItem oi " +
+	         "where oi.strGuideDate = ?1 and oi.isWarehouse = ?2")
+	public List<OrderItem> findByStrGuideDateIsWarehouse(String strGuideDate,Boolean isWarehouse);
 }

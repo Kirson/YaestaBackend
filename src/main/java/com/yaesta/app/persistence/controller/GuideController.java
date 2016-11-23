@@ -181,6 +181,20 @@ public class GuideController implements Serializable {
 		}
 	}
 	
+	@RequestMapping(value = "/findByDeliveryStatusPaymentMethodVO/{deliveryName}/{status}", method = RequestMethod.GET)
+	public ResponseEntity<List<GuideVO>> findByDeliveryStatusPaymentMethodVO(@PathVariable("deliveryName") String deliveryName,@PathVariable("status") String status) throws ParseException{
+		
+		
+		
+		List<GuideVO> found = guideService.findByDeliveryStatusPaymentMethodVO(deliveryName,status);
+		
+		if(found!=null && !found.isEmpty()){
+			return new ResponseEntity<List<GuideVO>>(found,HttpStatus.OK);
+		}else{
+			return new ResponseEntity<List<GuideVO>>(new ArrayList<GuideVO>(),HttpStatus.OK);
+		}
+	}
+	
 	@RequestMapping(value = "/getGuidesByStatusDateRangeVO/{status}/{startDate}/{finishDate}", method = RequestMethod.GET)
 	public ResponseEntity<List<GuideVO>> getGuidesByStatusDateRangeVO(@PathVariable("status") String status,@PathVariable("startDate") String startDate,@PathVariable("finishDate") String finishDate) throws ParseException{
 		

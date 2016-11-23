@@ -871,7 +871,7 @@ public class OrderVitexService extends BaseVitexService {
 					e.printStackTrace();
 				}
 				guide.setOrderStatus(orderComplete.getStatus());
-
+				guide.setPaymentMethod(OrderVtexUtil.getPaymentBean(orderComplete).getPaymentMethod());
 				guideService.saveGuide(guide);
 				gbd.setGuide(guide);
 				guideInfoList.add(gbd);
@@ -922,6 +922,8 @@ public class OrderVitexService extends BaseVitexService {
 		}
 
 		sendGuideMailCustomer(orderComplete);
+		
+		updateDetails(orderComplete);
 
 		return result;
 	}
@@ -1111,6 +1113,8 @@ public class OrderVitexService extends BaseVitexService {
 		} else if (guideInfoBean.getDeliverySelected().getNemonic().equals("CICLISTA")) {
 			return generateGuideCyclist(guideInfoBean);
 		}
+		
+		updateDetails(guideInfoBean.getOrderComplete());
 
 		return result;
 	}
@@ -1935,6 +1939,32 @@ public class OrderVitexService extends BaseVitexService {
 		}
 
 		return oscb;
+	}
+
+	private void updateDetails(OrderComplete oc) {
+		Order order = orderService.findByVitexId(oc.getOrderId());
+		List<Guide> guides = guideService.findByOrder(order);
+		List<OrderItem> items = orderService.getOrderItems(order);
+
+		if (guides != null && !guides.isEmpty()) {
+			for (Guide guide : guides) {
+				List<GuideDetail> details = guideService.getGuideDetails(guide);
+				if (details != null && !details.isEmpty())
+					for (GuideDetail detail : details) {
+						for(OrderItem oi:items){
+							if(detail.getItemId().equals(oi.getSkuId())){
+								oi.setGuideDate(guide.getCreateDate());
+								String strDate = UtilDate.fromDateToString(guide.getCreateDate(),"yyyy-MM-dd");
+								oi.setStrGuideDate(strDate);
+								if(guide.getGuideNumber()!=null && oi.getGuideNumber()==null){
+									oi.setGuideNumber(guide.getGuideNumber());
+								}
+								orderService.updateOrderItem(oi);
+							}
+						}
+					}
+			}
+		}
 	}
 
 }

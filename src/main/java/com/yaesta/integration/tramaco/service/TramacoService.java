@@ -243,14 +243,15 @@ public class TramacoService implements Serializable {
 					destinatario.setCalleSecundaria("");
 				}
 
-				if (guideInfo.getOrderComplete().getClientProfileData().getDocument() != null) {
+				if (guideInfo.getOrderComplete().getClientProfileData().getDocument() != null && !guideInfo.getOrderComplete().getClientProfileData().getDocument().equals("")) {
 					destinatario.setCiRuc(guideInfo.getOrderComplete().getClientProfileData().getDocument());
 					if(guideInfo.getCustomerDocument()!=null && !guideInfo.getCustomerDocument().equals("")){
 						destinatario.setCiRuc(guideInfo.getCustomerDocument());
 					}
 					destinatario.setTipoIden("05");
 				} else if (guideInfo.getOrderComplete().getClientProfileData().getIsCorporate()
-						&& guideInfo.getOrderComplete().getClientProfileData().getCorporateDocument() != null) {
+						&& guideInfo.getOrderComplete().getClientProfileData().getCorporateDocument() != null
+						&& !guideInfo.getOrderComplete().getClientProfileData().getCorporateDocument().equals("")) {
 					destinatario.setCiRuc(guideInfo.getOrderComplete().getClientProfileData().getCorporateDocument());
 					if(guideInfo.getCustomerDocument()!=null && !guideInfo.getCustomerDocument().equals("")){
 						destinatario.setCiRuc(guideInfo.getCustomerDocument());

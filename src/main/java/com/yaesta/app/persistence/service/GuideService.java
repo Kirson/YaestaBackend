@@ -48,6 +48,7 @@ import com.yaesta.integration.tramaco.dto.GuideBeanDTO;
 import com.yaesta.integration.tramaco.dto.GuideDTO;
 import com.yaesta.integration.tramaco.service.TramacoService;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
+import com.yaesta.integration.vitex.json.bean.enums.PaymentEnum;
 import com.yaesta.integration.vitex.service.OrderVitexService;
 
 import dmz.comercial.servicio.cliente.dto.SalidaTrackGuiaWs;
@@ -603,6 +604,22 @@ public class GuideService {
 
 	public List<GuideDetail> getGuideDetails(Guide guide) {
 		return guideDetailRepository.findByGuide(guide);
+	}
+	
+	public List<Guide> findByDeliveryStatusPaymentMethod(String deliveryName, String status){
+		return guideRepository.findByDeliveryNameStatusPaymentMethod(deliveryName, status, PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName());
+	}
+	
+	public List<GuideVO> findByDeliveryStatusPaymentMethodVO(String deliveryName, String status) {
+		List<Guide> found = findByDeliveryStatusPaymentMethod(deliveryName,status);
+		List<GuideVO> resultList = new ArrayList<GuideVO>();
+		if (found != null && !found.isEmpty()) {
+			for (Guide g : found) {
+				GuideVO gvo = GuideUtil.fromGuideToGuideVO(g);
+				resultList.add(gvo);
+			}
+		}
+		return resultList;
 	}
 
 	@Transactional

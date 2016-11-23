@@ -23,6 +23,7 @@ import com.yaesta.app.persistence.vo.GfkVO;
 import com.yaesta.app.persistence.vo.OrderItemBeanVO;
 import com.yaesta.app.persistence.vo.WarehouseVO;
 import com.yaesta.app.util.OrderItemUtil;
+import com.yaesta.app.util.UtilDate;
 
 @Service
 public class OrderService implements Serializable {
@@ -210,6 +211,18 @@ public class OrderService implements Serializable {
 		return resultList;
 	}
 	
+	public List<WarehouseVO> findByStrGuideDateIsWarehouse(Date guideDate, Boolean isWarehouse){
+		List<OrderItem> found = orderItemRepository.findByStrGuideDateIsWarehouse(UtilDate.fromDateToString(guideDate, "yyyy-MM-dd"), isWarehouse);
+		List<WarehouseVO> resultList = new ArrayList<WarehouseVO>();
+		if(found!=null && !found.isEmpty()){
+			for(OrderItem oi:found){
+				WarehouseVO oiv = OrderItemUtil.fromOrderItemToWarehouseVO(oi);
+				resultList.add(oiv);
+			}
+		}
+		return resultList;
+	}
+	
 	public List<Order> getPendingOrders(){
 		List<Order> found = orderRepository.findByPending(Boolean.TRUE);
 		
@@ -233,5 +246,14 @@ public class OrderService implements Serializable {
 		
 		return result;
 		
+	}
+	
+	public List<OrderItem> getOrderItems(Order order){
+		List<OrderItem> items = orderItemRepository.findByOrder(order);
+		return items;
+	}
+	
+	public void updateOrderItem(OrderItem item){
+		orderItemRepository.save(item);
 	}
 }
