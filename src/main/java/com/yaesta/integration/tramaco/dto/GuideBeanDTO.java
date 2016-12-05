@@ -24,6 +24,7 @@ public class GuideBeanDTO implements Serializable{
 	private Double deliveryPayment;
 	private Double itemValue;
 	private String pdfUrl;
+	private String pdfTagUrl;
 	private RespuestaGenerarGuiaWs guideResponse;
 	private RespuestaGenerarPdfWs  guidePdfResponse;
 	private RespuestaTrackGuiaWs guideTrackResponse;
@@ -131,6 +132,14 @@ public class GuideBeanDTO implements Serializable{
 
 	public void setDetails(List<GuideDetail> details) {
 		this.details = details;
+	}
+
+	public String getPdfTagUrl() {
+		return pdfTagUrl;
+	}
+
+	public void setPdfTagUrl(String pdfTagUrl) {
+		this.pdfTagUrl = pdfTagUrl;
 	}
 	
 	

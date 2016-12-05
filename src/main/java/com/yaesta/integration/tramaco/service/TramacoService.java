@@ -611,6 +611,8 @@ public class TramacoService implements Serializable {
 							guiD.setItemName(ic.getName());
 							guiD.setOrderVitexId(guideInfo.getOrderComplete().getOrderId());
 							guiD.setVitexId(ic.getId());
+							guiD.setQuantity(new Long(ic.getQuantity()));
+							guiD.setItemValue(itemValue);
 							guideInfo.getDetails().add(guiD);
 							detailList.add(guiD);
 

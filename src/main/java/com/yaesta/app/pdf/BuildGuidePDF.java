@@ -85,7 +85,7 @@ public class BuildGuidePDF implements Serializable {
 		return guideData;
 	}
 	
-	private static void inputImagePdf(Document document, String imagePath)
+	protected static void inputImagePdf(Document document, String imagePath)
 			throws BadElementException, MalformedURLException, IOException {
 		Image img = Image.getInstance(imagePath);
 		try {
@@ -96,7 +96,7 @@ public class BuildGuidePDF implements Serializable {
 		System.out.println("image...");
 	}
 	
-	private static void inputParagraphPDF(Document document, String textParagraph)
+	protected static void inputParagraphPDF(Document document, String textParagraph)
 			throws DocumentException {
 		document.add(new Paragraph(textParagraph));
 		

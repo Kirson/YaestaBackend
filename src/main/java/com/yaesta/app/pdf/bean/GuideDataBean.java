@@ -21,6 +21,11 @@ public class GuideDataBean implements Serializable {
 	private String author;
 	private String title;
 	private String dataTitle;
+	private String sourceAddress;
+	private String targetAddress;
+	private String guideDate;
+	private String deliveryName;
+	private String guideLeyend;
 	
 	public GuideDataBean(){
 		paragraphs = new ArrayList<String>();
@@ -118,6 +123,47 @@ public class GuideDataBean implements Serializable {
 	public void setDataTitle(String dataTitle) {
 		this.dataTitle = dataTitle;
 	}
+
+	public String getSourceAddress() {
+		return sourceAddress;
+	}
+
+	public void setSourceAddress(String sourceAddress) {
+		this.sourceAddress = sourceAddress;
+	}
+
+	public String getTargetAddress() {
+		return targetAddress;
+	}
+
+	public void setTargetAddress(String targetAddress) {
+		this.targetAddress = targetAddress;
+	}
+
+	public String getGuideDate() {
+		return guideDate;
+	}
+
+	public void setGuideDate(String guideDate) {
+		this.guideDate = guideDate;
+	}
+
+	public String getDeliveryName() {
+		return deliveryName;
+	}
+
+	public void setDeliveryName(String deliveryName) {
+		this.deliveryName = deliveryName;
+	}
+
+	public String getGuideLeyend() {
+		return guideLeyend;
+	}
+
+	public void setGuideLeyend(String guideLeyend) {
+		this.guideLeyend = guideLeyend;
+	}
+	
 	
 	
 }
