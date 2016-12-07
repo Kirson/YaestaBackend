@@ -1,5 +1,6 @@
 package com.yaesta.app.pdf;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.itextpdf.text.DocumentException;
@@ -9,7 +10,12 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.yaesta.app.pdf.bean.ItemData;
 import com.yaesta.app.pdf.enums.ItemDataEnum;
 
-public class TableBuilder {
+public class TableBuilder implements Serializable {
+
+	/**
+	 * Serial version
+	 */
+	private static final long serialVersionUID = 4444416262225998510L;
 
 	public static PdfPTable createTableData(List<ItemData> data, String tableLabel) throws DocumentException {
 
@@ -19,7 +25,7 @@ public class TableBuilder {
 
 		PdfPCell cell = new PdfPCell(new Phrase(tableLabel));
 
-		cell.setColspan(5);
+		cell.setColspan(3);
 		TableStyle.headerCellStyle(cell);
 		table.addCell(cell);
 		

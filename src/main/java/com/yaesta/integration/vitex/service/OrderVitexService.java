@@ -217,6 +217,7 @@ public class OrderVitexService extends BaseVitexService {
 	private @Value("${yaesta.pdf.guide.path}") String yaestaPdfGuidePath;
 	private @Value("${yaesta.pdf.guide.prefix}") String yaestaGuidePrefix;
 	private @Value("${yaesta.pdf.guide.leyend}") String yaestaGuideLeyend;
+	private @Value("${yaesta.pdf.guide.logo}") String yaestaGuideLogo;
 	
 	
 	
@@ -913,7 +914,7 @@ public class OrderVitexService extends BaseVitexService {
 				GuideDataBean gDbean = new GuideDataBean();
 				pdfURL = pdfURL + yaestaGuidePrefix + "TRAMACO" + "_" + guide.getGuideNumber() + "_" + ".pdf";
 				gDbean.setPdfPath(pdfURL);
-				gDbean.setLogoPath(logoPath);
+				//gDbean.setLogoPath(logoPath);
 				gDbean.setOrderId(orderComplete.getOrderId());
 				gDbean.setGuideNumber(guide.getGuideNumber());
 				guide.setDocumentUrl(pdfURL);
@@ -933,10 +934,10 @@ public class OrderVitexService extends BaseVitexService {
 				
 				
 				List<String> strList = new ArrayList<String>();
-				strList.add(" ");
+				//strList.add(" ");
 				//String str = "Guia # " + guide.getGuideNumber() + "";
 				//strList.add(str);
-				String courier = "Gestor Entrega " + "Tramaco";
+				String courier = "Gestor Entrega: " + "Tramaco";
 				strList.add(courier);
 				/*
 				String strPaymentForm = "Forma de pago: " + grr.getInformacionAdicional().getFormaPago();
@@ -945,35 +946,39 @@ public class OrderVitexService extends BaseVitexService {
 				strList.add(strPayment);
 				*/
 				strList.add("______________________________________________");
-				strList.add(" ");
+				//strList.add(" ");
 				
-				String supplierAddress = "Direccion Origen: " + gbd.getSupplier().getAddress();
+				String supplierAddress = "Origen: " + gbd.getSupplier().getAddress();
 				strList.add(supplierAddress);
+				/*
 				String supplierContact = "Contacto: " + gbd.getSupplier().getContactName() + " "
 						+ gbd.getSupplier().getContactLastName();
 				strList.add(supplierContact);
 				String supplierAux = "Email: " + gbd.getSupplier().getContactEmail();
 				strList.add(supplierAux);
+				*/
 				strList.add("______________________________________________");
-				strList.add(" ");
+				//strList.add(" ");
 
-				String customerAddress = "Direccion Destino: " + orderComplete.getShippingData().getAddress().getState() + " "
+				String customerAddress = "Destino: " + orderComplete.getShippingData().getAddress().getState() + " "
 						+ orderComplete.getShippingData().getAddress().getCity();
 				customerAddress = customerAddress + " " + orderComplete.getShippingData().getAddress().getStreet();
 				customerAddress = customerAddress + " " + orderComplete.getShippingData().getAddress().getReference();
 				strList.add(customerAddress);
-				String customer = "Destinatario :" + orderComplete.getCustomerName();
+				String customer = "Destinatario: " + orderComplete.getCustomerName();
 				strList.add(customer);
-				String email = "Email: " + orderComplete.getClientProfileData().getEmail();
+				/*String email = "Email: " + orderComplete.getClientProfileData().getEmail();
 				strList.add(email);
 				String phone = "Telefono: " + orderComplete.getClientProfileData().getPhone();
 				strList.add(phone);
+				*/
 				strList.add("______________________________________________");
-				strList.add(" ");
+				
+				//strList.add(" ");
 				gDbean.setParagraphs(strList);
 				guideService.saveGuide(guide);
 				gDbean.setGuideLeyend(yaestaGuideLeyend);
-
+				gDbean.setLogoPath(yaestaGuideLogo);
 				gDbean = BuildTagGuidePDF.generateGuidePDF(gDbean);
 				gbd.setPdfTagUrl(gDbean.getPdfPath());
 				newGuideInfoBeanList.add(gbd);
@@ -2059,7 +2064,7 @@ public class OrderVitexService extends BaseVitexService {
 				if (details != null && !details.isEmpty())
 					for (GuideDetail detail : details) {
 						for(OrderItem oi:items){
-							if(detail.getItemId().equals(oi.getSkuId())){
+							if(detail.getVitexId().equals(oi.getSkuId())){
 								oi.setGuideDate(guide.getCreateDate());
 								String strDate = UtilDate.fromDateToString(guide.getCreateDate(),"yyyy-MM-dd");
 								oi.setStrGuideDate(strDate);

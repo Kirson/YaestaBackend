@@ -17,6 +17,7 @@ import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.Barcode128;
+import com.itextpdf.text.pdf.CMYKColor;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -36,11 +37,15 @@ public class BuildTagGuidePDF extends BuildGuidePDF implements Serializable {
 
 		try {
 
+			
 			OutputStream file = new FileOutputStream(new File(guideData.getPdfPath()));
-			Document document = new Document();
+			Document document = new Document(PageSize.A5.rotate());
+			
 			PdfWriter writer = PdfWriter.getInstance(document, file);
 			document.open();
-			setAtributePDF(document, guideData); // set atribute in pdf
+			setPageAtributePDF(document, guideData); // set atribute in pdf
+			
+			
 
 			if (guideData.getLogoPath() != null) {
 				inputImagePdf(document, guideData.getLogoPath(),guideData.getGuideLeyend()); // input image
@@ -53,12 +58,13 @@ public class BuildTagGuidePDF extends BuildGuidePDF implements Serializable {
 
 			Barcode128 code128 = new Barcode128();
 			code128.setBaseline(-1);
-			code128.setSize(12);
+			code128.setSize(6);
+			//code128.setBarHeight(25f);
 			code128.setCode(guideData.getGuideNumber());
 			code128.setCodeType(Barcode128.CODE128);
-			Image code128Image = code128.createImageWithBarcode(cb, null, null);
+			Image code128Image = code128.createImageWithBarcode(cb, CMYKColor.BLACK, CMYKColor.BLACK);
 			PdfPCell cell = new PdfPCell();
-			cell.addElement(new Phrase("Guia #: " + guideData.getGuideNumber()));
+			//cell.addElement(new Phrase("Guia #: " + guideData.getGuideNumber()));
 			cell.addElement(code128Image);
 			table.addCell(cell);
 
@@ -106,13 +112,15 @@ public class BuildTagGuidePDF extends BuildGuidePDF implements Serializable {
 		System.out.println("image...");
 	}
 
-	private static void setAtributePDF(Document document, GuideDataBean guideData) {
-		document.setPageSize(PageSize.A6);
+	private static void setPageAtributePDF(Document document, GuideDataBean guideData) {
+		document.setPageSize(PageSize.A5.rotate());
 		document.addAuthor(guideData.getAuthor());
 		document.addCreationDate();
 		document.addCreator(guideData.getCreator());
 		document.addTitle(guideData.getTitle());
 		System.out.println("atribute...");
 	}
+	
+	
 
 }
