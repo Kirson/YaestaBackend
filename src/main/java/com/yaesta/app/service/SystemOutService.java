@@ -39,7 +39,7 @@ public class SystemOutService implements Serializable {
 			YaEstaLog yalog = new YaEstaLog();
 			yalog.setLogDate(new Date());
 			yalog.setProcessName("SYSTEM-OUT");
-			yalog.setErrorinfo(line);
+			yalog.setErrorInfo(line);
 			logService.save(yalog);
 		}
 		
@@ -53,7 +53,7 @@ public class SystemOutService implements Serializable {
 			YaEstaLog yalog = new YaEstaLog();
 			yalog.setLogDate(new Date());
 			yalog.setProcessName("SYSTEM-OUT");
-			yalog.setErrorinfo(exception.getMessage());
+			yalog.setErrorInfo(exception.getMessage());
 			logService.save(yalog);
 		}
 		
@@ -73,7 +73,7 @@ public class SystemOutService implements Serializable {
 			YaEstaLog yalog = new YaEstaLog();
 			yalog.setLogDate(new Date());
 			yalog.setProcessName("SYSTEM-OUT-ERROR");
-			yalog.setErrorinfo(e.getMessage());
+			yalog.setErrorInfo(e.getMessage());
 			logService.save(yalog);
 		}
 	}

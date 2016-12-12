@@ -218,7 +218,7 @@ public class OrderVitexService extends BaseVitexService {
 	private @Value("${yaesta.pdf.guide.prefix}") String yaestaGuidePrefix;
 	private @Value("${yaesta.pdf.guide.leyend}") String yaestaGuideLeyend;
 	private @Value("${yaesta.pdf.guide.logo}") String yaestaGuideLogo;
-	
+	private @Value("${yaesta.address}") String yaestaAddress;
 	
 	
 	public OrderVitexService() throws Exception {
@@ -824,6 +824,38 @@ public class OrderVitexService extends BaseVitexService {
 			return new GuideContainerBean();
 		}
 	}
+	
+	public GuideContainerBean resendGuides(GuideInfoBean guideInfoBean){
+		GuideContainerBean guideContainer = new GuideContainerBean();
+		if (guideInfoBean.getDeliverySelected().getNemonic().equals("TRAMACO")) {
+			
+			OrderComplete orderComplete = guideInfoBean.getOrderComplete();
+			
+			Order order = orderService.findByVitexId(orderComplete.getOrderId());
+			
+			List<Guide> guides = guideService.findByOrder(order);
+			
+			List<SupplierDeliveryInfo> supplierDeliveryInfoList = guideInfoBean.getSupplierDeliveryInfoList();
+			
+			Catalog delivery = guideInfoBean.getDeliverySelected();
+			
+			List<MailInfo> mailInfoList = prepareMailOrder(orderComplete, supplierDeliveryInfoList, delivery, "Reenviar");
+
+			for (MailInfo mailInfo : mailInfoList) {
+				for (Guide guide : guides) {
+					if (guide.getSupplier().getId().longValue() == mailInfo.getRefId().longValue()) {
+						mailInfo.getAttachmentList().add(guide.getDocumentUrl());
+						if(guide.getDocumentTagUrl()!=null){
+							mailInfo.getAttachmentList().add(guide.getDocumentTagUrl());
+						}
+					} 
+				}
+				mailService.sendMailTemplate(mailInfo, "guideNotification.vm");
+			}
+		}
+		
+		return guideContainer;
+	}
 
 	private GuideContainerBean generateGuidesTramaco(GuideInfoBean guideInfoBean) {
 		GuideContainerBean result = new GuideContainerBean();
@@ -917,7 +949,7 @@ public class OrderVitexService extends BaseVitexService {
 				//gDbean.setLogoPath(logoPath);
 				gDbean.setOrderId(orderComplete.getOrderId());
 				gDbean.setGuideNumber(guide.getGuideNumber());
-				guide.setDocumentUrl(pdfURL);
+				//guide.setDocumentUrl(pdfURL);
 				
 				List<GuideDetail> details = guideService.getGuideDetails(guide);
 				List<ItemData> itemDataList = new ArrayList<ItemData>();
@@ -948,7 +980,8 @@ public class OrderVitexService extends BaseVitexService {
 				strList.add("______________________________________________");
 				//strList.add(" ");
 				
-				String supplierAddress = "Origen: " + gbd.getSupplier().getAddress();
+				String supplierAddress = "Origen: " + yaestaAddress;
+				//supplierAddress = "Origen: "+ gbd.getSupplier().getAddress();
 				strList.add(supplierAddress);
 				/*
 				String supplierContact = "Contacto: " + gbd.getSupplier().getContactName() + " "
@@ -976,11 +1009,13 @@ public class OrderVitexService extends BaseVitexService {
 				
 				//strList.add(" ");
 				gDbean.setParagraphs(strList);
-				guideService.saveGuide(guide);
+				
 				gDbean.setGuideLeyend(yaestaGuideLeyend);
 				gDbean.setLogoPath(yaestaGuideLogo);
 				gDbean = BuildTagGuidePDF.generateGuidePDF(gDbean);
 				gbd.setPdfTagUrl(gDbean.getPdfPath());
+				guide.setDocumentTagUrl(gDbean.getPdfPath());
+				guideService.saveGuide(guide);
 				newGuideInfoBeanList.add(gbd);
 			}
 			
@@ -999,7 +1034,7 @@ public class OrderVitexService extends BaseVitexService {
 		result.setGuides(responseList);
 
 		List<MailInfo> mailInfoList = prepareMailOrder(orderComplete, supplierDeliveryInfoList,
-				guideInfoBean.getDeliverySelected());
+				guideInfoBean.getDeliverySelected(),null);
 
 		for (MailInfo mailInfo : mailInfoList) {
 			for (GuideBeanDTO gDto : guideDTO.getGuideBeanList()) {
@@ -1402,7 +1437,7 @@ public class OrderVitexService extends BaseVitexService {
 
 			orderService.saveOrder(order);
 
-			List<MailInfo> mailInfoList = prepareMailOrder(orderComplete, supplierDeliveryInfoList, delivery);
+			List<MailInfo> mailInfoList = prepareMailOrder(orderComplete, supplierDeliveryInfoList, delivery,null);
 
 			for (MailInfo mailInfo : mailInfoList) {
 				for (GuideBeanDTO gDto : guideInfoBeanList) {
@@ -1422,7 +1457,7 @@ public class OrderVitexService extends BaseVitexService {
 	}
 
 	private List<MailInfo> prepareMailOrder(OrderComplete orderComplete,
-			List<SupplierDeliveryInfo> supplierDeliveryInfoList, Catalog delivery) {
+			List<SupplierDeliveryInfo> supplierDeliveryInfoList, Catalog delivery, String flag) {
 
 		List<MailInfo> mailInfoList = new ArrayList<MailInfo>();
 
@@ -1430,6 +1465,7 @@ public class OrderVitexService extends BaseVitexService {
 
 			if (sdi.getSelected()) {
 				MailInfo mailInfo = new MailInfo();
+				mailInfo.setReferenceId(orderComplete.getOrderId());
 
 				MailParticipant sender = new MailParticipant();
 				sender.setName("YaEsta.com");
@@ -1504,6 +1540,10 @@ public class OrderVitexService extends BaseVitexService {
 
 				String subject = "Notificación de pedido " + " - Orden: " + orderComplete.getOrderId()
 						+ " - Proveedor: " + supplier.getName();
+				
+				if(flag!=null){
+					subject = flag + " - "+subject; 
+				}
 				
 				mailInfo.setReceivers(receiverTotal);
 				String strMailTextGuide = mailTextGuide;
@@ -1940,6 +1980,7 @@ public class OrderVitexService extends BaseVitexService {
 	private void sendGuideMailCustomer(OrderComplete orderComplete) {
 
 		MailInfo mailInfo = new MailInfo();
+		mailInfo.setReferenceId(orderComplete.getOrderId());
 
 		MailParticipant sender = new MailParticipant();
 		sender.setName("YaEsta.com");

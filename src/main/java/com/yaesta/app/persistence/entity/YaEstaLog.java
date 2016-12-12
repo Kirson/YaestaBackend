@@ -29,7 +29,7 @@ public class YaEstaLog {
 	private String xmlInfo;
 	
 	@Column(name="error_info")
-	private String errorinfo;
+	private String errorInfo;
 	
 	@org.hibernate.annotations.Type(type="com.yaesta.app.persistence.util.SQLXMLType")
 	@Column(name="addional_info")
@@ -69,12 +69,12 @@ public class YaEstaLog {
 		this.xmlInfo = xmlInfo;
 	}
 
-	public String getErrorinfo() {
-		return errorinfo;
+	public String getErrorInfo() {
+		return errorInfo;
 	}
 
-	public void setErrorinfo(String errorinfo) {
-		this.errorinfo = errorinfo;
+	public void setErrorInfo(String errorInfo) {
+		this.errorInfo = errorInfo;
 	}
 
 	public String getAdditionalInfo() {

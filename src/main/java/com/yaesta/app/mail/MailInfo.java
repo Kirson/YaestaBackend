@@ -29,6 +29,7 @@ public class MailInfo implements Serializable {
 	private List<ItemInfoGuide> itemInfoGuideList;
 	private List<ItemInfoSupplier> itemInfoSupplierList;
 	private Boolean sendMail;
+	private String referenceId;
 	
 	public MailInfo(){
 		attachmentList = new ArrayList<String>();
@@ -158,6 +159,14 @@ public class MailInfo implements Serializable {
 
 	public void setSendMail(Boolean sendMail) {
 		this.sendMail = sendMail;
+	}
+
+	public String getReferenceId() {
+		return referenceId;
+	}
+
+	public void setReferenceId(String referenceId) {
+		this.referenceId = referenceId;
 	}
 	
 	

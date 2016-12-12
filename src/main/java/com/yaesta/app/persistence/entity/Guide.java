@@ -149,6 +149,9 @@ public class Guide implements Serializable{
 	@Column(name="payment_method")
 	private String paymentMethod;
 	
+	@Column(name="document_tag_url")
+	private String documentTagUrl;
+	
 	@Transient
 	private List<GuideDetail> details;
 	
@@ -447,6 +450,14 @@ public class Guide implements Serializable{
 	}
 	
 	
+
+	public String getDocumentTagUrl() {
+		return documentTagUrl;
+	}
+
+	public void setDocumentTagUrl(String documentTagUrl) {
+		this.documentTagUrl = documentTagUrl;
+	}
 
 	public String getGuideNumber() {
 		return guideNumber;

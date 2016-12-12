@@ -40,6 +40,8 @@ public class BuildTagGuidePDF extends BuildGuidePDF implements Serializable {
 			
 			OutputStream file = new FileOutputStream(new File(guideData.getPdfPath()));
 			Document document = new Document(PageSize.A5.rotate());
+			document.setMargins(10, 10, 108, 10);
+	        document.setMarginMirroring(true);
 			
 			PdfWriter writer = PdfWriter.getInstance(document, file);
 			document.open();
@@ -57,12 +59,12 @@ public class BuildTagGuidePDF extends BuildGuidePDF implements Serializable {
 			PdfPTable table = new PdfPTable(1);
 
 			Barcode128 code128 = new Barcode128();
-			code128.setBaseline(-1);
-			code128.setSize(6);
-			//code128.setBarHeight(25f);
+			//code128.setBaseline(-1);
+			//code128.setSize(6);
+			code128.setBarHeight(20f);
 			code128.setCode(guideData.getGuideNumber());
 			code128.setCodeType(Barcode128.CODE128);
-			Image code128Image = code128.createImageWithBarcode(cb, CMYKColor.BLACK, CMYKColor.BLACK);
+			Image code128Image = code128.createImageWithBarcode(cb, null, null);
 			PdfPCell cell = new PdfPCell();
 			//cell.addElement(new Phrase("Guia #: " + guideData.getGuideNumber()));
 			cell.addElement(code128Image);
@@ -102,7 +104,7 @@ public class BuildTagGuidePDF extends BuildGuidePDF implements Serializable {
 			Phrase pp = new Phrase();
 			Image img = Image.getInstance(imagePath);
 			p.add((Element) new Chunk(img, 0, 0));
-			pp.add(text);
+			//pp.add(text);
 			p.add(pp);
 			document.add(p);
 
@@ -118,6 +120,8 @@ public class BuildTagGuidePDF extends BuildGuidePDF implements Serializable {
 		document.addCreationDate();
 		document.addCreator(guideData.getCreator());
 		document.addTitle(guideData.getTitle());
+		document.setMargins(10, 10, 108, 10);
+        document.setMarginMirroring(true);
 		System.out.println("atribute...");
 	}
 	

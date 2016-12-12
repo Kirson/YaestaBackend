@@ -201,6 +201,14 @@ public class VitexIntegrationController {
 
 		return new ResponseEntity<GuideContainerBean>(response, HttpStatus.OK);
 	}
+	
+	@RequestMapping(value = "/resendGuides", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<GuideContainerBean> resendGuides(@RequestBody GuideInfoBean guideInfoBean) {
+
+		GuideContainerBean response = new GuideContainerBean();
+		response = orderVitexService.resendGuides(guideInfoBean);
+		return new ResponseEntity<GuideContainerBean>(response, HttpStatus.OK);
+	}
 
 	@RequestMapping(value = "/invoiceOrder", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<FacturaRespuestaSRI> invoiceOrder(@RequestBody OrderCompleteBean orderCompleteBean) {
