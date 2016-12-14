@@ -681,6 +681,8 @@ public class TramacoService implements Serializable {
 							gbd.setSupplier(sdi.getSupplier());
 							gbd.setItemList(sdi.getItems());
 							gbd.setDetails(detailList);
+							gbd.setHasPayment(hasAdjunto);
+							gbd.setTotalValue(totalValue);
 							guideInfo.getGuideBeanList().add(gbd);
 
 						}

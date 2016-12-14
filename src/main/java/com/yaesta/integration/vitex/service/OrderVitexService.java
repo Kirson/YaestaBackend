@@ -902,7 +902,7 @@ public class OrderVitexService extends BaseVitexService {
 				guide.setCustomerPhone(orderComplete.getClientProfileData().getPhone());
 				guide.setGuideNumber(gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getGuia());
 				guide.setSerial(orderComplete.getSequence());
-
+				
 				String dateParts[] = UtilDate.dateParts(order.getCreateDate());
 				guide.setPeriode(dateParts[0] + "-" + dateParts[1]);
 
@@ -914,6 +914,9 @@ public class OrderVitexService extends BaseVitexService {
 				}
 				guide.setOrderStatus(orderComplete.getStatus());
 				guide.setPaymentMethod(OrderVtexUtil.getPaymentBean(orderComplete).getPaymentMethod());
+				guide.setHasPayment(gbd.getHasPayment());
+				guide.setTotalValue(gbd.getTotalValue());
+				
 				guideService.saveGuide(guide);
 				gbd.setGuide(guide);
 				guideInfoList.add(gbd);
@@ -944,6 +947,7 @@ public class OrderVitexService extends BaseVitexService {
 			
 				//Generar Tag Guide
 				GuideDataBean gDbean = new GuideDataBean();
+				pdfURL = yaestaPdfGuidePath;
 				pdfURL = pdfURL + yaestaGuidePrefix + "TRAMACO" + "_" + guide.getGuideNumber() + "_" + ".pdf";
 				gDbean.setPdfPath(pdfURL);
 				//gDbean.setLogoPath(logoPath);
@@ -970,6 +974,9 @@ public class OrderVitexService extends BaseVitexService {
 				//String str = "Guia # " + guide.getGuideNumber() + "";
 				//strList.add(str);
 				String courier = "Gestor Entrega: " + "Tramaco";
+				if(gbd.getHasPayment()){
+					courier =courier +" - Valor a Cobrar: "+ gbd.getTotalValue(); 
+				}
 				strList.add(courier);
 				/*
 				String strPaymentForm = "Forma de pago: " + grr.getInformacionAdicional().getFormaPago();

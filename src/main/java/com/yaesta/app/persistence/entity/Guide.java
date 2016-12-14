@@ -152,11 +152,22 @@ public class Guide implements Serializable{
 	@Column(name="document_tag_url")
 	private String documentTagUrl;
 	
+	@Column(name="has_payment")
+	private Boolean hasPayment;
+	
+	@Column(name="total_value")
+	private Double totalValue;
+	
 	@Transient
 	private List<GuideDetail> details;
 	
 	@Transient
 	private String guideId;
+	
+	public Guide(){
+		hasPayment = Boolean.FALSE;
+		totalValue = 0D;
+	}
 
 	public Long getId() {
 		return id;
@@ -493,6 +504,26 @@ public class Guide implements Serializable{
 
 	public void setPaymentMethod(String paymentMethod) {
 		this.paymentMethod = paymentMethod;
+	}
+	
+	
+
+	public Boolean getHasPayment() {
+		return hasPayment;
+	}
+
+	public void setHasPayment(Boolean hasPayment) {
+		this.hasPayment = hasPayment;
+	}
+	
+	
+
+	public Double getTotalValue() {
+		return totalValue;
+	}
+
+	public void setTotalValue(Double totalValue) {
+		this.totalValue = totalValue;
 	}
 
 	@Override

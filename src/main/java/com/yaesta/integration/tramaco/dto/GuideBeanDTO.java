@@ -34,11 +34,15 @@ public class GuideBeanDTO implements Serializable{
 	private List<ItemComplete> itemList;
 	private String response;
 	private List<GuideDetail> details;
+	private Boolean hasPayment;
+	private Double totalValue;
 	
 	public GuideBeanDTO(){
 		errorList = new ArrayList<String>();
 		itemList = new ArrayList<ItemComplete>();
 		details = new ArrayList<GuideDetail>();
+		hasPayment = Boolean.FALSE;
+		totalValue = 0D;
 	}
 	
 	public Guide getGuide() {
@@ -140,6 +144,22 @@ public class GuideBeanDTO implements Serializable{
 
 	public void setPdfTagUrl(String pdfTagUrl) {
 		this.pdfTagUrl = pdfTagUrl;
+	}
+
+	public Boolean getHasPayment() {
+		return hasPayment;
+	}
+
+	public void setHasPayment(Boolean hasPayment) {
+		this.hasPayment = hasPayment;
+	}
+
+	public Double getTotalValue() {
+		return totalValue;
+	}
+
+	public void setTotalValue(Double totalValue) {
+		this.totalValue = totalValue;
 	}
 	
 	
