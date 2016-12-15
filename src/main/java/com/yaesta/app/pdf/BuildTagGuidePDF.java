@@ -17,7 +17,7 @@ import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.Barcode128;
-import com.itextpdf.text.pdf.CMYKColor;
+//import com.itextpdf.text.pdf.CMYKColor;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -39,7 +39,7 @@ public class BuildTagGuidePDF extends BuildGuidePDF implements Serializable {
 
 			
 			OutputStream file = new FileOutputStream(new File(guideData.getPdfPath()));
-			Document document = new Document(PageSize.A5.rotate());
+			Document document = new Document(PageSize.A4.rotate());
 			document.setMargins(10, 10, 108, 10);
 	        document.setMarginMirroring(true);
 			
@@ -115,7 +115,7 @@ public class BuildTagGuidePDF extends BuildGuidePDF implements Serializable {
 	}
 
 	private static void setPageAtributePDF(Document document, GuideDataBean guideData) {
-		document.setPageSize(PageSize.A5.rotate());
+		document.setPageSize(PageSize.A4.rotate());
 		document.addAuthor(guideData.getAuthor());
 		document.addCreationDate();
 		document.addCreator(guideData.getCreator());

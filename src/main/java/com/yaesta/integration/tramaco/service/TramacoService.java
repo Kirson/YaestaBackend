@@ -362,6 +362,8 @@ public class TramacoService implements Serializable {
 						partialShipping = BaseUtil.roundValue(partialShipping);
 					}
 				}
+				
+				systemOut.println("PartialShipping "+partialShipping);
 
 				Double deliveryPayment = 0D;
 				Boolean hasAdjunto = false;
@@ -477,6 +479,11 @@ public class TramacoService implements Serializable {
 						Double deliveryCost = 0D;
 						Double totalValue = 0D;
 						Double totalAsegurado = 0D;
+						
+						if(hasAdjunto && partialShipping>0){
+							totalValue = partialShipping;
+						}
+						
 						List<GuideDetail> detailList = new ArrayList<GuideDetail>();
 						for (ItemComplete ic : sdi.getItems()) {
 							itemValue = 0D;
@@ -513,6 +520,8 @@ public class TramacoService implements Serializable {
 
 							itemValue = itemValue + ic.getPrice() * ic.getQuantity();
 							itemValue = (double) Math.round(itemValue * 100) / 100;
+							
+							systemOut.println("itemValue 0-> " +itemValue);
 							
 							Double discount = 0D;
 							Boolean hasTax = Boolean.FALSE;
@@ -555,7 +564,8 @@ public class TramacoService implements Serializable {
 							totalAsegurado = (double) Math.round(totalAsegurado * 100) / 100;
 							itemValue = itemValue - discount;
 							itemValue = (double) Math.round(itemValue * 100) / 100;
-
+							
+							systemOut.println("itemValue 1-> " +itemValue);
 							
 							if (ic.getTax() > 0) {
 								iva = ic.getTax();
@@ -570,13 +580,19 @@ public class TramacoService implements Serializable {
 							}
 							itemValue = (double) Math.round(itemValue * 100) / 100;
 
-							totalValue = totalValue + itemValue + partialShipping;
+							systemOut.println("itemValue 2-> " +itemValue);
+							
+							totalValue = totalValue + itemValue;
 							totalValue = (double) Math.round(totalValue * 100) / 100;
+							
+							systemOut.println("totalValue 1-> " +totalValue);
+							
 							if (hasAdjunto && itemValue > 0 || (hasAdjunto && partialShipping > 0)) {
 								carga.setAdjuntos(Boolean.TRUE);
 								TableSequenceResponseVO codigoAdjunto = getTramacoAdjCode();
 
 								systemOut.println("Codigo Adjunto " + codigoAdjunto.getCode());
+								systemOut.println("Valor al Cobro " + totalValue);
 								carga.setCodigoAdjunto(codigoAdjunto.getCode());
 								carga.setValorCobro(totalValue);
 
