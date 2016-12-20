@@ -10,7 +10,7 @@
 			Saludos de - ${mailInfo.mailSender.name}
 		</p>
 		<p>
-			Estimado - ${mailInfo.mailReceiver.name}
+			Estimado Sr(a).
 		</p>
 		<p>
 			 ${mailInfo.generalText}

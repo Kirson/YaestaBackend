@@ -434,7 +434,7 @@ public class TramacoService implements Serializable {
 						} else {
 							remitente.setReferencia("");
 						}
-						if (sdi.getSupplier().getPhone() == null) {
+						if (sdi.getSupplier().getPhone() != null) {
 							remitente.setTelefono(sdi.getSupplier().getPhone());
 						} else {
 							remitente.setTelefono("         ");
