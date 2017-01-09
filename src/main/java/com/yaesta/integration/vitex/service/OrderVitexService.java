@@ -619,7 +619,7 @@ public class OrderVitexService extends BaseVitexService {
 						YaEstaLog yaestalog = new YaEstaLog();
 						yaestalog.setLogDate(new Date());
 						yaestalog.setProcessName("SUPPLIER-QUERY");
-						yaestalog.setTextinfo("NO existe proveedor con ID" + supplierCode[0]);
+						yaestalog.setTextinfo("Error: NO existe proveedor con ID" + supplierCode[0]);
 						yaestalog.setOrderId(orderId);
 						logService.save(yaestalog);
 					}
@@ -786,7 +786,7 @@ public class OrderVitexService extends BaseVitexService {
 					YaEstaLog yaestalog = new YaEstaLog();
 					yaestalog.setLogDate(new Date());
 					yaestalog.setProcessName("SUPPLIER-QUERY");
-					yaestalog.setTextinfo("NO existe proveedor con ID" + sc);
+					yaestalog.setTextinfo("Error: NO existe proveedor con ID" + sc);
 					yaestalog.setOrderId(orderComplete.getOrderId());
 					logService.save(yaestalog);
 				}
@@ -1344,7 +1344,7 @@ public class OrderVitexService extends BaseVitexService {
 						YaEstaLog yaestalog = new YaEstaLog();
 						yaestalog.setLogDate(new Date());
 						yaestalog.setProcessName("SUPPLIER-QUERY");
-						yaestalog.setTextinfo("NO existe proveedor con ID" + idSup);
+						yaestalog.setTextinfo("Error: NO existe proveedor con ID" + idSup);
 						yaestalog.setOrderId(orderComplete.getOrderId());
 						logService.save(yaestalog);
 					}
@@ -1860,7 +1860,7 @@ public class OrderVitexService extends BaseVitexService {
 						yaestalog.setLogDate(new Date());
 						yaestalog.setProcessName("WAYBILL-PDF-TRAMACO");
 						yaestalog.setProcessName("SUPPLIER-QUERY");
-						yaestalog.setTextinfo("NO existe proveedor " + sdi.getSupplierId());
+						yaestalog.setTextinfo("Error: NO existe proveedor " + sdi.getSupplierId());
 						yaestalog.setOrderId(oc.getOrderId());
 						logService.save(yaestalog);
 					}

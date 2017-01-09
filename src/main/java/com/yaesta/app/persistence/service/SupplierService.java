@@ -111,7 +111,10 @@ public class SupplierService implements Serializable {
 		
 		if(entity.getId()==null){
 			entity.setId(tableSequenceService.getNextValue("SEQ_SUPPLIER"));
+			entity.setDateAdd(new Date());
 			isNew = Boolean.TRUE;
+		}else{
+			entity.setDateUpd(new Date());
 		}
 		
 		String postalCode = entity.getPostalCode();
@@ -278,11 +281,12 @@ public class SupplierService implements Serializable {
 				if(updSupplier==null){
 				
 					updSupplier = new Supplier();
-					
+					updSupplier.setDateAdd(new Date());
 					systemOut.println("NO Encuentra "+proveedor.getNombreProveedor() +" "+ proveedor.getCodigo());
 				}else{
 					count++;
 					found=true;
+					updSupplier.setDateUpd(new Date());
 					systemOut.println("Encuentra "+updSupplier.getName() +" "+ updSupplier.getId());
 				}
 				
@@ -485,6 +489,7 @@ public class SupplierService implements Serializable {
 						}
 						
 						if(update){
+							supplier.setDateUpd(new Date());
 							supplierRepository.saveAndFlush(supplier);
 						}
 					}//fin for address

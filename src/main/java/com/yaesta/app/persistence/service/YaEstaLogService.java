@@ -27,4 +27,8 @@ public class YaEstaLogService implements Serializable {
 	public YaEstaLog save(YaEstaLog entity){
 		return repository.save(entity);
 	}
+	
+	public List<YaEstaLog> findByOrderId(String orderId){
+		return repository.findByOrderId(orderId);
+	}
 }
