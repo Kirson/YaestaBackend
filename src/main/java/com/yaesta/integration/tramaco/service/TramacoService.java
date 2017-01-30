@@ -223,6 +223,8 @@ public class TramacoService implements Serializable {
 			TramacoAuthDTO tramacoAuth = authService();
 
 			if (response.equals(tramacoAuth.getResponse())) {
+				
+				if(tramacoAuth.getRespuestaAutenticarWs()!=null && tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs()!=null){
 
 				String url = "http://" + tramacoUrl + ":" + tramacoPort + "/";
 				// Obtener informacion para la guia
@@ -723,10 +725,30 @@ public class TramacoService implements Serializable {
 					// Por cada proveedor llamar al servicio de guias
 
 				} // for de supplier delivery info
+				
+				}// tengo response y tengo salida de auth
+				else{
+					YaEstaLog yaestalog = new YaEstaLog();
+					yaestalog.setLogDate(new Date());
+					yaestalog.setProcessName("WAYBILL-TRAMACO");
+					yaestalog.setTextinfo(guideInfo.getOrderComplete().getOrderId());
+					yaestalog.setTextinfo("Error no se tiene respuesta de autenticacion");
+					yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
+					response="ERROR";
+					logService.save(yaestalog);
+				}
 
 			} // response de servicio auth
 			else {
 				response = tramacoAuth.getResponse();
+				YaEstaLog yaestalog = new YaEstaLog();
+				yaestalog.setLogDate(new Date());
+				yaestalog.setProcessName("WAYBILL-TRAMACO");
+				yaestalog.setTextinfo(guideInfo.getOrderComplete().getOrderId());
+				yaestalog.setTextinfo("Error no se encuentra autenticado");
+				yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
+				response="ERROR";
+				logService.save(yaestalog);
 			}
 
 			guideInfo.setResponse(response);
@@ -741,6 +763,7 @@ public class TramacoService implements Serializable {
 			yaestalog.setTextinfo(guideInfo.getOrderComplete().getOrderId());
 			yaestalog.setTextinfo("Error " + e.getMessage());
 			yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
+			guideInfo.setResponse("ERROR");
 			logService.save(yaestalog);
 		}
 

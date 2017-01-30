@@ -35,6 +35,7 @@ import com.yaesta.app.persistence.repository.GuideDetailRepository;
 import com.yaesta.app.persistence.repository.GuideMigrateRepository;
 import com.yaesta.app.persistence.repository.GuideRepository;
 import com.yaesta.app.persistence.vo.DateRangeVO;
+import com.yaesta.app.persistence.vo.GuideBeanVO;
 import com.yaesta.app.persistence.vo.GuideDeliveryNotificationVO;
 import com.yaesta.app.persistence.vo.GuideSearchVO;
 import com.yaesta.app.persistence.vo.GuideVO;
@@ -189,6 +190,58 @@ public class GuideService {
 	public List<Guide> findByOrderId(String orderId) {
 		return guideRepository.findByOrderVitexId(orderId);
 	}
+	
+	public List<Guide> findByProgrammedDate(Date programmedDate){
+		return guideRepository.findByProgrammedDate(programmedDate);
+	}
+	
+	public List<Guide> findByProgrammedDateAndStatus(Date programmedDate, String status){
+		return guideRepository.findByProgrammedDateAndStatus(programmedDate,status);
+	}
+	
+	public List<Guide> findByProcessDate(Date processDate){
+		return guideRepository.findByProcessDate(processDate);
+	}
+	
+	public List<Guide> findByProcessDateAndStatus(Date processDate, String status){
+		return guideRepository.findByProcessDateAndStatus(processDate,status);
+	}
+	
+	public List<GuideVO> findGuideVOByProgrammedDate(GuideSearchVO guideSearch) {
+		List<GuideVO> resultList = new ArrayList<GuideVO>();
+
+		List<Guide> found = findByProgrammedDate(guideSearch.getProgrammedDate());
+
+		if (found != null && !found.isEmpty()) {
+			for (Guide g : found) {
+				GuideVO gvo = GuideUtil.fromGuideToGuideVO(g);
+				List<GuideDetail> details = this.getGuideDetails(g);
+				gvo.setDetails(details);
+				resultList.add(gvo);
+			}
+		}
+
+		return resultList;
+	}
+	
+	public List<GuideVO> findGuideVOByProgrammedDateAndStatus(GuideSearchVO guideSearch) {
+		List<GuideVO> resultList = new ArrayList<GuideVO>();
+
+		List<Guide> found = findByProgrammedDateAndStatus(guideSearch.getProgrammedDate(),guideSearch.getStatus());
+
+		if (found != null && !found.isEmpty()) {
+			for (Guide g : found) {
+				GuideVO gvo = GuideUtil.fromGuideToGuideVO(g);
+				List<GuideDetail> details = this.getGuideDetails(g);
+				gvo.setDetails(details);
+				resultList.add(gvo);
+			}
+		}
+
+		return resultList;
+	}
+
+
 
 	@Transactional
 	public Guide saveGuideDetail(Guide guide, List<GuideDetail> details) {
@@ -346,6 +399,22 @@ public class GuideService {
 
 		List<Guide> found = guideRepository.findByOrderDateBetweenAndStatus(guideSearch.getStartDate(),
 				guideSearch.getStartDate(), guideSearch.getStatus());
+
+		if (found != null && !found.isEmpty()) {
+			for (Guide g : found) {
+				GuideVO gvo = GuideUtil.fromGuideToGuideVO(g);
+				resultList.add(gvo);
+			}
+		}
+
+		return resultList;
+	}
+	
+	public List<GuideVO> findByCreateDateBetweenAndStatus(GuideSearchVO guideSearch) {
+		List<GuideVO> resultList = new ArrayList<GuideVO>();
+
+		List<Guide> found = guideRepository.findByCreateDateBetweenAndStatus(guideSearch.getStartDate(),
+				guideSearch.getFinishDate(), guideSearch.getStatus());
 
 		if (found != null && !found.isEmpty()) {
 			for (Guide g : found) {
@@ -682,5 +751,35 @@ public class GuideService {
 		}
 		
 		return result;
+	}
+	
+	public GuideBeanVO updateGuide(GuideBeanVO guideBean){
+		
+		if(guideBean.getGuide()!=null){
+			guideRepository.save(guideBean.getGuide());
+			guideBean.setStatus("OK");
+		}
+		else{
+			guideBean.setStatus("ERROR");
+			guideBean.setMessage("Objeto guia es nulo");
+		}
+		return guideBean;
+		
+	}
+	
+	public Long countByProgrammedDate(Date programmedDate){
+		return guideRepository.countByProgrammedDate(programmedDate);
+	}
+	
+	public Long countByProgrammedDateAndStatus(Date programmedDate, String status){
+		return guideRepository.countByProgrammedDateAndStatus(programmedDate,status);
+	}
+	
+	public Long countByProcessDate(Date processDate){
+		return guideRepository.countByProcessDate(processDate);
+	}
+	
+	public Long countByProcessDateAndStatus(Date processDate, String status){
+		return guideRepository.countByProcessDateAndStatus(processDate,status);
 	}
 }

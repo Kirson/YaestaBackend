@@ -219,8 +219,7 @@ public class OrderVitexService extends BaseVitexService {
 	private @Value("${yaesta.pdf.guide.leyend}") String yaestaGuideLeyend;
 	private @Value("${yaesta.pdf.guide.logo}") String yaestaGuideLogo;
 	private @Value("${yaesta.address}") String yaestaAddress;
-	
-	
+
 	public OrderVitexService() throws Exception {
 		super();
 		// TODO Auto-generated constructor stub
@@ -824,36 +823,37 @@ public class OrderVitexService extends BaseVitexService {
 			return new GuideContainerBean();
 		}
 	}
-	
-	public GuideContainerBean resendGuides(GuideInfoBean guideInfoBean){
+
+	public GuideContainerBean resendGuides(GuideInfoBean guideInfoBean) {
 		GuideContainerBean guideContainer = new GuideContainerBean();
 		if (guideInfoBean.getDeliverySelected().getNemonic().equals("TRAMACO")) {
-			
+
 			OrderComplete orderComplete = guideInfoBean.getOrderComplete();
-			
+
 			Order order = orderService.findByVitexId(orderComplete.getOrderId());
-			
+
 			List<Guide> guides = guideService.findByOrder(order);
-			
+
 			List<SupplierDeliveryInfo> supplierDeliveryInfoList = guideInfoBean.getSupplierDeliveryInfoList();
-			
+
 			Catalog delivery = guideInfoBean.getDeliverySelected();
-			
-			List<MailInfo> mailInfoList = prepareMailOrder(orderComplete, supplierDeliveryInfoList, delivery, "Reenviar");
+
+			List<MailInfo> mailInfoList = prepareMailOrder(orderComplete, supplierDeliveryInfoList, delivery,
+					"Reenviar");
 
 			for (MailInfo mailInfo : mailInfoList) {
 				for (Guide guide : guides) {
 					if (guide.getSupplier().getId().longValue() == mailInfo.getRefId().longValue()) {
 						mailInfo.getAttachmentList().add(guide.getDocumentUrl());
-						if(guide.getDocumentTagUrl()!=null){
+						if (guide.getDocumentTagUrl() != null) {
 							mailInfo.getAttachmentList().add(guide.getDocumentTagUrl());
 						}
-					} 
+					}
 				}
 				mailService.sendMailTemplate(mailInfo, "guideNotification.vm");
 			}
 		}
-		
+
 		return guideContainer;
 	}
 
@@ -880,160 +880,170 @@ public class OrderVitexService extends BaseVitexService {
 
 		GuideDTO resultGuideInfo = tramacoService.generateGuides(guideDTO);
 
-		List<GuideBeanDTO> guideInfoBeanList = resultGuideInfo.getGuideBeanList();
-		List<GuideBeanDTO> guideInfoList = new ArrayList<GuideBeanDTO>();
-		String pdfURL = yaestaPdfGuidePath;
+		if (resultGuideInfo.getResponse().equals("OK")) {
 
-		if (guideInfoBeanList != null && !guideInfoBeanList.isEmpty()) {
-			for (GuideBeanDTO gbd : guideInfoBeanList) {
-				Guide guide = new Guide();
-				guide.setCreateDate(new Date());
-				guide.setOrderVitexId(orderComplete.getOrderId());
-				guide.setVitexDispatcherId(gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getId()
-						+ "%" + gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getGuia());
-				guide.setGuideInfo(new Gson().toJson(gbd));
-				guide.setOrder(order);
-				guide.setDeliveryCost(gbd.getDeliveryCost());
-				guide.setDeliveryPayment(gbd.getDeliveryPayment());
-				guide.setItemValue(gbd.getItemValue());
-				guide.setDeliveryStatus("GENERATED");
-				guide.setSupplier(gbd.getSupplier());
-				guide.setCustomerName(orderComplete.getCustomerName());
-				guide.setCustomerPhone(orderComplete.getClientProfileData().getPhone());
-				guide.setGuideNumber(gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getGuia());
-				guide.setSerial(orderComplete.getSequence());
-				
-				String dateParts[] = UtilDate.dateParts(order.getCreateDate());
-				guide.setPeriode(dateParts[0] + "-" + dateParts[1]);
+			List<GuideBeanDTO> guideInfoBeanList = resultGuideInfo.getGuideBeanList();
+			List<GuideBeanDTO> guideInfoList = new ArrayList<GuideBeanDTO>();
+			String pdfURL = yaestaPdfGuidePath;
 
-				try {
-					guide.setOrderDate(UtilDate.fromIsoToDateTime(orderComplete.getCreationDate()));
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				guide.setOrderStatus(orderComplete.getStatus());
-				guide.setPaymentMethod(OrderVtexUtil.getPaymentBean(orderComplete).getPaymentMethod());
-				guide.setHasPayment(gbd.getHasPayment());
-				guide.setTotalValue(gbd.getTotalValue());
-				
-				guideService.saveGuide(guide);
-				gbd.setGuide(guide);
-				guideInfoList.add(gbd);
+			if (guideInfoBeanList != null && !guideInfoBeanList.isEmpty()) {
+				for (GuideBeanDTO gbd : guideInfoBeanList) {
+					Guide guide = new Guide();
+					guide.setCreateDate(new Date());
+					guide.setOrderVitexId(orderComplete.getOrderId());
+					guide.setVitexDispatcherId(
+							gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getId() + "%"
+									+ gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getGuia());
+					guide.setGuideInfo(new Gson().toJson(gbd));
+					guide.setOrder(order);
+					guide.setDeliveryCost(gbd.getDeliveryCost());
+					guide.setDeliveryPayment(gbd.getDeliveryPayment());
+					guide.setItemValue(gbd.getItemValue());
+					guide.setDeliveryStatus("GENERATED");
+					guide.setSupplier(gbd.getSupplier());
+					guide.setCustomerName(orderComplete.getCustomerName());
+					guide.setCustomerPhone(orderComplete.getClientProfileData().getPhone());
+					guide.setGuideNumber(
+							gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getGuia());
+					guide.setSerial(orderComplete.getSequence());
 
-				List<GuideDetail> details = gbd.getDetails();
-				// Guardar los detalles de la guia
-				if (details != null && !details.isEmpty()) {
-					guideService.saveGuideDetail(guide, details);
-				}
-			}//lista de guias
+					String dateParts[] = UtilDate.dateParts(order.getCreateDate());
+					guide.setPeriode(dateParts[0] + "-" + dateParts[1]);
 
-			guideDTO.setGuideBeanList(guideInfoList);
-			// LLamar ahora al servicio de pdfs
-			resultGuideInfo = tramacoService.generateGuidesPDF(guideDTO);
-			guideInfoBeanList = resultGuideInfo.getGuideBeanList();
-			// Realizar segunda iteracion para las guias
-			List<GuideBeanDTO> newGuideInfoBeanList = new ArrayList<GuideBeanDTO>();
-			List<Guide> guides = new ArrayList<Guide>();
-			for (GuideBeanDTO gbd : guideInfoBeanList) {
-				Guide guide = gbd.getGuide();
-				guide.setStatus("GENERATED-PDF");
-				guide.setDocumentUrl(gbd.getPdfUrl());
-				guide.setDeliveryName("TRAMACO");
-				guide.setTrackingUrl(tramacoTrackingUrl);
-				guideService.saveGuide(guide);
-				guides.add(guide);
-				response.getPdfPathList().add(gbd.getPdfUrl());
-			
-				//Generar Tag Guide
-				GuideDataBean gDbean = new GuideDataBean();
-				pdfURL = yaestaPdfGuidePath;
-				pdfURL = pdfURL + yaestaGuidePrefix + "TRAMACO" + "_" + guide.getGuideNumber() + "_" + ".pdf";
-				gDbean.setPdfPath(pdfURL);
-				//gDbean.setLogoPath(logoPath);
-				gDbean.setOrderId(orderComplete.getOrderId());
-				gDbean.setGuideNumber(guide.getGuideNumber());
-				//guide.setDocumentUrl(pdfURL);
-				
-				List<GuideDetail> details = guideService.getGuideDetails(guide);
-				List<ItemData> itemDataList = new ArrayList<ItemData>();
-				if(details!=null && !details.isEmpty()){
-					for(GuideDetail gd:details){
-						ItemData id = new ItemData();
-						id.setCode(gd.getVitexId());
-						id.setName(gd.getItemName());
-						id.setQuantity(gd.getQuantity() + "");
-						itemDataList.add(id);
+					try {
+						guide.setOrderDate(UtilDate.fromIsoToDateTime(orderComplete.getCreationDate()));
+					} catch (ParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-				}
-				gDbean.setItemDataList(itemDataList);
-				
-				
-				List<String> strList = new ArrayList<String>();
-				//strList.add(" ");
-				//String str = "Guia # " + guide.getGuideNumber() + "";
-				//strList.add(str);
-				String courier = "Gestor Entrega: " + "Tramaco";
-				if(gbd.getHasPayment()){
-					courier =courier +" - Valor a Cobrar: "+ gbd.getTotalValue(); 
-				}
-				strList.add(courier);
-				/*
-				String strPaymentForm = "Forma de pago: " + grr.getInformacionAdicional().getFormaPago();
-				strList.add(strPaymentForm);
-				String strPayment = "Valor a cobrar: " + grr.getInformacionAdicional().getValorACobrar();
-				strList.add(strPayment);
-				*/
-				strList.add("______________________________________________");
-				//strList.add(" ");
-				
-				String supplierAddress = "Origen: " + yaestaAddress;
-				//supplierAddress = "Origen: "+ gbd.getSupplier().getAddress();
-				strList.add(supplierAddress);
-				/*
-				String supplierContact = "Contacto: " + gbd.getSupplier().getContactName() + " "
-						+ gbd.getSupplier().getContactLastName();
-				strList.add(supplierContact);
-				String supplierAux = "Email: " + gbd.getSupplier().getContactEmail();
-				strList.add(supplierAux);
-				*/
-				strList.add("______________________________________________");
-				//strList.add(" ");
+					guide.setOrderStatus(orderComplete.getStatus());
+					guide.setPaymentMethod(OrderVtexUtil.getPaymentBean(orderComplete).getPaymentMethod());
+					guide.setHasPayment(gbd.getHasPayment());
+					guide.setTotalValue(gbd.getTotalValue());
 
-				String customerAddress = "Destino: " + orderComplete.getShippingData().getAddress().getState() + " "
-						+ orderComplete.getShippingData().getAddress().getCity();
-				customerAddress = customerAddress + " " + orderComplete.getShippingData().getAddress().getStreet();
-				customerAddress = customerAddress + " " + orderComplete.getShippingData().getAddress().getReference();
-				strList.add(customerAddress);
-				String customer = "Destinatario: " + orderComplete.getCustomerName();
-				strList.add(customer);
-				/*String email = "Email: " + orderComplete.getClientProfileData().getEmail();
-				strList.add(email);
-				String phone = "Telefono: " + orderComplete.getClientProfileData().getPhone();
-				strList.add(phone);
-				*/
-				strList.add("______________________________________________");
-				
-				//strList.add(" ");
-				gDbean.setParagraphs(strList);
-				
-				gDbean.setGuideLeyend(yaestaGuideLeyend);
-				gDbean.setLogoPath(yaestaGuideLogo);
-				gDbean = BuildTagGuidePDF.generateGuidePDF(gDbean);
-				gbd.setPdfTagUrl(gDbean.getPdfPath());
-				guide.setDocumentTagUrl(gDbean.getPdfPath());
-				guideService.saveGuide(guide);
-				newGuideInfoBeanList.add(gbd);
-			}
-			
-			resultGuideInfo.setGuideBeanList(newGuideInfoBeanList);
+					guideService.saveGuide(guide);
+					gbd.setGuide(guide);
+					guideInfoList.add(gbd);
 
-			orderService.saveOrder(order);
-			responseList.add(resultGuideInfo);
-			guideDTO = resultGuideInfo;
-			
-			
-			
+					List<GuideDetail> details = gbd.getDetails();
+					// Guardar los detalles de la guia
+					if (details != null && !details.isEmpty()) {
+						guideService.saveGuideDetail(guide, details);
+					}
+				} // lista de guias
+
+				guideDTO.setGuideBeanList(guideInfoList);
+				// LLamar ahora al servicio de pdfs
+				resultGuideInfo = tramacoService.generateGuidesPDF(guideDTO);
+				guideInfoBeanList = resultGuideInfo.getGuideBeanList();
+				// Realizar segunda iteracion para las guias
+				List<GuideBeanDTO> newGuideInfoBeanList = new ArrayList<GuideBeanDTO>();
+				List<Guide> guides = new ArrayList<Guide>();
+				for (GuideBeanDTO gbd : guideInfoBeanList) {
+					Guide guide = gbd.getGuide();
+					guide.setStatus("GENERATED-PDF");
+					guide.setDocumentUrl(gbd.getPdfUrl());
+					guide.setDeliveryName("TRAMACO");
+					guide.setTrackingUrl(tramacoTrackingUrl);
+					guideService.saveGuide(guide);
+					guides.add(guide);
+					response.getPdfPathList().add(gbd.getPdfUrl());
+
+					// Generar Tag Guide
+					GuideDataBean gDbean = new GuideDataBean();
+					pdfURL = yaestaPdfGuidePath;
+					pdfURL = pdfURL + yaestaGuidePrefix + "TRAMACO" + "_" + guide.getGuideNumber() + "_" + ".pdf";
+					gDbean.setPdfPath(pdfURL);
+					// gDbean.setLogoPath(logoPath);
+					gDbean.setOrderId(orderComplete.getOrderId());
+					gDbean.setGuideNumber(guide.getGuideNumber());
+					// guide.setDocumentUrl(pdfURL);
+
+					List<GuideDetail> details = guideService.getGuideDetails(guide);
+					List<ItemData> itemDataList = new ArrayList<ItemData>();
+					if (details != null && !details.isEmpty()) {
+						for (GuideDetail gd : details) {
+							ItemData id = new ItemData();
+							id.setCode(gd.getVitexId());
+							id.setName(gd.getItemName());
+							id.setQuantity(gd.getQuantity() + "");
+							itemDataList.add(id);
+						}
+					}
+					gDbean.setItemDataList(itemDataList);
+
+					List<String> strList = new ArrayList<String>();
+					// strList.add(" ");
+					// String str = "Guia # " + guide.getGuideNumber() + "";
+					// strList.add(str);
+					String courier = "Gestor Entrega: " + "Tramaco";
+					if (gbd.getHasPayment()) {
+						courier = courier + " - Valor a Cobrar: " + gbd.getTotalValue();
+					}
+					strList.add(courier);
+					/*
+					 * String strPaymentForm = "Forma de pago: " +
+					 * grr.getInformacionAdicional().getFormaPago();
+					 * strList.add(strPaymentForm); String strPayment =
+					 * "Valor a cobrar: " +
+					 * grr.getInformacionAdicional().getValorACobrar();
+					 * strList.add(strPayment);
+					 */
+					strList.add("______________________________________________");
+					// strList.add(" ");
+
+					String supplierAddress = "Origen: " + yaestaAddress;
+					// supplierAddress = "Origen: "+
+					// gbd.getSupplier().getAddress();
+					strList.add(supplierAddress);
+					/*
+					 * String supplierContact = "Contacto: " +
+					 * gbd.getSupplier().getContactName() + " " +
+					 * gbd.getSupplier().getContactLastName();
+					 * strList.add(supplierContact); String supplierAux =
+					 * "Email: " + gbd.getSupplier().getContactEmail();
+					 * strList.add(supplierAux);
+					 */
+					strList.add("______________________________________________");
+					// strList.add(" ");
+
+					String customerAddress = "Destino: " + orderComplete.getShippingData().getAddress().getState() + " "
+							+ orderComplete.getShippingData().getAddress().getCity();
+					customerAddress = customerAddress + " " + orderComplete.getShippingData().getAddress().getStreet();
+					customerAddress = customerAddress + " "
+							+ orderComplete.getShippingData().getAddress().getReference();
+					strList.add(customerAddress);
+					String customer = "Destinatario: " + orderComplete.getCustomerName();
+					strList.add(customer);
+					/*
+					 * String email = "Email: " +
+					 * orderComplete.getClientProfileData().getEmail();
+					 * strList.add(email); String phone = "Telefono: " +
+					 * orderComplete.getClientProfileData().getPhone();
+					 * strList.add(phone);
+					 */
+					strList.add("______________________________________________");
+
+					// strList.add(" ");
+					gDbean.setParagraphs(strList);
+
+					gDbean.setGuideLeyend(yaestaGuideLeyend);
+					gDbean.setLogoPath(yaestaGuideLogo);
+					gDbean = BuildTagGuidePDF.generateGuidePDF(gDbean);
+					gbd.setPdfTagUrl(gDbean.getPdfPath());
+					guide.setDocumentTagUrl(gDbean.getPdfPath());
+					guideService.saveGuide(guide);
+					newGuideInfoBeanList.add(gbd);
+				}
+
+				resultGuideInfo.setGuideBeanList(newGuideInfoBeanList);
+
+				orderService.saveOrder(order);
+				responseList.add(resultGuideInfo);
+				guideDTO = resultGuideInfo;
+
+			} // si la generacion fue exitosa
+
 		}
 
 		result.setGuideInfoBean(response);
@@ -1041,13 +1051,13 @@ public class OrderVitexService extends BaseVitexService {
 		result.setGuides(responseList);
 
 		List<MailInfo> mailInfoList = prepareMailOrder(orderComplete, supplierDeliveryInfoList,
-				guideInfoBean.getDeliverySelected(),null);
+				guideInfoBean.getDeliverySelected(), null);
 
 		for (MailInfo mailInfo : mailInfoList) {
 			for (GuideBeanDTO gDto : guideDTO.getGuideBeanList()) {
 				if (gDto.getSupplier().getId() == mailInfo.getRefId()) {
 					mailInfo.getAttachmentList().add(gDto.getPdfUrl());
-					if(gDto.getPdfTagUrl()!=null){
+					if (gDto.getPdfTagUrl() != null) {
 						mailInfo.getAttachmentList().add(gDto.getPdfTagUrl());
 					}
 				}
@@ -1055,10 +1065,10 @@ public class OrderVitexService extends BaseVitexService {
 			mailService.sendMailTemplate(mailInfo, "guideNotification.vm");
 		}
 
-		if(mailNotifyCustomer.equals("Y")){
+		if (mailNotifyCustomer.equals("Y")) {
 			sendGuideMailCustomer(orderComplete);
 		}
-		
+
 		updateDetails(orderComplete);
 
 		return result;
@@ -1150,7 +1160,7 @@ public class OrderVitexService extends BaseVitexService {
 		 * mailService.sendMailTemplate(mailInfo, "guideNotification.vm"); }
 		 */
 
-		if(mailNotifyCustomer.equals("Y")){
+		if (mailNotifyCustomer.equals("Y")) {
 			sendGuideMailCustomer(orderComplete);
 		}
 
@@ -1251,7 +1261,7 @@ public class OrderVitexService extends BaseVitexService {
 		} else if (guideInfoBean.getDeliverySelected().getNemonic().equals("CICLISTA")) {
 			return generateGuideCyclist(guideInfoBean);
 		}
-		
+
 		updateDetails(guideInfoBean.getOrderComplete());
 
 		return result;
@@ -1263,8 +1273,8 @@ public class OrderVitexService extends BaseVitexService {
 				guideInfoBean.getDeliverySelected(), "SEQ_WAYBILL");
 		result = processStandarGuide(response, guideInfoBean.getOrderComplete(), guideInfoBean.getDeliverySelected(),
 				guideInfoBean.getSupplierDeliveryInfoList());
-		
-		if(mailNotifyCustomer.equals("Y")){
+
+		if (mailNotifyCustomer.equals("Y")) {
 			sendGuideMailCustomer(guideInfoBean.getOrderComplete());
 		}
 		return result;
@@ -1277,8 +1287,7 @@ public class OrderVitexService extends BaseVitexService {
 		result = processStandarGuide(response, guideInfoBean.getOrderComplete(), guideInfoBean.getDeliverySelected(),
 				guideInfoBean.getSupplierDeliveryInfoList());
 
-		
-		if(mailNotifyCustomer.equals("Y")){
+		if (mailNotifyCustomer.equals("Y")) {
 			sendGuideMailCustomer(guideInfoBean.getOrderComplete());
 		}
 		return result;
@@ -1294,8 +1303,7 @@ public class OrderVitexService extends BaseVitexService {
 		result = processStandarGuide(response, guideInfoBean.getOrderComplete(), guideInfoBean.getDeliverySelected(),
 				guideInfoBean.getSupplierDeliveryInfoList());
 
-		
-		if(mailNotifyCustomer.equals("Y")){
+		if (mailNotifyCustomer.equals("Y")) {
 			sendGuideMailCustomer(guideInfoBean.getOrderComplete());
 		}
 		return result;
@@ -1444,7 +1452,7 @@ public class OrderVitexService extends BaseVitexService {
 
 			orderService.saveOrder(order);
 
-			List<MailInfo> mailInfoList = prepareMailOrder(orderComplete, supplierDeliveryInfoList, delivery,null);
+			List<MailInfo> mailInfoList = prepareMailOrder(orderComplete, supplierDeliveryInfoList, delivery, null);
 
 			for (MailInfo mailInfo : mailInfoList) {
 				for (GuideBeanDTO gDto : guideInfoBeanList) {
@@ -1526,9 +1534,9 @@ public class OrderVitexService extends BaseVitexService {
 					mp.setIsSupplier(Boolean.TRUE);
 					recSupplierList.add(mp);
 				}
-				//if(mailNotifySupplier.equals("Y")){
-				  receiverTotal.addAll(recSupplierList);
-				//}
+				// if(mailNotifySupplier.equals("Y")){
+				receiverTotal.addAll(recSupplierList);
+				// }
 				List<ItemComplete> icSupplierList = sdi.getItems();
 				if (icSupplierList != null && !icSupplierList.isEmpty()) {
 					for (ItemComplete ic : icSupplierList) {
@@ -1547,11 +1555,11 @@ public class OrderVitexService extends BaseVitexService {
 
 				String subject = "Notificación de pedido " + " - Orden: " + orderComplete.getOrderId()
 						+ " - Proveedor: " + supplier.getName();
-				
-				if(flag!=null){
-					subject = flag + " - "+subject; 
+
+				if (flag != null) {
+					subject = flag + " - " + subject;
 				}
-				
+
 				mailInfo.setReceivers(receiverTotal);
 				String strMailTextGuide = mailTextGuide;
 				strMailTextGuide = strMailTextGuide.replace(mailTextGuideToken, determineDeliveryName(delivery));
@@ -1578,8 +1586,6 @@ public class OrderVitexService extends BaseVitexService {
 
 		return mailInfoList;
 	}
-	
-	
 
 	public MultivaluedMap<String, Object> buildHeaders() {
 
@@ -2111,12 +2117,12 @@ public class OrderVitexService extends BaseVitexService {
 				List<GuideDetail> details = guideService.getGuideDetails(guide);
 				if (details != null && !details.isEmpty())
 					for (GuideDetail detail : details) {
-						for(OrderItem oi:items){
-							if(detail.getVitexId().equals(oi.getSkuId())){
+						for (OrderItem oi : items) {
+							if (detail.getVitexId().equals(oi.getSkuId())) {
 								oi.setGuideDate(guide.getCreateDate());
-								String strDate = UtilDate.fromDateToString(guide.getCreateDate(),"yyyy-MM-dd");
+								String strDate = UtilDate.fromDateToString(guide.getCreateDate(), "yyyy-MM-dd");
 								oi.setStrGuideDate(strDate);
-								if(guide.getGuideNumber()!=null && oi.getGuideNumber()==null){
+								if (guide.getGuideNumber() != null && oi.getGuideNumber() == null) {
 									oi.setGuideNumber(guide.getGuideNumber());
 								}
 								orderService.updateOrderItem(oi);

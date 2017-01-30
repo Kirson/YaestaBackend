@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 	"orderId",
 	"supplierId",
 	"supplierName",
+	"programmedDate",
 	"details"
 })
 public class GuideVO implements Serializable {
@@ -48,6 +49,7 @@ public class GuideVO implements Serializable {
 	private Long supplierId;
 	private String supplierName;
 	private List<GuideDetail> details;
+	private Date programmedDate;
 	
 	public GuideVO(){
 		details = new ArrayList<GuideDetail>();
@@ -132,6 +134,14 @@ public class GuideVO implements Serializable {
 
 	public void setDetails(List<GuideDetail> details) {
 		this.details = details;
+	}
+
+	public Date getProgrammedDate() {
+		return programmedDate;
+	}
+
+	public void setProgrammedDate(Date programmedDate) {
+		this.programmedDate = programmedDate;
 	}
 	
 	

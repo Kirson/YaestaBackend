@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.PostLoad;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -20,6 +21,7 @@ import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.yaesta.app.pdf.enums.GuideStatusEnum;
 import com.yaesta.app.util.UtilDate;
 
 @Entity
@@ -125,6 +127,14 @@ public class Guide implements Serializable{
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date orderDate;
 	
+	@Column(name="programmed_date")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date programmedDate;
+	
+	@Column(name="process_date")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date processDate;
+	
 	@Column(name="order_status")
 	private String orderStatus;
 	
@@ -163,6 +173,10 @@ public class Guide implements Serializable{
 	
 	@Transient
 	private String guideId;
+	
+	@Transient
+	private String statusDescription;
+	
 	
 	public Guide(){
 		hasPayment = Boolean.FALSE;
@@ -521,9 +535,49 @@ public class Guide implements Serializable{
 	public Double getTotalValue() {
 		return totalValue;
 	}
-
+	
 	public void setTotalValue(Double totalValue) {
 		this.totalValue = totalValue;
+	}
+	
+	
+
+	public Date getProgrammedDate() {
+		return programmedDate;
+	}
+
+	public void setProgrammedDate(Date programmedDate) {
+		this.programmedDate = programmedDate;
+	}
+
+	
+	
+	
+	public Date getProcessDate() {
+		return processDate;
+	}
+
+	public void setProcessDate(Date processDate) {
+		this.processDate = processDate;
+	}
+	
+
+	public String getStatusDescription() {
+		return statusDescription;
+	}
+
+	public void setStatusDescription(String statusDescription) {
+		this.statusDescription = statusDescription;
+	}
+
+	@PostLoad
+	public void postLoad(){
+		
+		for(GuideStatusEnum gse:GuideStatusEnum.values()){
+			if(this.status.equals(gse.getCode())){
+				this.setStatusDescription(gse.getDescription());
+			}
+		}
 	}
 
 	@Override
