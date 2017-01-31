@@ -167,15 +167,15 @@ public class GuideController implements Serializable {
 	}
 	
 	@RequestMapping(value = "/getGuidesByStatusDeliveryDateVO/{status}/{deliveryDate}", method = RequestMethod.GET)
-	public ResponseEntity<List<GuideVO>> getGuidesByStatusDeliveryDateVO(@PathVariable("status") String status,@PathVariable("deliveryDate") Date deliveryDate) throws ParseException{
+	public ResponseEntity<List<GuideVO>> getGuidesByStatusDeliveryDateVO(@PathVariable("status") String status,@PathVariable("deliveryDate") Long deliveryDate) throws ParseException{
 		
 		GuideSearchVO guideSearch = new GuideSearchVO();
 		
 		//SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		
-		//Date dDeliveryDate = format.parse(deliveryDate);
+		Date dDeliveryDate = new Date(deliveryDate);
 		
-		guideSearch.setDeliveryDate(deliveryDate);
+		guideSearch.setDeliveryDate(dDeliveryDate);
 		guideSearch.setStatus(status);
 		
 		List<GuideVO> found = guideService.findByStatusAndDeliveryDate(guideSearch);
@@ -188,12 +188,13 @@ public class GuideController implements Serializable {
 	}
 	
 	@RequestMapping(value = "/getGuidesByStatusProgrammedDateVO/{status}/{programmedDate}", method = RequestMethod.GET)
-	public ResponseEntity<List<GuideVO>> getGuidesByStatusProgrammedDateVO(@PathVariable("status") String status,@PathVariable("programmedDate") Date programmedDate) throws ParseException{
+	public ResponseEntity<List<GuideVO>> getGuidesByStatusProgrammedDateVO(@PathVariable("status") String status,@PathVariable("programmedDate") Long programmedDate) throws ParseException{
 		
 		GuideSearchVO guideSearch = new GuideSearchVO();
 		
-		
-		guideSearch.setProgrammedDate(programmedDate);
+		Date dProgrammedDate = new Date(programmedDate);
+		System.out.println("Fecha programada "+dProgrammedDate);
+		guideSearch.setProgrammedDate(dProgrammedDate);
 		guideSearch.setStatus(status);
 		
 		List<GuideVO> found = guideService.findGuideVOByProgrammedDateAndStatus(guideSearch);

@@ -56,7 +56,7 @@ public class ScheduledTasks implements Serializable {
 		 guideService.processGuideTracking();
 	 }
 	 
-	 @Scheduled(cron="0 43 21 * * SUN-SAT")
+	 @Scheduled(cron="0 30 23 * * SUN-SAT")
 	 public void doProcessDate(){
 		 System.out.println("Antes de ejecutar inicio de dia " + dateFormat.format(new Date()));
 		 guideProcessService.doProcessDate();
