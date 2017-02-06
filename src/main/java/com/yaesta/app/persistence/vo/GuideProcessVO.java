@@ -7,8 +7,14 @@ import com.yaesta.app.persistence.entity.GuideProcess;
 
 public class GuideProcessVO implements Serializable {
 
+	/**
+	 * Serial version
+	 */
+	private static final long serialVersionUID = -7065184605385066313L;
+	
 	private Date processDate;
 	private GuideProcess guideProcess;
+	
 	public Date getProcessDate() {
 		return processDate;
 	}

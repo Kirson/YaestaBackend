@@ -17,14 +17,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.yaesta.app.pdf.bean.GuideProcessResultBean;
+import com.yaesta.app.persistence.entity.Catalog;
 import com.yaesta.app.persistence.entity.Guide;
+import com.yaesta.app.persistence.service.GuideProcessService;
 import com.yaesta.app.persistence.service.GuideService;
 import com.yaesta.app.persistence.vo.DateRangeVO;
 import com.yaesta.app.persistence.vo.GuideBeanVO;
 import com.yaesta.app.persistence.vo.GuideDeliveryNotificationVO;
+import com.yaesta.app.persistence.vo.GuidePaymentVO;
 import com.yaesta.app.persistence.vo.GuideSearchVO;
 import com.yaesta.app.persistence.vo.GuideVO;
 import com.yaesta.app.persistence.vo.TrackingVO;
+import com.yaesta.integration.vitex.json.bean.enums.PaymentEnum;
 
 @RestController
 @RequestMapping(value = "/guide")
@@ -37,6 +42,9 @@ public class GuideController implements Serializable {
 	
 	@Autowired
 	GuideService guideService;
+	
+	@Autowired
+	GuideProcessService guideProcessService;
 	
 	@RequestMapping(value = "/getAll/", method = RequestMethod.GET)
 	public ResponseEntity<List<Guide>> getAll(){
@@ -290,5 +298,46 @@ public class GuideController implements Serializable {
 	public ResponseEntity<String> processMigrate(){
 		String result = guideService.processMigrate();
 		return new ResponseEntity<String>(result,HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/doProcessDate", method = RequestMethod.GET)
+	public ResponseEntity<GuideProcessResultBean> doProcessDate(){
+		GuideProcessResultBean result = guideProcessService.doProcessDate();
+		return new ResponseEntity<GuideProcessResultBean>(result,HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/filterGuideStatus/{status}", method = RequestMethod.GET)
+	public ResponseEntity<List<Catalog>> filterGuideStatus(@PathVariable("status") String status){
+		List<Catalog> found = guideService.filterGuideStatus(status);
+		
+		if(found!=null && !found.isEmpty()){
+			return new ResponseEntity<List<Catalog>>(found,HttpStatus.OK);
+		}else{
+			return new ResponseEntity<List<Catalog>>(new ArrayList<Catalog>(),HttpStatus.OK);
+		}
+	}
+	
+	
+	
+	@RequestMapping(value = "/getGuidesPaymentMethod/{deliveryName}/{periode}", method = RequestMethod.GET)
+	public ResponseEntity<List<Guide>> getGuidesPaymentMethod(@PathVariable("deliveryName") String deliveryName, @PathVariable("periode") String periode){
+		List<Guide> found = guideService.findByPaymentMethodAndDeliveryNameAndPeriode(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName(), deliveryName, periode);
+		
+		if(found!=null && !found.isEmpty()){
+			return new ResponseEntity<List<Guide>>(found,HttpStatus.OK);
+		}else{
+			return new ResponseEntity<List<Guide>>(new ArrayList<Guide>(),HttpStatus.OK);
+		}
+	}
+	
+	@RequestMapping(value = "/getGuidesByPaymentMethod/{deliveryName}/{periode}", method = RequestMethod.GET)
+	public ResponseEntity<List<GuidePaymentVO>> getGuidesByPaymentMethod(@PathVariable("deliveryName") String deliveryName, @PathVariable("periode") String periode){
+		List<GuidePaymentVO> found = guideService.findGuidesByPaymentMethodAndDeliveryNameAndPeriode(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName(), deliveryName, periode);
+		
+		if(found!=null && !found.isEmpty()){
+			return new ResponseEntity<List<GuidePaymentVO>>(found,HttpStatus.OK);
+		}else{
+			return new ResponseEntity<List<GuidePaymentVO>>(new ArrayList<GuidePaymentVO>(),HttpStatus.OK);
+		}
 	}
 }

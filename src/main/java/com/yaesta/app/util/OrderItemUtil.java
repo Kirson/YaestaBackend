@@ -32,6 +32,11 @@ public class OrderItemUtil {
 		obj.setWayToPay(item.getWayToPay());
 		obj.setInvoiceNumber("'"+item.getInvoiceNumber());
 		obj.setGuideNumber("'"+item.getGuideNumber());
+		obj.setGuideValue(item.getGuideValue());
+		obj.setPartialItemValue(item.getItemPartialValue());
+		if(item.getProgrammedDate()!=null){
+			obj.setProgrammedDate(item.getProgrammedDate().toString());
+		}
 		return obj;
 	}
 	

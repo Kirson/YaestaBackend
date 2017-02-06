@@ -1,4 +1,4 @@
-package com.yaesta.app.pdf.enums;
+package com.yaesta.app.persistence.enums;
 
 public enum GuideStatusEnum {
 

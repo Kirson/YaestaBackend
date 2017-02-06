@@ -152,9 +152,19 @@ public class OrderItem implements Serializable{
 	@Column(name="guide_date")
 	private Date guideDate;
 	
+	@Column(name="item_partial_value")
+	private Double itemPartialValue;
+	
+	@Column(name="guide_value")
+	private Double guideValue;
+	
+	@Column(name="programmed_date")
+	private Date programmedDate;
 	
 	public OrderItem(){
 		isWarehouse=Boolean.FALSE;
+		itemPartialValue=0D;
+		guideValue=0D;
 	}
 
 	public Long getId() {
@@ -461,6 +471,30 @@ public class OrderItem implements Serializable{
 
 	public void setGuideDate(Date guideDate) {
 		this.guideDate = guideDate;
+	}
+
+	public Double getItemPartialValue() {
+		return itemPartialValue;
+	}
+
+	public void setItemPartialValue(Double itemPartialValue) {
+		this.itemPartialValue = itemPartialValue;
+	}
+
+	public Double getGuideValue() {
+		return guideValue;
+	}
+
+	public void setGuideValue(Double guideValue) {
+		this.guideValue = guideValue;
+	}
+
+	public Date getProgrammedDate() {
+		return programmedDate;
+	}
+
+	public void setProgrammedDate(Date programmedDate) {
+		this.programmedDate = programmedDate;
 	}
 	
 	

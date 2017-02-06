@@ -62,4 +62,6 @@ public interface GuideRepository extends JpaRepository<Guide, Long>{
 	         "where gui.processDate = ?1 and gui.status = ?2")
 	public Long countByProcessDateAndStatus(Date processDate,String status);
 	
+	public List<Guide> findByPaymentMethodAndDeliveryNameAndPeriode(String paymentMethod,String deliveryName, String periode);
+	
 }

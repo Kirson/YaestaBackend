@@ -21,7 +21,7 @@ import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.yaesta.app.pdf.enums.GuideStatusEnum;
+import com.yaesta.app.persistence.enums.GuideStatusEnum;
 import com.yaesta.app.util.UtilDate;
 
 @Entity
@@ -168,6 +168,9 @@ public class Guide implements Serializable{
 	@Column(name="total_value")
 	private Double totalValue;
 	
+	@Column(name="pending")
+	private Boolean pending;
+	
 	@Transient
 	private List<GuideDetail> details;
 	
@@ -177,10 +180,15 @@ public class Guide implements Serializable{
 	@Transient
 	private String statusDescription;
 	
+	@Transient
+	private String supplierName;
+	
 	
 	public Guide(){
 		hasPayment = Boolean.FALSE;
 		totalValue = 0D;
+		programmedDate = new Date();
+		pending = Boolean.FALSE;
 	}
 
 	public Long getId() {
@@ -569,6 +577,26 @@ public class Guide implements Serializable{
 	public void setStatusDescription(String statusDescription) {
 		this.statusDescription = statusDescription;
 	}
+	
+	
+
+	public Boolean getPending() {
+		return pending;
+	}
+
+	public void setPending(Boolean pending) {
+		this.pending = pending;
+	}
+	
+	
+
+	public String getSupplierName() {
+		return supplierName;
+	}
+
+	public void setSupplierName(String supplierName) {
+		this.supplierName = supplierName;
+	}
 
 	@PostLoad
 	public void postLoad(){
@@ -577,6 +605,10 @@ public class Guide implements Serializable{
 			if(this.status.equals(gse.getCode())){
 				this.setStatusDescription(gse.getDescription());
 			}
+		}
+		
+		if(this.supplier!=null){
+			this.setSupplierName(this.supplier.getName());
 		}
 	}
 

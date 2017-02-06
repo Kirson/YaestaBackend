@@ -221,520 +221,531 @@ public class TramacoService implements Serializable {
 			String response = "OK";
 			// Autenticar
 			TramacoAuthDTO tramacoAuth = authService();
+			System.out.println("AUTH RESPONSE 1"+tramacoAuth.getResponse());
+			System.out.println("AUTH RESPONSE 2"+tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs());
 
 			if (response.equals(tramacoAuth.getResponse())) {
-				
-				if(tramacoAuth.getRespuestaAutenticarWs()!=null && tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs()!=null){
 
-				String url = "http://" + tramacoUrl + ":" + tramacoPort + "/";
-				// Obtener informacion para la guia
-				ServicioGenerarGuias cliente = new ServicioGenerarGuias(url);
+				if (tramacoAuth.getRespuestaAutenticarWs() != null
+						&& tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs() != null) {
 
-				// ***Cargar el destinatario al inicio***//
-				EntityActor destinatario = new EntityActor();
-				destinatario.setApellidos(guideInfo.getOrderComplete().getClientProfileData().getLastName());
-				destinatario.setCallePrimaria(guideInfo.getOrderComplete().getShippingData().getAddress().getStreet());
-				String complemento = guideInfo.getOrderComplete().getShippingData().getAddress().getComplement();
+					String url = "http://" + tramacoUrl + ":" + tramacoPort + "/";
+					// Obtener informacion para la guia
+					ServicioGenerarGuias cliente = new ServicioGenerarGuias(url);
 
-				if (complemento != null) {
-					if (complemento.length() > 150) {
-						complemento = complemento.substring(0, 149);
-					}
-					destinatario.setCalleSecundaria(complemento);
-				} else {
-					destinatario.setCalleSecundaria("");
-				}
-
-				if (guideInfo.getOrderComplete().getClientProfileData().getDocument() != null && !guideInfo.getOrderComplete().getClientProfileData().getDocument().equals("")) {
-					destinatario.setCiRuc(guideInfo.getOrderComplete().getClientProfileData().getDocument());
-					if(guideInfo.getCustomerDocument()!=null && !guideInfo.getCustomerDocument().equals("")){
-						destinatario.setCiRuc(guideInfo.getCustomerDocument());
-					}
-					destinatario.setTipoIden("05");
-				} else if (guideInfo.getOrderComplete().getClientProfileData().getIsCorporate()
-						&& guideInfo.getOrderComplete().getClientProfileData().getCorporateDocument() != null
-						&& !guideInfo.getOrderComplete().getClientProfileData().getCorporateDocument().equals("")) {
-					destinatario.setCiRuc(guideInfo.getOrderComplete().getClientProfileData().getCorporateDocument());
-					if(guideInfo.getCustomerDocument()!=null && !guideInfo.getCustomerDocument().equals("")){
-						destinatario.setCiRuc(guideInfo.getCustomerDocument());
-					}
-					destinatario.setTipoIden("04");
-				} else {
-					destinatario.setCiRuc(tramacoDefaultDocument);
-					destinatario.setTipoIden("08");
-				}
-
-				if (guideInfo.getOrderComplete().getShippingData().getAddress().getCity() != null) {
-					String province = guideInfo.getOrderComplete().getShippingData().getAddress().getState()
-							.toUpperCase();
-					String canton = guideInfo.getOrderComplete().getShippingData().getAddress().getCity().toUpperCase();
-					List<TramacoZone> zones = tramacoZoneRepository.findByProvinciaAndCantonAndParroquia(province,
-							canton, canton);
-					if (zones != null && !zones.isEmpty()) {
-						// destinatario.setCodigoPostal(zones.get(0).getCodigo()+"");
-						destinatario.setCodigoParroquia(zones.get(0).getCodigo().intValue());
-					}
-
-				} else if (guideInfo.getOrderComplete().getShippingData().getAddress().getPostalCode() != null) {
-					// destinatario.setCodigoPostal(guideInfo.getOrderComplete().getShippingData().getAddress().getPostalCode());
-					destinatario.setCodigoParroquia(
-							new Integer(guideInfo.getOrderComplete().getShippingData().getAddress().getPostalCode()));
-				} else {
-					// destinatario.setCodigoPostal("0");
-					destinatario.setCodigoParroquia(0);
-				}
-
-				destinatario.setEmail(guideInfo.getOrderComplete().getClientProfileData().getEmail());
-				destinatario.setNombres(guideInfo.getOrderComplete().getClientProfileData().getFirstName());
-				destinatario.setNumero(guideInfo.getOrderComplete().getShippingData().getAddress().getNumber());
-				if (guideInfo.getOrderComplete().getShippingData().getAddress().getReference() != null) {
+					// ***Cargar el destinatario al inicio***//
+					EntityActor destinatario = new EntityActor();
+					destinatario.setApellidos(guideInfo.getOrderComplete().getClientProfileData().getLastName());
 					destinatario
-							.setReferencia(guideInfo.getOrderComplete().getShippingData().getAddress().getReference());
-				} else {
-					destinatario.setReferencia("");
-				}
-				if (guideInfo.getOrderComplete().getClientProfileData().getPhone() != null) {
-					destinatario.setTelefono(guideInfo.getOrderComplete().getClientProfileData().getPhone());
-				} else {
-					destinatario.setTelefono("         ");
-				}
+							.setCallePrimaria(guideInfo.getOrderComplete().getShippingData().getAddress().getStreet());
+					String complemento = guideInfo.getOrderComplete().getShippingData().getAddress().getComplement();
 
-				String formaPago = "N/A";
-				if (guideInfo.getOrderComplete().getPaymentData().getTransactions() != null
-						&& !guideInfo.getOrderComplete().getPaymentData().getTransactions().isEmpty()) {
-					for (Transaction tr : guideInfo.getOrderComplete().getPaymentData().getTransactions()) {
-						if (tr.getPayments() != null && !tr.getPayments().isEmpty()) {
-							for (Payment py : tr.getPayments()) {
-								formaPago = py.getPaymentSystemName();
-								if (py.getPaymentSystemName()
-										.equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName())) {
-									formaPago = formaPago + ": " + PagoEnum.EFECTIVO.getDescripcionSRI();
-								} else if (py.getPaymentSystemName()
-										.equals(PaymentEnum.SAFETYPAY.getPaymentSystemName())) {
-									formaPago = formaPago + ": " + PagoEnum.TRANSFER_OTRO_BANCO.getDescripcionSRI();
-								} else if (py.getPaymentSystemName().equals(
-										PaymentEnum.TRANSFERENCIA_BANCARIA_OTRAS_ENTIDADES.getPaymentSystemName())) {
-									formaPago = formaPago + ": " + PagoEnum.TRANSFER_OTRO_BANCO.getDescripcionSRI();
-								} else if (py.getPaymentSystemName()
-										.equals(PaymentEnum.PAYCLUB.getPaymentSystemName())) {
-									formaPago = formaPago + ": "
-											+ PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
-								} else if (py.getPaymentSystemName()
-										.equals(PaymentEnum.TARJETA_ALIA.getPaymentSystemName())) {
-									formaPago = formaPago + ": "
-											+ PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
-								} else if (py.getPaymentSystemName()
-										.equals(PaymentEnum.TARJETA_CREDITO.getPaymentSystemName())) {
-									formaPago = formaPago + ": "
-											+ PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
-								} else if (py.getPaymentSystemName()
-										.equals(PaymentEnum.PAYPAL.getPaymentSystemName())) {
-									formaPago = formaPago + ": "
-											+ PagoEnum.TARJETA_CREDITO_INTERNACIONAL.getDescripcionSRI();
+					if (complemento != null) {
+						if (complemento.length() > 150) {
+							complemento = complemento.substring(0, 149);
+						}
+						destinatario.setCalleSecundaria(complemento);
+					} else {
+						destinatario.setCalleSecundaria("");
+					}
+
+					if (guideInfo.getOrderComplete().getClientProfileData().getDocument() != null
+							&& !guideInfo.getOrderComplete().getClientProfileData().getDocument().equals("")) {
+						destinatario.setCiRuc(guideInfo.getOrderComplete().getClientProfileData().getDocument());
+						if (guideInfo.getCustomerDocument() != null && !guideInfo.getCustomerDocument().equals("")) {
+							destinatario.setCiRuc(guideInfo.getCustomerDocument());
+						}
+						destinatario.setTipoIden("05");
+					} else if (guideInfo.getOrderComplete().getClientProfileData().getIsCorporate()
+							&& guideInfo.getOrderComplete().getClientProfileData().getCorporateDocument() != null
+							&& !guideInfo.getOrderComplete().getClientProfileData().getCorporateDocument().equals("")) {
+						destinatario
+								.setCiRuc(guideInfo.getOrderComplete().getClientProfileData().getCorporateDocument());
+						if (guideInfo.getCustomerDocument() != null && !guideInfo.getCustomerDocument().equals("")) {
+							destinatario.setCiRuc(guideInfo.getCustomerDocument());
+						}
+						destinatario.setTipoIden("04");
+					} else {
+						destinatario.setCiRuc(tramacoDefaultDocument);
+						destinatario.setTipoIden("08");
+					}
+
+					if (guideInfo.getOrderComplete().getShippingData().getAddress().getCity() != null) {
+						String province = guideInfo.getOrderComplete().getShippingData().getAddress().getState()
+								.toUpperCase();
+						String canton = guideInfo.getOrderComplete().getShippingData().getAddress().getCity()
+								.toUpperCase();
+						List<TramacoZone> zones = tramacoZoneRepository.findByProvinciaAndCantonAndParroquia(province,
+								canton, canton);
+						if (zones != null && !zones.isEmpty()) {
+							// destinatario.setCodigoPostal(zones.get(0).getCodigo()+"");
+							destinatario.setCodigoParroquia(zones.get(0).getCodigo().intValue());
+						}
+
+					} else if (guideInfo.getOrderComplete().getShippingData().getAddress().getPostalCode() != null) {
+						// destinatario.setCodigoPostal(guideInfo.getOrderComplete().getShippingData().getAddress().getPostalCode());
+						destinatario.setCodigoParroquia(new Integer(
+								guideInfo.getOrderComplete().getShippingData().getAddress().getPostalCode()));
+					} else {
+						// destinatario.setCodigoPostal("0");
+						destinatario.setCodigoParroquia(0);
+					}
+
+					destinatario.setEmail(guideInfo.getOrderComplete().getClientProfileData().getEmail());
+					destinatario.setNombres(guideInfo.getOrderComplete().getClientProfileData().getFirstName());
+					destinatario.setNumero(guideInfo.getOrderComplete().getShippingData().getAddress().getNumber());
+					if (guideInfo.getOrderComplete().getShippingData().getAddress().getReference() != null) {
+						destinatario.setReferencia(
+								guideInfo.getOrderComplete().getShippingData().getAddress().getReference());
+					} else {
+						destinatario.setReferencia("");
+					}
+					if (guideInfo.getOrderComplete().getClientProfileData().getPhone() != null) {
+						destinatario.setTelefono(guideInfo.getOrderComplete().getClientProfileData().getPhone());
+					} else {
+						destinatario.setTelefono("         ");
+					}
+
+					String formaPago = "N/A";
+					if (guideInfo.getOrderComplete().getPaymentData().getTransactions() != null
+							&& !guideInfo.getOrderComplete().getPaymentData().getTransactions().isEmpty()) {
+						for (Transaction tr : guideInfo.getOrderComplete().getPaymentData().getTransactions()) {
+							if (tr.getPayments() != null && !tr.getPayments().isEmpty()) {
+								for (Payment py : tr.getPayments()) {
+									formaPago = py.getPaymentSystemName();
+									if (py.getPaymentSystemName()
+											.equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName())) {
+										formaPago = formaPago + ": " + PagoEnum.EFECTIVO.getDescripcionSRI();
+									} else if (py.getPaymentSystemName()
+											.equals(PaymentEnum.SAFETYPAY.getPaymentSystemName())) {
+										formaPago = formaPago + ": " + PagoEnum.TRANSFER_OTRO_BANCO.getDescripcionSRI();
+									} else if (py.getPaymentSystemName()
+											.equals(PaymentEnum.TRANSFERENCIA_BANCARIA_OTRAS_ENTIDADES
+													.getPaymentSystemName())) {
+										formaPago = formaPago + ": " + PagoEnum.TRANSFER_OTRO_BANCO.getDescripcionSRI();
+									} else if (py.getPaymentSystemName()
+											.equals(PaymentEnum.PAYCLUB.getPaymentSystemName())) {
+										formaPago = formaPago + ": "
+												+ PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
+									} else if (py.getPaymentSystemName()
+											.equals(PaymentEnum.TARJETA_ALIA.getPaymentSystemName())) {
+										formaPago = formaPago + ": "
+												+ PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
+									} else if (py.getPaymentSystemName()
+											.equals(PaymentEnum.TARJETA_CREDITO.getPaymentSystemName())) {
+										formaPago = formaPago + ": "
+												+ PagoEnum.TARJETA_CREDITO_NACIONAL.getDescripcionSRI();
+									} else if (py.getPaymentSystemName()
+											.equals(PaymentEnum.PAYPAL.getPaymentSystemName())) {
+										formaPago = formaPago + ": "
+												+ PagoEnum.TARJETA_CREDITO_INTERNACIONAL.getDescripcionSRI();
+									}
+
+								} // fin for
+
+							} //
+						}
+					}
+
+					Double shippingValue = 0D;
+					Double partialShipping = 0D;
+					Double ivaPartial = 0D;
+
+					for (Total vtot : guideInfo.getOrderComplete().getTotals()) {
+
+						if (vtot.getId().equals("Shipping")) {
+							shippingValue = shippingValue + vtot.getValue();
+						}
+					}
+
+					if (shippingValue > 0) {
+
+						if (guideInfo.getOrderComplete().getSupplierDeliveryInfoList() != null
+								&& !guideInfo.getOrderComplete().getSupplierDeliveryInfoList().isEmpty()) {
+
+							partialShipping = shippingValue
+									/ guideInfo.getOrderComplete().getSupplierDeliveryInfoList().size();
+							partialShipping = BaseUtil.roundValue(partialShipping);
+							ivaPartial = BaseUtil.calculateIVA(partialShipping, new Integer(datilIvaValue),
+									datilIvaPercentValue);
+							partialShipping = partialShipping + ivaPartial;
+							partialShipping = BaseUtil.roundValue(partialShipping);
+						}
+					}
+
+					systemOut.println("PartialShipping " + partialShipping);
+
+					Double deliveryPayment = 0D;
+					Boolean hasAdjunto = false;
+					if (guideInfo.getOrderComplete().getPaymentData().getTransactions() != null
+							&& !guideInfo.getOrderComplete().getPaymentData().getTransactions().isEmpty()) {
+						for (Transaction tr : guideInfo.getOrderComplete().getPaymentData().getTransactions()) {
+							if (tr.getPayments() != null && !tr.getPayments().isEmpty()) {
+								for (Payment py : tr.getPayments()) {
+									if (py.getPaymentSystemName().trim().toLowerCase().equals(
+											PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName().toLowerCase())) {
+										hasAdjunto = true;
+										deliveryPayment = deliveryPayment + py.getValue();
+									}
+								} // fin for
+
+							} //
+						}
+					} // fin payment data
+
+					String observacionText = "Orden: " + guideInfo.getOrderComplete().getOrderId() + " de "
+							+ guideInfo.getOrderComplete().getCustomerName() + " "
+							+ guideInfo.getOrderComplete().getClientProfileData().getDocument() + " \n ";
+					observacionText = observacionText + "Forma de Pago: " + formaPago;
+
+					if (guideInfo.getCustomerAdditionalInfo() != null
+							&& !guideInfo.getCustomerAdditionalInfo().equals("")) {
+						observacionText = observacionText + "Referencia" + guideInfo.getCustomerAdditionalInfo();
+					}
+
+					for (SupplierDeliveryInfo sdi : guideInfo.getOrderComplete().getSupplierDeliveryInfoList()) {
+
+						List<String> errorInfo = SupplierUtil.validateSupplierInfo(sdi.getSupplier());
+
+						// if(errorInfo.isEmpty() && sdi.getSelected() &&
+						// sdi.getDelivery()!=null &&
+						// sdi.getDelivery().getNemonic().equals(DeliveryEnum.TRAMACO.getNemonic())){
+						if (errorInfo.isEmpty() && sdi.getSelected() && guideInfo.getDeliverySelected() != null
+								&& guideInfo.getDeliverySelected().getNemonic()
+										.equals(DeliveryEnum.TRAMACO.getNemonic())) {
+
+							/**
+							 * Datos de entrada
+							 */
+							EntradaGenerarGuiaWs entGen = new EntradaGenerarGuiaWs();
+
+							// ***********/
+							EntityActor remitente = new EntityActor();
+							remitente.setNombres(sdi.getSupplier().getName() + " - ");
+							remitente.setApellidos(
+									sdi.getSupplier().getContactName() + " " + sdi.getSupplier().getContactLastName());
+							remitente.setCallePrimaria(sdi.getSupplier().getStreetMain());
+							remitente.setCalleSecundaria(sdi.getSupplier().getStreetSecundary());
+							remitente.setCiRuc(yaestaRuc);
+							if (sdi.getSupplier().getPostalCode() != null) {
+								// remitente.setCodigoPostal(sdi.getSupplier().getPostalCode());
+								remitente.setCodigoParroquia(new Integer(sdi.getSupplier().getPostalCode()));
+							}
+
+							remitente.setEmail(sdi.getSupplier().getContactEmail());
+
+							if (sdi.getSupplier().getStreetNumber() == null) {
+								remitente.setNumero("SN");
+							} else {
+								remitente.setNumero(sdi.getSupplier().getStreetNumber());
+							}
+
+							if (sdi.getSupplier().getAddressReference() == null) {
+								remitente.setReferencia(sdi.getSupplier().getAddressReference());
+							} else {
+								remitente.setReferencia("");
+							}
+							if (sdi.getSupplier().getPhone() != null) {
+								remitente.setTelefono(sdi.getSupplier().getPhone());
+							} else {
+								remitente.setTelefono("         ");
+							}
+							remitente.setTipoIden("04");
+
+							// *****//
+							List<EntityCargaDestino> lstCargaDestino = new ArrayList<>();
+							// ................................TRANSACCION
+							// 1.........................................//
+
+							EntityCargaDestino entCargaDestino = new EntityCargaDestino();
+							entCargaDestino.setId(tableSequenceService.getNextValue("CARGA_DESTINO").intValue());
+							// *******//
+							EntityCarga carga = new EntityCarga();
+							carga.setBultos(sdi.getPackages().intValue());
+							Integer contrato = 0;
+							Integer producto = 0;
+							EntityContrato contratoTramaco = null;
+							for (EntityContrato entityContrato : tramacoAuth.getRespuestaAutenticarWs()
+									.getSalidaAutenticarWs().getLstContrato()) {
+								contrato = entityContrato.getId();
+								contratoTramaco = entityContrato;
+								if (contrato == 2977) { // 2977 --> Produccion
+									break;
+								}
+							}
+							EntityProducto productoTramaco = null;
+							for (EntityProducto entityProducto : contratoTramaco.getLstProducto()) {
+								producto = entityProducto.getId();
+								productoTramaco = entityProducto;
+								if (producto == 1) {
+									break;
+								}
+							}
+
+							carga.setContrato(contrato);
+
+							String desc = "";
+							Long ite = new Long(1);
+							Double itemValue = 0D;
+							Double deliveryCost = 0D;
+							Double totalValue = 0D;
+							Double totalAsegurado = 0D;
+
+							if (hasAdjunto && partialShipping > 0) {
+								totalValue = partialShipping;
+							}
+
+							List<GuideDetail> detailList = new ArrayList<GuideDetail>();
+							for (ItemComplete ic : sdi.getItems()) {
+								itemValue = 0D;
+								systemOut.println("Ite==>> " + ite);
+								ite++;
+								Dimension dim = (Dimension) ic.getAdditionalProperties().get("dimension");
+
+								if (dim != null) {
+									carga.setAlto(dim.getHeight());
+									carga.setAncho(dim.getWidth());
+									carga.setLargo(dim.getLength());
+									carga.setPeso(dim.getWeight());
+								} else {
+									carga.setAlto(0D);
+									carga.setAncho(0D);
+									carga.setLargo(0D);
+									carga.setPeso(0D);
 								}
 
-							} // fin for
-
-						} //
-					}
-				}
-
-				Double shippingValue = 0D;
-				Double partialShipping = 0D;
-				Double ivaPartial = 0D;
-
-				for (Total vtot : guideInfo.getOrderComplete().getTotals()) {
-
-					if (vtot.getId().equals("Shipping")) {
-						shippingValue = shippingValue + vtot.getValue();
-					}
-				}
-
-				if (shippingValue > 0) {
-
-					if (guideInfo.getOrderComplete().getSupplierDeliveryInfoList() != null
-							&& !guideInfo.getOrderComplete().getSupplierDeliveryInfoList().isEmpty()) {
-
-						partialShipping = shippingValue
-								/ guideInfo.getOrderComplete().getSupplierDeliveryInfoList().size();
-						partialShipping = BaseUtil.roundValue(partialShipping);
-						ivaPartial = BaseUtil.calculateIVA(partialShipping, new Integer(datilIvaValue),
-								datilIvaPercentValue);
-						partialShipping = partialShipping + ivaPartial;
-						partialShipping = BaseUtil.roundValue(partialShipping);
-					}
-				}
-				
-				systemOut.println("PartialShipping "+partialShipping);
-
-				Double deliveryPayment = 0D;
-				Boolean hasAdjunto = false;
-				if (guideInfo.getOrderComplete().getPaymentData().getTransactions() != null
-						&& !guideInfo.getOrderComplete().getPaymentData().getTransactions().isEmpty()) {
-					for (Transaction tr : guideInfo.getOrderComplete().getPaymentData().getTransactions()) {
-						if (tr.getPayments() != null && !tr.getPayments().isEmpty()) {
-							for (Payment py : tr.getPayments()) {
-								if (py.getPaymentSystemName().trim().toLowerCase()
-										.equals(PaymentEnum.PAGO_CONTRA_ENTREGA.getPaymentSystemName().toLowerCase())) {
-									hasAdjunto = true;
-									deliveryPayment = deliveryPayment + py.getValue();
+								if (sdi.getItemIdentityType() != null
+										&& sdi.getItemIdentityType().getNemonic().equals("NOMBREPRODUCTO")) {
+									desc = desc + "#Can. " + ic.getQuantity() + " PRO:" + ic.getName() + " _ ";
+								} else {
+									String[] supplierCodes = SupplierUtil.returnSupplierCode((String) ic.getRefId());
+									desc = desc + "#Can. " + ic.getQuantity() + " COD:" + supplierCodes[2] + " _ ";
 								}
-							} // fin for
 
-						} //
-					}
-				} // fin payment data
+								if (desc.length() > 200) {
+									desc = desc.substring(0, 199);
+								}
 
-				String observacionText = "Orden: " + guideInfo.getOrderComplete().getOrderId() + " de "
-						+ guideInfo.getOrderComplete().getCustomerName() + " "
-						+ guideInfo.getOrderComplete().getClientProfileData().getDocument() + " \n ";
-				observacionText = observacionText + "Forma de Pago: " + formaPago;
+								carga.setDescripcion(desc);
+								carga.setObservacion(observacionText);
 
-				if (guideInfo.getCustomerAdditionalInfo() != null
-						&& !guideInfo.getCustomerAdditionalInfo().equals("")) {
-					observacionText = observacionText + "Referencia" + guideInfo.getCustomerAdditionalInfo();
-				}
+								itemValue = itemValue + ic.getPrice() * ic.getQuantity();
+								itemValue = (double) Math.round(itemValue * 100) / 100;
 
-				for (SupplierDeliveryInfo sdi : guideInfo.getOrderComplete().getSupplierDeliveryInfoList()) {
+								systemOut.println("itemValue 0-> " + itemValue);
 
-					List<String> errorInfo = SupplierUtil.validateSupplierInfo(sdi.getSupplier());
-
-					// if(errorInfo.isEmpty() && sdi.getSelected() &&
-					// sdi.getDelivery()!=null &&
-					// sdi.getDelivery().getNemonic().equals(DeliveryEnum.TRAMACO.getNemonic())){
-					if (errorInfo.isEmpty() && sdi.getSelected() && guideInfo.getDeliverySelected() != null
-							&& guideInfo.getDeliverySelected().getNemonic().equals(DeliveryEnum.TRAMACO.getNemonic())) {
-
-						/**
-						 * Datos de entrada
-						 */
-						EntradaGenerarGuiaWs entGen = new EntradaGenerarGuiaWs();
-
-						// ***********/
-						EntityActor remitente = new EntityActor();
-						remitente.setNombres(sdi.getSupplier().getName() + " - ");
-						remitente.setApellidos(
-								sdi.getSupplier().getContactName() + " " + sdi.getSupplier().getContactLastName());
-						remitente.setCallePrimaria(sdi.getSupplier().getStreetMain());
-						remitente.setCalleSecundaria(sdi.getSupplier().getStreetSecundary());
-						remitente.setCiRuc(yaestaRuc);
-						if (sdi.getSupplier().getPostalCode() != null) {
-							// remitente.setCodigoPostal(sdi.getSupplier().getPostalCode());
-							remitente.setCodigoParroquia(new Integer(sdi.getSupplier().getPostalCode()));
-						}
-
-						remitente.setEmail(sdi.getSupplier().getContactEmail());
-
-						if (sdi.getSupplier().getStreetNumber() == null) {
-							remitente.setNumero("SN");
-						} else {
-							remitente.setNumero(sdi.getSupplier().getStreetNumber());
-						}
-
-						if (sdi.getSupplier().getAddressReference() == null) {
-							remitente.setReferencia(sdi.getSupplier().getAddressReference());
-						} else {
-							remitente.setReferencia("");
-						}
-						if (sdi.getSupplier().getPhone() != null) {
-							remitente.setTelefono(sdi.getSupplier().getPhone());
-						} else {
-							remitente.setTelefono("         ");
-						}
-						remitente.setTipoIden("04");
-
-						// *****//
-						List<EntityCargaDestino> lstCargaDestino = new ArrayList<>();
-						// ................................TRANSACCION
-						// 1.........................................//
-
-						EntityCargaDestino entCargaDestino = new EntityCargaDestino();
-						entCargaDestino.setId(tableSequenceService.getNextValue("CARGA_DESTINO").intValue());
-						// *******//
-						EntityCarga carga = new EntityCarga();
-						carga.setBultos(sdi.getPackages().intValue());
-						Integer contrato = 0;
-						Integer producto = 0;
-						EntityContrato contratoTramaco = null;
-						for (EntityContrato entityContrato : tramacoAuth.getRespuestaAutenticarWs()
-								.getSalidaAutenticarWs().getLstContrato()) {
-							contrato = entityContrato.getId();
-							contratoTramaco = entityContrato;
-							if (contrato == 2977) { // 2977 --> Produccion
-								break;
-							}
-						}
-						EntityProducto productoTramaco = null;
-						for (EntityProducto entityProducto : contratoTramaco.getLstProducto()) {
-							producto = entityProducto.getId();
-							productoTramaco = entityProducto;
-							if (producto == 1) {
-								break;
-							}
-						}
-
-						carga.setContrato(contrato);
-
-						String desc = "";
-						Long ite = new Long(1);
-						Double itemValue = 0D;
-						Double deliveryCost = 0D;
-						Double totalValue = 0D;
-						Double totalAsegurado = 0D;
-						
-						if(hasAdjunto && partialShipping>0){
-							totalValue = partialShipping;
-						}
-						
-						List<GuideDetail> detailList = new ArrayList<GuideDetail>();
-						for (ItemComplete ic : sdi.getItems()) {
-							itemValue = 0D;
-							systemOut.println("Ite==>> " + ite);
-							ite++;
-							Dimension dim = (Dimension) ic.getAdditionalProperties().get("dimension");
-
-							if (dim != null) {
-								carga.setAlto(dim.getHeight());
-								carga.setAncho(dim.getWidth());
-								carga.setLargo(dim.getLength());
-								carga.setPeso(dim.getWeight());
-							} else {
-								carga.setAlto(0D);
-								carga.setAncho(0D);
-								carga.setLargo(0D);
-								carga.setPeso(0D);
-							}
-
-							if (sdi.getItemIdentityType() != null
-									&& sdi.getItemIdentityType().getNemonic().equals("NOMBREPRODUCTO")) {
-								desc = desc + "#Can. " + ic.getQuantity() + " PRO:" + ic.getName() + " _ ";
-							} else {
-								String[] supplierCodes = SupplierUtil.returnSupplierCode((String) ic.getRefId());
-								desc = desc + "#Can. " + ic.getQuantity() + " COD:" + supplierCodes[2] + " _ ";
-							}
-
-							if (desc.length() > 200) {
-								desc = desc.substring(0, 199);
-							}
-
-							carga.setDescripcion(desc);
-							carga.setObservacion(observacionText);
-
-							itemValue = itemValue + ic.getPrice() * ic.getQuantity();
-							itemValue = (double) Math.round(itemValue * 100) / 100;
-							
-							systemOut.println("itemValue 0-> " +itemValue);
-							
-							Double discount = 0D;
-							Boolean hasTax = Boolean.FALSE;
-							if (ic.getPriceTags() != null && !ic.getPriceTags().isEmpty()) {
-								for (PriceTag pt : ic.getPriceTags()) {
-									if (pt.getName().contains("discount@price")) {
-										Double val = pt.getValue();
-										if (val < 0) {
-											val = val * (-1);
+								Double discount = 0D;
+								Boolean hasTax = Boolean.FALSE;
+								if (ic.getPriceTags() != null && !ic.getPriceTags().isEmpty()) {
+									for (PriceTag pt : ic.getPriceTags()) {
+										if (pt.getName().contains("discount@price")) {
+											Double val = pt.getValue();
+											if (val < 0) {
+												val = val * (-1);
+											}
+											val = (double) Math.round(val * 100) / 100;
+											discount = discount + Math.abs(val);
+											// break;
 										}
-										val = (double) Math.round(val * 100) / 100;
-										discount = discount + Math.abs(val);
-										// break;
-									}
-									if (pt.getName().contains("DISCOUNT@MARKETPLACE")) {
-										Double val = pt.getValue();
-										if (val < 0) {
-											val = val * (-1);
+										if (pt.getName().contains("DISCOUNT@MARKETPLACE")) {
+											Double val = pt.getValue();
+											if (val < 0) {
+												val = val * (-1);
+											}
+											val = (double) Math.round(val * 100) / 100;
+											discount = discount + Math.abs(val);
 										}
-										val = (double) Math.round(val * 100) / 100;
-										discount = discount + Math.abs(val);
+										if (pt.getName().contains("tax@price")) {
+											hasTax = Boolean.TRUE;
+										}
 									}
-									if (pt.getName().contains("tax@price")) {
-										hasTax = Boolean.TRUE;
+								} else {
+									discount = 0D;
+								}
+
+								if (ic.getShippingPrice() != null && hasAdjunto) {
+									systemOut.println("shippingPrice " + ic.getShippingPrice());
+									carga.setValorCobro(ic.getShippingPrice());
+									deliveryCost = deliveryCost + ic.getShippingPrice();
+								} else {
+									systemOut.println("Sin costo de cobro de envio");
+								}
+								Double iva = 0D;
+								totalAsegurado = totalAsegurado + itemValue;
+								totalAsegurado = (double) Math.round(totalAsegurado * 100) / 100;
+								itemValue = itemValue - discount;
+								itemValue = (double) Math.round(itemValue * 100) / 100;
+
+								systemOut.println("itemValue 1-> " + itemValue);
+
+								if (ic.getTax() > 0) {
+									iva = ic.getTax();
+								} else {
+									if (hasTax) {
+										iva = BaseUtil.calculateIVA(itemValue, new Integer(datilIvaValue),
+												datilIvaPercentValue);
 									}
 								}
-							} else {
-								discount = 0D;
-							}
-
-							if (ic.getShippingPrice() != null && hasAdjunto) {
-								systemOut.println("shippingPrice " + ic.getShippingPrice());
-								carga.setValorCobro(ic.getShippingPrice());
-								deliveryCost = deliveryCost + ic.getShippingPrice();
-							} else {
-								systemOut.println("Sin costo de cobro de envio");
-							}
-							Double iva = 0D;
-							totalAsegurado = totalAsegurado + itemValue;
-							totalAsegurado = (double) Math.round(totalAsegurado * 100) / 100;
-							itemValue = itemValue - discount;
-							itemValue = (double) Math.round(itemValue * 100) / 100;
-							
-							systemOut.println("itemValue 1-> " +itemValue);
-							
-							if (ic.getTax() > 0) {
-								iva = ic.getTax();
-							} else {
-								if (hasTax) {
-									iva = BaseUtil.calculateIVA(itemValue, new Integer(datilIvaValue),
-											datilIvaPercentValue);
+								if (itemValue > 0) {
+									itemValue = itemValue + iva;
 								}
-							}
-							if (itemValue > 0) {
-								itemValue = itemValue + iva;
-							}
-							itemValue = (double) Math.round(itemValue * 100) / 100;
+								itemValue = (double) Math.round(itemValue * 100) / 100;
 
-							systemOut.println("itemValue 2-> " +itemValue);
-							
-							totalValue = totalValue + itemValue;
-							totalValue = (double) Math.round(totalValue * 100) / 100;
-							
-							systemOut.println("totalValue 1-> " +totalValue);
-							
-							if (hasAdjunto && itemValue > 0 || (hasAdjunto && partialShipping > 0)) {
-								carga.setAdjuntos(Boolean.TRUE);
-								TableSequenceResponseVO codigoAdjunto = getTramacoAdjCode();
+								systemOut.println("itemValue 2-> " + itemValue);
 
-								systemOut.println("Codigo Adjunto " + codigoAdjunto.getCode());
-								systemOut.println("Valor al Cobro " + totalValue);
-								carga.setCodigoAdjunto(codigoAdjunto.getCode());
-								carga.setValorCobro(totalValue);
+								totalValue = totalValue + itemValue;
+								totalValue = (double) Math.round(totalValue * 100) / 100;
 
-								if (!codigoAdjunto.getInsideLimit()) {
-									// Enviar email
+								systemOut.println("totalValue 1-> " + totalValue);
 
-									MailInfo mailInfo = prepareMailSequence(codigoAdjunto);
-									mailService.sendMailTemplate(mailInfo, "sequenceNotification.vm");
+								if (hasAdjunto && itemValue > 0 || (hasAdjunto && partialShipping > 0)) {
+									carga.setAdjuntos(Boolean.TRUE);
+									TableSequenceResponseVO codigoAdjunto = getTramacoAdjCode();
+
+									systemOut.println("Codigo Adjunto " + codigoAdjunto.getCode());
+									systemOut.println("Valor al Cobro " + totalValue);
+									carga.setCodigoAdjunto(codigoAdjunto.getCode());
+									carga.setValorCobro(totalValue);
+
+									if (!codigoAdjunto.getInsideLimit()) {
+										// Enviar email
+
+										MailInfo mailInfo = prepareMailSequence(codigoAdjunto);
+										mailService.sendMailTemplate(mailInfo, "sequenceNotification.vm");
+									}
+
+								} else {
+									carga.setAdjuntos(Boolean.FALSE);
+									systemOut.println("No hay adjunto " + hasAdjunto + " " + itemValue);
 								}
 
-							} else {
-								carga.setAdjuntos(Boolean.FALSE);
-								systemOut.println("No hay adjunto " + hasAdjunto + " " + itemValue);
+								if (hasAdjunto && totalValue > guideInfo.getOrderComplete().getValue().doubleValue()) {
+									carga.setValorCobro(guideInfo.getOrderComplete().getValue().doubleValue());
+									systemOut.println("Valor a cobrar" + carga.getValorCobro());
+
+								}
+
+								if (productoTramaco != null) {
+									carga.setProducto(productoTramaco.getId());
+								} else {
+									carga.setProducto(contratoTramaco.getLstProducto().get(1).getId());
+								}
+								carga.setValorAsegurado(totalAsegurado);
+								carga.setLocalidad(0);
+								carga.setGuia(guideInfo.getOrderComplete().getOrderId());
+
+								GuideDetail guiD = new GuideDetail();
+								guiD.setItemName(ic.getName());
+								guiD.setOrderVitexId(guideInfo.getOrderComplete().getOrderId());
+								guiD.setVitexId(ic.getId());
+								guiD.setQuantity(new Long(ic.getQuantity()));
+								guiD.setItemValue(itemValue);
+								guideInfo.getDetails().add(guiD);
+								detailList.add(guiD);
+
+							} // for de items
+
+							systemOut.println("Contrato " + carga.getContrato());
+							systemOut.println("Producto " + carga.getProducto());
+
+							entCargaDestino.setCarga(carga);
+
+							// *************//
+							List<EntityServicio> lstServicio = new ArrayList<>();
+							entCargaDestino.setLstServicio(lstServicio);
+
+							/********/
+							entCargaDestino.setDestinatario(destinatario);
+							lstCargaDestino.add(entCargaDestino);
+							// *******//
+							entGen.setRemitente(remitente);
+							entGen.setLstCargaDestino(lstCargaDestino);
+							entGen.setUsuario(
+									tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs().getUsuario()); // Verificar
+
+							/**/
+							RespuestaGenerarGuiaWs respuestaGenerarGuiaWs = cliente.generarGuia(entGen);
+							/**
+							 * Datos de salida
+							 */
+							if (respuestaGenerarGuiaWs != null) {
+								if (respuestaGenerarGuiaWs.getCuerpoRespuesta() != null) {
+									String codigo = "CODIGO:" + respuestaGenerarGuiaWs.getCuerpoRespuesta().getCodigo();
+									String mensaje = "MENSAJE:"
+											+ respuestaGenerarGuiaWs.getCuerpoRespuesta().getMensaje();
+									String excepcion = "EXCEPCION:"
+											+ respuestaGenerarGuiaWs.getCuerpoRespuesta().getExcepcion();
+									systemOut.println(codigo);
+									systemOut.println(mensaje);
+									systemOut.println(excepcion);
+
+									String textInfo = codigo + " " + mensaje + " " + excepcion;
+
+									YaEstaLog yaestalog = new YaEstaLog();
+									yaestalog.setLogDate(new Date());
+									yaestalog.setProcessName("WAYBILL-TRAMACO");
+									yaestalog.setTextinfo(guideInfo.getOrderComplete().getOrderId());
+									yaestalog.setTextinfo(textInfo);
+									yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
+									logService.save(yaestalog);
+
+									if (respuestaGenerarGuiaWs.getCuerpoRespuesta().getCodigo() != "1") {
+										response = respuestaGenerarGuiaWs.getCuerpoRespuesta().getMensaje();
+										errorInfo.add(response);
+									}
+
+								}
+								if (respuestaGenerarGuiaWs.getSalidaGenerarGuiaWs() != null) {
+									SalidaGenerarGuiaWs salida = respuestaGenerarGuiaWs.getSalidaGenerarGuiaWs();
+									for (EntityGuia guia : salida.getLstGuias()) {
+										systemOut.println("ID:" + guia.getId() + " GUIA:" + guia.getGuia());
+									}
+								}
+
+								GuideBeanDTO gbd = new GuideBeanDTO();
+								gbd.setGuideResponse(respuestaGenerarGuiaWs);
+								gbd.setItemValue(itemValue);
+								gbd.setDeliveryCost(deliveryCost);
+								gbd.setDeliveryPayment(deliveryPayment);
+								gbd.setSupplier(sdi.getSupplier());
+								gbd.setItemList(sdi.getItems());
+								gbd.setDetails(detailList);
+								gbd.setHasPayment(hasAdjunto);
+								gbd.setTotalValue(totalValue);
+								guideInfo.getGuideBeanList().add(gbd);
+
 							}
 
-							if (hasAdjunto && totalValue > guideInfo.getOrderComplete().getValue().doubleValue()) {
-								carga.setValorCobro(guideInfo.getOrderComplete().getValue().doubleValue());
-								systemOut.println("Valor a cobrar" + carga.getValorCobro());
-
-							}
-
-							if (productoTramaco != null) {
-								carga.setProducto(productoTramaco.getId());
-							} else {
-								carga.setProducto(contratoTramaco.getLstProducto().get(1).getId());
-							}
-							carga.setValorAsegurado(totalAsegurado);
-							carga.setLocalidad(0);
-							carga.setGuia(guideInfo.getOrderComplete().getOrderId());
-
-							GuideDetail guiD = new GuideDetail();
-							guiD.setItemName(ic.getName());
-							guiD.setOrderVitexId(guideInfo.getOrderComplete().getOrderId());
-							guiD.setVitexId(ic.getId());
-							guiD.setQuantity(new Long(ic.getQuantity()));
-							guiD.setItemValue(itemValue);
-							guideInfo.getDetails().add(guiD);
-							detailList.add(guiD);
-
-						} // for de items
-
-						systemOut.println("Contrato " + carga.getContrato());
-						systemOut.println("Producto " + carga.getProducto());
-
-						entCargaDestino.setCarga(carga);
-
-						// *************//
-						List<EntityServicio> lstServicio = new ArrayList<>();
-						entCargaDestino.setLstServicio(lstServicio);
-
-						/********/
-						entCargaDestino.setDestinatario(destinatario);
-						lstCargaDestino.add(entCargaDestino);
-						// *******//
-						entGen.setRemitente(remitente);
-						entGen.setLstCargaDestino(lstCargaDestino);
-						entGen.setUsuario(tramacoAuth.getRespuestaAutenticarWs().getSalidaAutenticarWs().getUsuario()); // Verificar
-
-						/**/
-						RespuestaGenerarGuiaWs respuestaGenerarGuiaWs = cliente.generarGuia(entGen);
-						/**
-						 * Datos de salida
-						 */
-						if (respuestaGenerarGuiaWs != null) {
-							if (respuestaGenerarGuiaWs.getCuerpoRespuesta() != null) {
-								String codigo = "CODIGO:" + respuestaGenerarGuiaWs.getCuerpoRespuesta().getCodigo();
-								String mensaje = "MENSAJE:" + respuestaGenerarGuiaWs.getCuerpoRespuesta().getMensaje();
-								String excepcion = "EXCEPCION:"
-										+ respuestaGenerarGuiaWs.getCuerpoRespuesta().getExcepcion();
-								systemOut.println(codigo);
-								systemOut.println(mensaje);
-								systemOut.println(excepcion);
-
-								String textInfo = codigo + " " + mensaje + " " + excepcion;
-
+						} // no hay error en informacion de proveedor
+						else {
+							systemOut.println("Error en informacion de proveedor " + sdi.getSupplier().getName());
+							response = "Error";
+							guideInfo.setErrorList(errorInfo);
+							for (String e : errorInfo) {
+								systemOut.println("Problemas en::" + e);
 								YaEstaLog yaestalog = new YaEstaLog();
 								yaestalog.setLogDate(new Date());
 								yaestalog.setProcessName("WAYBILL-TRAMACO");
 								yaestalog.setTextinfo(guideInfo.getOrderComplete().getOrderId());
-								yaestalog.setTextinfo(textInfo);
+								yaestalog.setTextinfo(e);
 								yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
 								logService.save(yaestalog);
-
-								if (respuestaGenerarGuiaWs.getCuerpoRespuesta().getCodigo() != "1") {
-									response = respuestaGenerarGuiaWs.getCuerpoRespuesta().getMensaje();
-									errorInfo.add(response);
-								}
-
 							}
-							if (respuestaGenerarGuiaWs.getSalidaGenerarGuiaWs() != null) {
-								SalidaGenerarGuiaWs salida = respuestaGenerarGuiaWs.getSalidaGenerarGuiaWs();
-								for (EntityGuia guia : salida.getLstGuias()) {
-									systemOut.println("ID:" + guia.getId() + " GUIA:" + guia.getGuia());
-								}
-							}
-
-							GuideBeanDTO gbd = new GuideBeanDTO();
-							gbd.setGuideResponse(respuestaGenerarGuiaWs);
-							gbd.setItemValue(itemValue);
-							gbd.setDeliveryCost(deliveryCost);
-							gbd.setDeliveryPayment(deliveryPayment);
-							gbd.setSupplier(sdi.getSupplier());
-							gbd.setItemList(sdi.getItems());
-							gbd.setDetails(detailList);
-							gbd.setHasPayment(hasAdjunto);
-							gbd.setTotalValue(totalValue);
-							guideInfo.getGuideBeanList().add(gbd);
-
 						}
 
-					} // no hay error en informacion de proveedor
-					else {
-						systemOut.println("Error en informacion de proveedor " + sdi.getSupplier().getName());
-						response = "Error";
-						guideInfo.setErrorList(errorInfo);
-						for (String e : errorInfo) {
-							systemOut.println("Problemas en::" + e);
-							YaEstaLog yaestalog = new YaEstaLog();
-							yaestalog.setLogDate(new Date());
-							yaestalog.setProcessName("WAYBILL-TRAMACO");
-							yaestalog.setTextinfo(guideInfo.getOrderComplete().getOrderId());
-							yaestalog.setTextinfo(e);
-							yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
-							logService.save(yaestalog);
-						}
-					}
+						// Por cada proveedor llamar al servicio de guias
 
-					// Por cada proveedor llamar al servicio de guias
+					} // for de supplier delivery info
 
-				} // for de supplier delivery info
-				
-				}// tengo response y tengo salida de auth
-				else{
+				} // tengo response y tengo salida de auth
+				else {
 					YaEstaLog yaestalog = new YaEstaLog();
 					yaestalog.setLogDate(new Date());
 					yaestalog.setProcessName("WAYBILL-TRAMACO");
 					yaestalog.setTextinfo(guideInfo.getOrderComplete().getOrderId());
 					yaestalog.setTextinfo("Error no se tiene respuesta de autenticacion");
 					yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
-					response="ERROR";
+					response = "ERROR";
 					logService.save(yaestalog);
 				}
 
@@ -747,7 +758,7 @@ public class TramacoService implements Serializable {
 				yaestalog.setTextinfo(guideInfo.getOrderComplete().getOrderId());
 				yaestalog.setTextinfo("Error no se encuentra autenticado");
 				yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
-				response="ERROR";
+				response = "ERROR";
 				logService.save(yaestalog);
 			}
 

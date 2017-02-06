@@ -29,6 +29,9 @@ public class GuideProcessController implements Serializable{
 	
 	@RequestMapping(value = "/getGuideProcessNoCloseList", method = RequestMethod.GET)
 	public ResponseEntity<List<GuideProcess>> getGuideProcessNoCloseList(){
+		
+		guideProcessService.doProcessDate();
+		
 		List<GuideProcess> found = guideProcessService.findByClosedDate(Boolean.FALSE);
 		
 		if(found!=null && !found.isEmpty()){

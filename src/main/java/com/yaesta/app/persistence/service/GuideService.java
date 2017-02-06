@@ -31,12 +31,14 @@ import com.yaesta.app.persistence.entity.Order;
 import com.yaesta.app.persistence.entity.Supplier;
 import com.yaesta.app.persistence.entity.SupplierContact;
 import com.yaesta.app.persistence.entity.YaEstaLog;
+import com.yaesta.app.persistence.enums.GuideStatusEnum;
 import com.yaesta.app.persistence.repository.GuideDetailRepository;
 import com.yaesta.app.persistence.repository.GuideMigrateRepository;
 import com.yaesta.app.persistence.repository.GuideRepository;
 import com.yaesta.app.persistence.vo.DateRangeVO;
 import com.yaesta.app.persistence.vo.GuideBeanVO;
 import com.yaesta.app.persistence.vo.GuideDeliveryNotificationVO;
+import com.yaesta.app.persistence.vo.GuidePaymentVO;
 import com.yaesta.app.persistence.vo.GuideSearchVO;
 import com.yaesta.app.persistence.vo.GuideVO;
 import com.yaesta.app.persistence.vo.TrackingContainerVO;
@@ -134,6 +136,10 @@ public class GuideService {
 		if (guide.getDeliveryDate() != null) {
 			guide.setStrDeliveryDate(UtilDate.fromDateToString(guide.getDeliveryDate(), "yyyy-MM-dd"));
 			guide.setPeriode(UtilDate.fromDateToString(guide.getDeliveryDate(), "yyyy-MM"));
+		}
+		
+		if (guide.getId() != null) {
+			guide.setUpdDate(new Date());
 		}
 
 		guideRepository.save(guide);
@@ -782,4 +788,63 @@ public class GuideService {
 	public Long countByProcessDateAndStatus(Date processDate, String status){
 		return guideRepository.countByProcessDateAndStatus(processDate,status);
 	}
+	
+	public List<Catalog> filterGuideStatus(String currentStatus){
+		
+		List<Catalog> result = new ArrayList<Catalog>();
+		
+		if(currentStatus.equals(GuideStatusEnum.GENERATED_PDF.getCode())){
+			Catalog programed = catalogService.findByNemonic(GuideStatusEnum.PROGRAMED.getCode());
+			result.add(programed);
+			Catalog pending = catalogService.findByNemonic(GuideStatusEnum.PENDING.getCode());
+			result.add(pending);
+			Catalog cancel = catalogService.findByNemonic(GuideStatusEnum.CANCELED.getCode());
+			result.add(cancel);
+		}else if(currentStatus.equals(GuideStatusEnum.PROGRAMED.getCode())){
+			Catalog delivery = catalogService.findByNemonic(GuideStatusEnum.DELIVERED.getCode());
+			result.add(delivery);
+			Catalog pendingDelivery = catalogService.findByNemonic(GuideStatusEnum.DELIVERY_PENDING.getCode());
+			result.add(pendingDelivery);
+			Catalog cancel = catalogService.findByNemonic(GuideStatusEnum.CANCELED.getCode());
+			result.add(cancel);
+		}else if(currentStatus.equals(GuideStatusEnum.PENDING.getCode())){
+			Catalog programed = catalogService.findByNemonic(GuideStatusEnum.PROGRAMED.getCode());
+			result.add(programed);
+			Catalog cancel = catalogService.findByNemonic(GuideStatusEnum.CANCELED.getCode());
+			result.add(cancel);
+		}else if(currentStatus.equals(GuideStatusEnum.DELIVERY_PENDING.getCode())){
+			Catalog delivered = catalogService.findByNemonic(GuideStatusEnum.DELIVERED.getCode());
+			result.add(delivered);
+			Catalog programed = catalogService.findByNemonic(GuideStatusEnum.PROGRAMED.getCode());
+			result.add(programed);
+			Catalog pending = catalogService.findByNemonic(GuideStatusEnum.PENDING.getCode());
+			result.add(pending);
+			Catalog cancel = catalogService.findByNemonic(GuideStatusEnum.CANCELED.getCode());
+			result.add(cancel);
+		}
+		
+		
+		return result;
+		
+	}
+	
+	public List<Guide> findByPaymentMethodAndDeliveryNameAndPeriode(String paymentMethod,String deliveryName, String periode){
+		return guideRepository.findByPaymentMethodAndDeliveryNameAndPeriode(paymentMethod, deliveryName, periode);
+	}
+	
+	public List<GuidePaymentVO> findGuidesByPaymentMethodAndDeliveryNameAndPeriode(String paymentMethod,String deliveryName, String periode){
+		List<GuidePaymentVO> result = new ArrayList<GuidePaymentVO>();
+		
+		List<Guide> found = findByPaymentMethodAndDeliveryNameAndPeriode(paymentMethod,deliveryName,periode);
+		
+		if(found!=null && !found.isEmpty()){
+			for(Guide g:found){
+				GuidePaymentVO gp = GuideUtil.fromGuideToGuidePaymentVO(g);
+				result.add(gp);
+			}
+		}
+		
+		return result;
+	}
+
 }

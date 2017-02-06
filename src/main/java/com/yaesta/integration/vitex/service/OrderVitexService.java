@@ -1044,31 +1044,34 @@ public class OrderVitexService extends BaseVitexService {
 
 			} // si la generacion fue exitosa
 
-		}
+			
+			result.setGuideInfoBean(response);
 
-		result.setGuideInfoBean(response);
+			result.setGuides(responseList);
 
-		result.setGuides(responseList);
+			List<MailInfo> mailInfoList = prepareMailOrder(orderComplete, supplierDeliveryInfoList,
+					guideInfoBean.getDeliverySelected(), null);
 
-		List<MailInfo> mailInfoList = prepareMailOrder(orderComplete, supplierDeliveryInfoList,
-				guideInfoBean.getDeliverySelected(), null);
-
-		for (MailInfo mailInfo : mailInfoList) {
-			for (GuideBeanDTO gDto : guideDTO.getGuideBeanList()) {
-				if (gDto.getSupplier().getId() == mailInfo.getRefId()) {
-					mailInfo.getAttachmentList().add(gDto.getPdfUrl());
-					if (gDto.getPdfTagUrl() != null) {
-						mailInfo.getAttachmentList().add(gDto.getPdfTagUrl());
+			for (MailInfo mailInfo : mailInfoList) {
+				for (GuideBeanDTO gDto : guideDTO.getGuideBeanList()) {
+					if (gDto.getSupplier().getId() == mailInfo.getRefId()) {
+						mailInfo.getAttachmentList().add(gDto.getPdfUrl());
+						if (gDto.getPdfTagUrl() != null) {
+							mailInfo.getAttachmentList().add(gDto.getPdfTagUrl());
+						}
 					}
 				}
+				mailService.sendMailTemplate(mailInfo, "guideNotification.vm");
 			}
-			mailService.sendMailTemplate(mailInfo, "guideNotification.vm");
-		}
 
-		if (mailNotifyCustomer.equals("Y")) {
-			sendGuideMailCustomer(orderComplete);
-		}
+			if (mailNotifyCustomer.equals("Y")) {
+				sendGuideMailCustomer(orderComplete);
+			}
 
+			
+		}//si hubo exito en la generacion de guias, se controla no se envie el email
+
+		
 		updateDetails(orderComplete);
 
 		return result;
@@ -2111,9 +2114,18 @@ public class OrderVitexService extends BaseVitexService {
 		Order order = orderService.findByVitexId(oc.getOrderId());
 		List<Guide> guides = guideService.findByOrder(order);
 		List<OrderItem> items = orderService.getOrderItems(order);
+		int numItems = 1;
+		if(items!=null && !items.isEmpty()){
+			numItems = items.size();
+		}
 
 		if (guides != null && !guides.isEmpty()) {
 			for (Guide guide : guides) {
+				
+				Double partialItemValue =0D;
+				if(guide.getDeliveryPayment()!=null){
+					partialItemValue = guide.getDeliveryPayment().doubleValue()/numItems;
+				}
 				List<GuideDetail> details = guideService.getGuideDetails(guide);
 				if (details != null && !details.isEmpty())
 					for (GuideDetail detail : details) {
@@ -2124,6 +2136,11 @@ public class OrderVitexService extends BaseVitexService {
 								oi.setStrGuideDate(strDate);
 								if (guide.getGuideNumber() != null && oi.getGuideNumber() == null) {
 									oi.setGuideNumber(guide.getGuideNumber());
+								}
+								oi.setProgrammedDate(guide.getProgrammedDate());
+								if(guide.getDeliveryPayment()!=null){
+									oi.setGuideValue(guide.getDeliveryPayment());
+									oi.setItemPartialValue(partialItemValue);
 								}
 								orderService.updateOrderItem(oi);
 							}

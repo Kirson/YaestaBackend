@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service;
 
 import com.yaesta.app.pdf.bean.GuideProcessBean;
 import com.yaesta.app.pdf.bean.GuideProcessResultBean;
-import com.yaesta.app.pdf.enums.GuideStatusEnum;
 import com.yaesta.app.persistence.entity.Guide;
 import com.yaesta.app.persistence.entity.GuideProcess;
 import com.yaesta.app.persistence.entity.Parameter;
+import com.yaesta.app.persistence.enums.GuideStatusEnum;
 import com.yaesta.app.persistence.repository.GuideProcessRepository;
 import com.yaesta.app.persistence.repository.GuideRepository;
 import com.yaesta.app.persistence.repository.ParameterRepository;
@@ -43,6 +43,8 @@ public class GuideProcessService {
 	public GuideProcess findByProcessDate(Date processDate) {
 
 		GuideProcess result = null;
+		
+		//doProcessDate();
 
 		List<GuideProcess> found = guideProcessRepository.findByProcessDate(processDate);
 
@@ -105,7 +107,7 @@ public class GuideProcessService {
 				} else if (gpb.getStatus().equals(GuideStatusEnum.DELIVERY_PENDING.getCode())) {
 					todayProcess.setNumDeliveryPending(gpb.getCount());
 				} else if (gpb.getStatus().equals(GuideStatusEnum.PENDING.getCode())) {
-					todayProcess.setNumDeliveryPending(gpb.getCount());
+					todayProcess.setNumPending(gpb.getCount());
 				}
 
 			}
