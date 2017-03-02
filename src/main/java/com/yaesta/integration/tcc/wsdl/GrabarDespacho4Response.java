@@ -2,7 +2,7 @@
 // Este archivo ha sido generado por la arquitectura JavaTM para la implantación de la referencia de enlace (JAXB) XML v2.2.11 
 // Visite <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
 // Todas las modificaciones realizadas en este archivo se perderán si se vuelve a compilar el esquema de origen. 
-// Generado el: 2016.09.06 a las 03:08:21 PM ECT 
+// Generado el: 2017.02.26 a las 08:51:58 PM ECT 
 //
 
 
@@ -49,8 +49,8 @@ import javax.xml.bind.annotation.XmlType;
     "urlRotulos",
     "urlRemesa",
     "imgRelacionEnvio",
-    "imgRotulos",
-    "imgRemesa",
+    "imgrotulos",
+    "imgremesa",
     "respuesta",
     "mensaje"
 })
@@ -66,10 +66,10 @@ public class GrabarDespacho4Response {
     protected String urlRemesa;
     @XmlElement(name = "IMGRelacionEnvio")
     protected byte[] imgRelacionEnvio;
-    @XmlElement(name = "IMGRotulos")
-    protected byte[] imgRotulos;
-    @XmlElement(name = "IMGRemesa")
-    protected byte[] imgRemesa;
+    @XmlElement(name = "imgrotulos")
+    protected byte[] imgrotulos;
+    @XmlElement(name = "imgremesa")
+    protected byte[] imgremesa;
     protected int respuesta;
     protected String mensaje;
 
@@ -198,8 +198,8 @@ public class GrabarDespacho4Response {
      *     possible object is
      *     byte[]
      */
-    public byte[] getIMGRotulos() {
-        return imgRotulos;
+    public byte[] getImgrotulos() {
+        return imgrotulos;
     }
 
     /**
@@ -209,8 +209,8 @@ public class GrabarDespacho4Response {
      *     allowed object is
      *     byte[]
      */
-    public void setIMGRotulos(byte[] value) {
-        this.imgRotulos = value;
+    public void setImgrotulos(byte[] value) {
+        this.imgrotulos = value;
     }
 
     /**
@@ -220,8 +220,8 @@ public class GrabarDespacho4Response {
      *     possible object is
      *     byte[]
      */
-    public byte[] getIMGRemesa() {
-        return imgRemesa;
+    public byte[] getImgremesa() {
+        return imgremesa;
     }
 
     /**
@@ -231,8 +231,8 @@ public class GrabarDespacho4Response {
      *     allowed object is
      *     byte[]
      */
-    public void setIMGRemesa(byte[] value) {
-        this.imgRemesa = value;
+    public void setImgremesa(byte[] value) {
+        this.imgremesa = value;
     }
 
     /**

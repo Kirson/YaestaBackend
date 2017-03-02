@@ -174,4 +174,6 @@ public class OrderVtexUtil implements Serializable {
 
 		return paymentBean;
 	}
+	
+	
 }

@@ -168,6 +168,9 @@ public class Guide implements Serializable{
 	@Column(name="total_value")
 	private Double totalValue;
 	
+	@Column(name="rotule_url")
+	private String rotuleUrl;
+	
 	@Column(name="pending")
 	private Boolean pending;
 	
@@ -421,6 +424,16 @@ public class Guide implements Serializable{
 	}
 	
 	
+	
+	
+
+	public String getRotuleUrl() {
+		return rotuleUrl;
+	}
+
+	public void setRotuleUrl(String rotuleUrl) {
+		this.rotuleUrl = rotuleUrl;
+	}
 
 	public Catalog getGuideStatus() {
 		return guideStatus;
@@ -602,7 +615,7 @@ public class Guide implements Serializable{
 	public void postLoad(){
 		
 		for(GuideStatusEnum gse:GuideStatusEnum.values()){
-			if(this.status.equals(gse.getCode())){
+			if(this.status!=null && this.status.equals(gse.getCode())){
 				this.setStatusDescription(gse.getDescription());
 			}
 		}

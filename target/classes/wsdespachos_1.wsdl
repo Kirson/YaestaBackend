@@ -1,0 +1,650 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://clientes.tcc.com.co/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://clientes.tcc.com.co/" xmlns:s1="http://www.tcc.com.co/xsd" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://clientes.tcc.com.co/">
+      <s:import namespace="http://www.tcc.com.co/xsd"/>
+      <s:element name="GrabarDespacho">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="clave" type="s:string"/>
+            <s:element minOccurs="0" maxOccurs="1" name="objDespacho" type="tns:clsDespachoPaqueteria"/>
+            <s:element minOccurs="0" maxOccurs="1" name="remesa" type="s:string"/>
+            <s:element minOccurs="1" maxOccurs="1" name="respuesta" type="s:int"/>
+            <s:element minOccurs="0" maxOccurs="1" name="mensaje" type="s:string"/>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="clsDespachoPaqueteria">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IDDespacho" nillable="true" type="s:int"/>
+          <s:element minOccurs="0" maxOccurs="1" name="CodigoLote" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="FechaHoraLote" nillable="true" type="s:dateTime"/>
+          <s:element minOccurs="1" maxOccurs="1" name="FechaHoraRecepcion" nillable="true" type="s:dateTime"/>
+          <s:element minOccurs="1" maxOccurs="1" name="FechaDespacho" type="s:dateTime"/>
+          <s:element minOccurs="1" maxOccurs="1" name="IDClienteRemitente" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="IDCiudadCliente" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="IDSucursalRemitente" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="CodigoCuentaRemitente" nillable="true" type="s:int"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NombreRemitente" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="IDTipoIdentificacionRte" nillable="true" type="s:int"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NumeroIdentificacionRte" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="TelefonoRte" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="DireccionRte" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="CodigoDaneOrigen" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="IDOrigen" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="IDCDOrigen" nillable="true" type="s:int"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NombreDestinatario" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="IDTipoIdentificacionDrio" nillable="true" type="s:int"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NumeroIdentificacionDrio" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="TelefonoDrio" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="DireccionDrio" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="CodigoDaneDestino" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="IDDestino" nillable="true" type="s:int"/>
+          <s:element minOccurs="0" maxOccurs="1" name="BarrioDrio" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="IDCDDestino" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="TotalUnidades" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="TotalPeso" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="TotalPesoFacturado" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="TotalValorMercancia" nillable="true" type="s:double"/>
+          <s:element minOccurs="0" maxOccurs="1" name="TipoServicioTCC" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="Comentarios" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NumeroRemesa" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="IDEstadoDespacho" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="FechaHoraCreacion" nillable="true" type="s:dateTime"/>
+          <s:element minOccurs="0" maxOccurs="1" name="UsuarioCreacion" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="FechaHoraUltimaModificacion" nillable="true" type="s:dateTime"/>
+          <s:element minOccurs="0" maxOccurs="1" name="UsuarioUltimaModificacion" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="ComentarioAnulacion" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="FechaHoraAnulacion" nillable="true" type="s:dateTime"/>
+          <s:element minOccurs="0" maxOccurs="1" name="UsuarioAnulacion" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="TipoDocumentoReferencia" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NumeroDocumentoReferencia" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="FechaDocumentoReferencia" nillable="true" type="s:dateTime"/>
+          <s:element minOccurs="1" maxOccurs="1" name="DocumentosDevolver" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="DocumentosEntregar" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="EsEntregaBodega" type="s:boolean"/>
+          <s:element minOccurs="0" maxOccurs="1" name="CentroCosto" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="CiudadOrigen" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="DepartamentoOrigen" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="CiudadDestino" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="DepartamentoDestino" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="detDespacho" type="tns:ArrayOfClsDespachoPaqueteriaDetalle"/>
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfClsDespachoPaqueteriaDetalle">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="clsDespachoPaqueteriaDetalle" nillable="true" type="tns:clsDespachoPaqueteriaDetalle"/>
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="clsDespachoPaqueteriaDetalle">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IDDespacho" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="Consecutivo" nillable="true" type="s:int"/>
+          <s:element minOccurs="0" maxOccurs="1" name="TipoDeEmpaque" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="ReferenciaCte" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="Descripcion" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="CantidadUnidades" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="PesoKilosTotalDetalle" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="PesoKilosFacturadosTotalDetalle" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="PesoKilosUnitario" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="PesoKilosFacturadosUnitario" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="LargoCmsUnitario" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="AnchoCmsUnitario" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="AltoCmsUnitario" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="PesoVolumenUnitario" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="PesoVolumenTotalDetalle" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="ValorMercanciaUnitario" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="ValorMercanciaTotalDetalle" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="PesoInfUnitario" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="UnidadMedidaPesoInf" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="LargoInfUnitario" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="AnchoInfUnitario" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="AltoInfUnitario" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="UnidadMedidaLongitudInf" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="FechaHoraCreacion" nillable="true" type="s:dateTime"/>
+          <s:element minOccurs="0" maxOccurs="1" name="UsuarioCreacion" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="FechaHoraUltimaModificacion" nillable="true" type="s:dateTime"/>
+          <s:element minOccurs="0" maxOccurs="1" name="UsuarioUltimaModificacion" type="s:string"/>
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GrabarDespachoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="remesa" type="s:string"/>
+            <s:element minOccurs="1" maxOccurs="1" name="respuesta" type="s:int"/>
+            <s:element minOccurs="0" maxOccurs="1" name="mensaje" type="s:string"/>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AnularDespacho">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="clave" type="s:string"/>
+            <s:element minOccurs="0" maxOccurs="1" name="objDespacho" type="tns:clsDespachoPaqueteria"/>
+            <s:element minOccurs="1" maxOccurs="1" name="respuesta" type="s:int"/>
+            <s:element minOccurs="0" maxOccurs="1" name="mensaje" type="s:string"/>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AnularDespachoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="respuesta" type="s:int"/>
+            <s:element minOccurs="0" maxOccurs="1" name="mensaje" type="s:string"/>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GrabarDespacho2">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="clave" type="s:string"/>
+            <s:element minOccurs="0" maxOccurs="1" name="objDespacho" type="tns:clsDespachoPaqueteria2"/>
+            <s:element minOccurs="0" maxOccurs="1" name="remesa" type="s:string"/>
+            <s:element minOccurs="1" maxOccurs="1" name="respuesta" type="s:int"/>
+            <s:element minOccurs="0" maxOccurs="1" name="mensaje" type="s:string"/>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="clsDespachoPaqueteria2">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IDClienteRemitente" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="IDCiudadCliente" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="IDSucursalRemitente" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="CodigoCuentaRemitente" nillable="true" type="s:int"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NombreRemitente" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="IDTipoIdentificacionRte" nillable="true" type="s:int"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NumeroIdentificacionRte" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="TelefonoRte" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="DireccionRte" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="CodigoDaneOrigen" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="CiudadOrigen" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="DepartamentoOrigen" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NombreDestinatario" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="IDTipoIdentificacionDrio" nillable="true" type="s:int"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NumeroIdentificacionDrio" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="TelefonoDrio" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="DireccionDrio" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="CodigoPostalDrio" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="CodigoDaneDestino" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="CiudadDestino" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="DepartamentoDestino" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="CodigoDestinatario" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="CorreoElectronicoDrio" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="TotalUnidades" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="TotalPeso" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="TotalVolumen" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="TotalValorMercancia" nillable="true" type="s:double"/>
+          <s:element minOccurs="0" maxOccurs="1" name="Comentarios" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NumeroRemesa" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="TipoServicioTCC" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="FechaDespacho" type="s:dateTime"/>
+          <s:element minOccurs="0" maxOccurs="1" name="CodigoLote" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="FechaLote" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="UsuarioCreacion" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="TipoDocumentoReferencia" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NumeroDocumentoReferencia" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="FechaDocumentoReferencia" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="CantDocumentosDevolver" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="CantDocumentosEntregar" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="EsEntregaBodega" nillable="true" type="s:boolean"/>
+          <s:element minOccurs="0" maxOccurs="1" name="CentroCosto" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="detDespacho" type="tns:ArrayOfClsDespachoPaqueteria2_Detalle"/>
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfClsDespachoPaqueteria2_Detalle">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="clsDespachoPaqueteria2_Detalle" nillable="true" type="tns:clsDespachoPaqueteria2_Detalle"/>
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="clsDespachoPaqueteria2_Detalle">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="CodigoIUP" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="TipoDeEmpaque" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="Referencia" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="Descripcion" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="CantidadUnidades" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="PesoKilosUnitario" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="PesoVolumenUnitario" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="LargoCmsUnitario" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="AnchoCmsUnitario" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="AltoCmsUnitario" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="ValorMercanciaUnitario" nillable="true" type="s:double"/>
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GrabarDespacho2Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="remesa" type="s:string"/>
+            <s:element minOccurs="1" maxOccurs="1" name="respuesta" type="s:int"/>
+            <s:element minOccurs="0" maxOccurs="1" name="mensaje" type="s:string"/>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GrabarDespacho3">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="clave" type="s:string"/>
+            <s:element minOccurs="0" maxOccurs="1" name="objDespacho" type="tns:clsDespachoPaqueteria3"/>
+            <s:element minOccurs="0" maxOccurs="1" name="remesa" type="s:string"/>
+            <s:element minOccurs="1" maxOccurs="1" name="respuesta" type="s:int"/>
+            <s:element minOccurs="0" maxOccurs="1" name="mensaje" type="s:string"/>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="clsDespachoPaqueteria3">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="FechaDespacho" type="s:dateTime"/>
+          <s:element minOccurs="1" maxOccurs="1" name="CodigoCuentaRemitente" nillable="true" type="s:int"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NombreDestinatario" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NumeroIdentificacionDrio" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="TelefonoDrio" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="DireccionDrio" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="IDDestino" type="s:int"/>
+          <s:element minOccurs="0" maxOccurs="1" name="BarrioDrio" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="TotalUnidades" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="TotalPeso" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="TotalValorMercancia" nillable="true" type="s:double"/>
+          <s:element minOccurs="0" maxOccurs="1" name="TipoServicioTCC" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="Comentarios" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NumeroRemesa" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="UsuarioCreacion" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="UsuarioUltimaModificacion" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="TipoDocumentoReferencia" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NumeroDocumentoReferencia" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="FechaDocumentoReferencia" nillable="true" type="s:dateTime"/>
+          <s:element minOccurs="1" maxOccurs="1" name="DocumentosDevolver" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="DocumentosEntregar" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="EsEntregaBodega" type="s:boolean"/>
+          <s:element minOccurs="0" maxOccurs="1" name="detDespacho" type="tns:ArrayOfClsDespachoPaqueteriaDetalle3"/>
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfClsDespachoPaqueteriaDetalle3">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="clsDespachoPaqueteriaDetalle3" nillable="true" type="tns:clsDespachoPaqueteriaDetalle3"/>
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="clsDespachoPaqueteriaDetalle3">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="CantidadUnidades" nillable="true" type="s:int"/>
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GrabarDespacho3Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="remesa" type="s:string"/>
+            <s:element minOccurs="1" maxOccurs="1" name="respuesta" type="s:int"/>
+            <s:element minOccurs="0" maxOccurs="1" name="mensaje" type="s:string"/>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GrabarDespacho4">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="objDespacho" type="s1:tpGrabarRemesaCompleta"/>
+            <s:element minOccurs="0" maxOccurs="1" name="remesa" type="s:string"/>
+            <s:element minOccurs="0" maxOccurs="1" name="URLRelacionEnvio" type="s:string"/>
+            <s:element minOccurs="0" maxOccurs="1" name="URLRotulos" type="s:string"/>
+            <s:element minOccurs="0" maxOccurs="1" name="URLRemesa" type="s:string"/>
+            <s:element minOccurs="0" maxOccurs="1" name="IMGRelacionEnvio" type="s:base64Binary"/>
+            <s:element minOccurs="0" maxOccurs="1" name="IMGRotulos" type="s:base64Binary"/>
+            <s:element minOccurs="0" maxOccurs="1" name="IMGRemesa" type="s:base64Binary"/>
+            <s:element minOccurs="1" maxOccurs="1" name="respuesta" type="s:int"/>
+            <s:element minOccurs="0" maxOccurs="1" name="mensaje" type="s:string"/>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GrabarDespacho4Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="remesa" type="s:string"/>
+            <s:element minOccurs="0" maxOccurs="1" name="URLRelacionEnvio" type="s:string"/>
+            <s:element minOccurs="0" maxOccurs="1" name="URLRotulos" type="s:string"/>
+            <s:element minOccurs="0" maxOccurs="1" name="URLRemesa" type="s:string"/>
+            <s:element minOccurs="0" maxOccurs="1" name="IMGRelacionEnvio" type="s:base64Binary"/>
+            <s:element minOccurs="0" maxOccurs="1" name="IMGRotulos" type="s:base64Binary"/>
+            <s:element minOccurs="0" maxOccurs="1" name="IMGRemesa" type="s:base64Binary"/>
+            <s:element minOccurs="1" maxOccurs="1" name="respuesta" type="s:int"/>
+            <s:element minOccurs="0" maxOccurs="1" name="mensaje" type="s:string"/>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GrabarDespacho5">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="clave" type="s:string"/>
+            <s:element minOccurs="0" maxOccurs="1" name="objDespacho" type="tns:clsDespachoPaqueteria5"/>
+            <s:element minOccurs="0" maxOccurs="1" name="remesa" type="s:string"/>
+            <s:element minOccurs="1" maxOccurs="1" name="respuesta" type="s:int"/>
+            <s:element minOccurs="0" maxOccurs="1" name="mensaje" type="s:string"/>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="clsDespachoPaqueteria5">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="FechaDespacho" type="s:dateTime"/>
+          <s:element minOccurs="1" maxOccurs="1" name="CodigoCuentaRemitente" nillable="true" type="s:int"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NombreDestinatario" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NumeroIdentificacionDrio" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="TelefonoDrio" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="DireccionDrio" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="IDDestino" type="s:int"/>
+          <s:element minOccurs="0" maxOccurs="1" name="BarrioDrio" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="TotalUnidades" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="TotalPeso" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="TotalValorMercancia" nillable="true" type="s:double"/>
+          <s:element minOccurs="0" maxOccurs="1" name="TipoServicioTCC" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="Comentarios" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NumeroRemesa" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="UsuarioCreacion" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="UsuarioUltimaModificacion" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="TipoDocumentoReferencia" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="NumeroDocumentoReferencia" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="FechaDocumentoReferencia" nillable="true" type="s:dateTime"/>
+          <s:element minOccurs="1" maxOccurs="1" name="DocumentosDevolver" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="DocumentosEntregar" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="EsEntregaBodega" type="s:boolean"/>
+          <s:element minOccurs="0" maxOccurs="1" name="detDespacho" type="tns:ArrayOfClsDespachoPaqueteriaDetalle5"/>
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfClsDespachoPaqueteriaDetalle5">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="clsDespachoPaqueteriaDetalle5" nillable="true" type="tns:clsDespachoPaqueteriaDetalle5"/>
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="clsDespachoPaqueteriaDetalle5">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="CantidadUnidades" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="PesoKilosTotalDetalle" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="PesoVolumenTotalDetalle" nillable="true" type="s:double"/>
+          <s:element minOccurs="1" maxOccurs="1" name="LargoCmsUnitario" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="AnchoCmsUnitario" nillable="true" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="AltoCmsUnitario" nillable="true" type="s:int"/>
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GrabarDespacho5Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="remesa" type="s:string"/>
+            <s:element minOccurs="1" maxOccurs="1" name="respuesta" type="s:int"/>
+            <s:element minOccurs="0" maxOccurs="1" name="mensaje" type="s:string"/>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://www.tcc.com.co/xsd">
+      <s:complexType name="tpGrabarRemesaCompleta">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="clave" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="codigolote" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="fechahoralote" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="numeroremesa" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="numeroDepacho" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="unidadnegocio" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="fechadespacho" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="cuentaremitente" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="sederemitente" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="primernombreremitente" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="segundonombreremitente" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="primerapellidoremitente" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="segundoapellidoremitente" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="razonsocialremitente" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="naturalezaremitente" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="tipoidentificacionremitente" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="identificacionremitente" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="telefonoremitente" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="direccionremitente" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="ciudadorigen" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="tipoidentificaciondestinatario" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="identificaciondestinatario" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="sededestinatario" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="primernombredestinatario" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="segundonombredestinatario" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="primerapellidodestinatario" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="segundoapellidodestinatario" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="razonsocialdestinatario" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="naturalezadestinatario" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="direcciondestinatario" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="telefonodestinatario" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="ciudaddestinatario" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="barriodestinatario" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="totalpeso" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="totalpesovolumen" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="totalvalormercancia" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="formapago" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="observaciones" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="llevabodega" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="recogebodega" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="centrocostos" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="totalvalorproducto" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="unbounded" form="unqualified" name="unidad" type="s1:tpUnidad"/>
+          <s:element minOccurs="0" maxOccurs="unbounded" form="unqualified" name="documentoreferencia" nillable="true" type="s1:tpDocumentoReferencia"/>
+          <s:element minOccurs="1" maxOccurs="1" form="unqualified" name="numeroReferenciaCliente" nillable="true" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="fuente" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" form="unqualified" name="generarDocumentos" type="s:boolean"/>
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="tpUnidad">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" form="unqualified" name="tipounidad" nillable="true" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" form="unqualified" name="tipoempaque" nillable="true" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" form="unqualified" name="claseempaque" nillable="true" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" form="unqualified" name="dicecontener" nillable="true" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="cantidadunidades" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="kilosreales" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" form="unqualified" name="largo" nillable="true" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" form="unqualified" name="alto" nillable="true" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" form="unqualified" name="ancho" nillable="true" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="pesovolumen" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" form="unqualified" name="valormercancia" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" form="unqualified" name="codigobarras" nillable="true" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" form="unqualified" name="numerobolsa" nillable="true" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" form="unqualified" name="referencias" nillable="true" type="s:string"/>
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="tpDocumentoReferencia">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" form="unqualified" name="tipodocumento" nillable="true" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" form="unqualified" name="numerodocumento" nillable="true" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" form="unqualified" name="fechadocumento" nillable="true" type="s:string"/>
+        </s:sequence>
+      </s:complexType>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GrabarDespachoSoapIn">
+    <wsdl:part name="parameters" element="tns:GrabarDespacho"/>
+  </wsdl:message>
+  <wsdl:message name="GrabarDespachoSoapOut">
+    <wsdl:part name="parameters" element="tns:GrabarDespachoResponse"/>
+  </wsdl:message>
+  <wsdl:message name="AnularDespachoSoapIn">
+    <wsdl:part name="parameters" element="tns:AnularDespacho"/>
+  </wsdl:message>
+  <wsdl:message name="AnularDespachoSoapOut">
+    <wsdl:part name="parameters" element="tns:AnularDespachoResponse"/>
+  </wsdl:message>
+  <wsdl:message name="GrabarDespacho2SoapIn">
+    <wsdl:part name="parameters" element="tns:GrabarDespacho2"/>
+  </wsdl:message>
+  <wsdl:message name="GrabarDespacho2SoapOut">
+    <wsdl:part name="parameters" element="tns:GrabarDespacho2Response"/>
+  </wsdl:message>
+  <wsdl:message name="GrabarDespacho3SoapIn">
+    <wsdl:part name="parameters" element="tns:GrabarDespacho3"/>
+  </wsdl:message>
+  <wsdl:message name="GrabarDespacho3SoapOut">
+    <wsdl:part name="parameters" element="tns:GrabarDespacho3Response"/>
+  </wsdl:message>
+  <wsdl:message name="GrabarDespacho4SoapIn">
+    <wsdl:part name="parameters" element="tns:GrabarDespacho4"/>
+  </wsdl:message>
+  <wsdl:message name="GrabarDespacho4SoapOut">
+    <wsdl:part name="parameters" element="tns:GrabarDespacho4Response"/>
+  </wsdl:message>
+  <wsdl:message name="GrabarDespacho5SoapIn">
+    <wsdl:part name="parameters" element="tns:GrabarDespacho5"/>
+  </wsdl:message>
+  <wsdl:message name="GrabarDespacho5SoapOut">
+    <wsdl:part name="parameters" element="tns:GrabarDespacho5Response"/>
+  </wsdl:message>
+  <wsdl:portType name="wsDespachosSoap">
+    <wsdl:operation name="GrabarDespacho">
+      <wsdl:documentation>Graba un despacho de Paquetería</wsdl:documentation>
+      <wsdl:input message="tns:GrabarDespachoSoapIn"/>
+      <wsdl:output message="tns:GrabarDespachoSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="AnularDespacho">
+      <wsdl:documentation>Anula un despacho. Se debe proporcionar el número de remesa y la cuenta del despacho.</wsdl:documentation>
+      <wsdl:input message="tns:AnularDespachoSoapIn"/>
+      <wsdl:output message="tns:AnularDespachoSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="GrabarDespacho2">
+      <wsdl:documentation>Graba un despacho de Paquetería con el segundo esquema de Despacho</wsdl:documentation>
+      <wsdl:input message="tns:GrabarDespacho2SoapIn"/>
+      <wsdl:output message="tns:GrabarDespacho2SoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="GrabarDespacho3">
+      <wsdl:documentation>Graba un despacho de Paquetería</wsdl:documentation>
+      <wsdl:input message="tns:GrabarDespacho3SoapIn"/>
+      <wsdl:output message="tns:GrabarDespacho3SoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="GrabarDespacho4">
+      <wsdl:documentation>Graba un despacho de Paquetería</wsdl:documentation>
+      <wsdl:input message="tns:GrabarDespacho4SoapIn"/>
+      <wsdl:output message="tns:GrabarDespacho4SoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="GrabarDespacho5">
+      <wsdl:documentation>Graba un despacho de Paquetería</wsdl:documentation>
+      <wsdl:input message="tns:GrabarDespacho5SoapIn"/>
+      <wsdl:output message="tns:GrabarDespacho5SoapOut"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="wsDespachosHttpGet"/>
+  <wsdl:binding name="wsDespachosSoap" type="tns:wsDespachosSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="GrabarDespacho">
+      <soap:operation soapAction="http://clientes.tcc.com.co/GrabarDespacho" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AnularDespacho">
+      <soap:operation soapAction="http://clientes.tcc.com.co/AnularDespacho" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GrabarDespacho2">
+      <soap:operation soapAction="http://clientes.tcc.com.co/GrabarDespacho2" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GrabarDespacho3">
+      <soap:operation soapAction="http://clientes.tcc.com.co/GrabarDespacho3" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GrabarDespacho4">
+      <soap:operation soapAction="http://clientes.tcc.com.co/GrabarDespacho4" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GrabarDespacho5">
+      <soap:operation soapAction="http://clientes.tcc.com.co/GrabarDespacho5" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="wsDespachosSoap12" type="tns:wsDespachosSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="GrabarDespacho">
+      <soap12:operation soapAction="http://clientes.tcc.com.co/GrabarDespacho" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AnularDespacho">
+      <soap12:operation soapAction="http://clientes.tcc.com.co/AnularDespacho" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GrabarDespacho2">
+      <soap12:operation soapAction="http://clientes.tcc.com.co/GrabarDespacho2" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GrabarDespacho3">
+      <soap12:operation soapAction="http://clientes.tcc.com.co/GrabarDespacho3" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GrabarDespacho4">
+      <soap12:operation soapAction="http://clientes.tcc.com.co/GrabarDespacho4" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GrabarDespacho5">
+      <soap12:operation soapAction="http://clientes.tcc.com.co/GrabarDespacho5" style="document"/>
+      <wsdl:input>
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="wsDespachosHttpGet" type="tns:wsDespachosHttpGet">
+    <http:binding verb="GET"/>
+  </wsdl:binding>
+  <wsdl:service name="wsDespachos">
+    <wsdl:port name="wsDespachosSoap" binding="tns:wsDespachosSoap">
+      <soap:address location="http://clientes.tcc.com.co/servicios/wsdespachos.asmx"/>
+    </wsdl:port>
+    <wsdl:port name="wsDespachosSoap12" binding="tns:wsDespachosSoap12">
+      <soap12:address location="http://clientes.tcc.com.co/servicios/wsdespachos.asmx"/>
+    </wsdl:port>
+    <wsdl:port name="wsDespachosHttpGet" binding="tns:wsDespachosHttpGet">
+      <http:address location="http://clientes.tcc.com.co/servicios/wsdespachos.asmx"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

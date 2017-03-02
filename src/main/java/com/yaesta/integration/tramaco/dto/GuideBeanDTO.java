@@ -25,6 +25,7 @@ public class GuideBeanDTO implements Serializable{
 	private Double itemValue;
 	private String pdfUrl;
 	private String pdfTagUrl;
+	private String pdfRotuleUrl;
 	private RespuestaGenerarGuiaWs guideResponse;
 	private RespuestaGenerarPdfWs  guidePdfResponse;
 	private RespuestaTrackGuiaWs guideTrackResponse;
@@ -36,6 +37,8 @@ public class GuideBeanDTO implements Serializable{
 	private List<GuideDetail> details;
 	private Boolean hasPayment;
 	private Double totalValue;
+	private String guideNumber;
+	private String deliveryName;
 	
 	public GuideBeanDTO(){
 		errorList = new ArrayList<String>();
@@ -160,6 +163,30 @@ public class GuideBeanDTO implements Serializable{
 
 	public void setTotalValue(Double totalValue) {
 		this.totalValue = totalValue;
+	}
+
+	public String getPdfRotuleUrl() {
+		return pdfRotuleUrl;
+	}
+
+	public void setPdfRotuleUrl(String pdfRotuleUrl) {
+		this.pdfRotuleUrl = pdfRotuleUrl;
+	}
+
+	public String getGuideNumber() {
+		return guideNumber;
+	}
+
+	public void setGuideNumber(String guideNumber) {
+		this.guideNumber = guideNumber;
+	}
+
+	public String getDeliveryName() {
+		return deliveryName;
+	}
+
+	public void setDeliveryName(String deliveryName) {
+		this.deliveryName = deliveryName;
 	}
 	
 	

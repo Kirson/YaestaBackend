@@ -71,6 +71,7 @@ import dmz.comercial.servicio.cliente.impl.ServicioGenerarGuias;
 import dmz.comercial.servicio.cliente.impl.ServicioGenerarPdf;
 import dmz.comercial.servicio.cliente.impl.ServicioTrackingGuia;
 
+
 @Service
 public class TramacoService implements Serializable {
 
@@ -950,7 +951,7 @@ public class TramacoService implements Serializable {
 					systemOut.println(codigo);
 					systemOut.println(mensaje);
 					systemOut.println(excepcion);
-
+					
 					String textInfo = codigo + " " + mensaje + " " + excepcion;
 
 					YaEstaLog yaestalog = new YaEstaLog();
@@ -966,7 +967,7 @@ public class TramacoService implements Serializable {
 					for (SalidaTrackGuiaWs trackGuia : respuestaTrackGuiaWs.getLstSalidaTrackGuiaWs()) {
 						systemOut.println("FECHA_HORA:" + trackGuia.getFechaHora() + " DESCRIPCION:"
 								+ trackGuia.getDescripcion());
-
+						
 					}
 
 					Guide guide = guideInfo.getGuideBean().getGuide();

@@ -72,6 +72,7 @@ import com.yaesta.integration.datil.json.bean.ItemGuiaRemision;
 import com.yaesta.integration.datil.json.enums.PagoEnum;
 import com.yaesta.integration.datil.service.DatilService;
 import com.yaesta.integration.tcc.service.TccService;
+import com.yaesta.integration.tcc.service.TccServiceJaxWs;
 import com.yaesta.integration.tramaco.dto.GuideBeanDTO;
 import com.yaesta.integration.tramaco.dto.GuideDTO;
 import com.yaesta.integration.tramaco.service.TramacoService;
@@ -155,6 +156,9 @@ public class OrderVitexService extends BaseVitexService {
 
 	@Autowired
 	TccService tccService;
+	
+	@Autowired
+	TccServiceJaxWs tccServiceJax;
 
 	@Autowired
 	private MailService mailService;
@@ -879,8 +883,10 @@ public class OrderVitexService extends BaseVitexService {
 		guideDTO.setCustomerDocument(guideInfoBean.getCustomerDocument());
 
 		GuideDTO resultGuideInfo = tramacoService.generateGuides(guideDTO);
+		
+		System.out.println("Resultado generar Guias " + resultGuideInfo.getResponse());
 
-		if (resultGuideInfo.getResponse().equals("OK")) {
+		if (resultGuideInfo.getResponse().equals("OK") || resultGuideInfo.getResponse().equals("EXITO")) {
 
 			List<GuideBeanDTO> guideInfoBeanList = resultGuideInfo.getGuideBeanList();
 			List<GuideBeanDTO> guideInfoList = new ArrayList<GuideBeanDTO>();
@@ -934,7 +940,9 @@ public class OrderVitexService extends BaseVitexService {
 
 				guideDTO.setGuideBeanList(guideInfoList);
 				// LLamar ahora al servicio de pdfs
+				System.out.println("Antes de llamar a generar PDF");
 				resultGuideInfo = tramacoService.generateGuidesPDF(guideDTO);
+				System.out.println("Luego de llamar a generar PDF");
 				guideInfoBeanList = resultGuideInfo.getGuideBeanList();
 				// Realizar segunda iteracion para las guias
 				List<GuideBeanDTO> newGuideInfoBeanList = new ArrayList<GuideBeanDTO>();
@@ -1098,7 +1106,7 @@ public class OrderVitexService extends BaseVitexService {
 		guideDTO.setCustomerAdditionalInfo(guideInfoBean.getCustomerAdditionalInfo());
 		guideDTO.setDeliverySelected(guideInfoBean.getDeliverySelected());
 
-		GuideDTO resultGuideInfo = tccService.generateGuides(guideDTO);
+		GuideDTO resultGuideInfo = tccServiceJax.generateGuides(guideDTO);
 
 		List<GuideBeanDTO> guideInfoBeanList = resultGuideInfo.getGuideBeanList();
 		List<GuideBeanDTO> guideInfoList = new ArrayList<GuideBeanDTO>();
@@ -1108,8 +1116,7 @@ public class OrderVitexService extends BaseVitexService {
 				Guide guide = new Guide();
 				guide.setCreateDate(new Date());
 				guide.setOrderVitexId(orderComplete.getOrderId());
-				guide.setVitexDispatcherId(gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getId()
-						+ "%" + gbd.getGuideResponse().getSalidaGenerarGuiaWs().getLstGuias().get(0).getGuia());
+				guide.setVitexDispatcherId(gbd.getGuideNumber());
 				guide.setGuideInfo(new Gson().toJson(gbd));
 				guide.setOrder(order);
 				guide.setDeliveryCost(gbd.getDeliveryCost());
@@ -1118,6 +1125,8 @@ public class OrderVitexService extends BaseVitexService {
 				guide.setDeliveryStatus("GENERATED");
 				guide.setSupplier(gbd.getSupplier());
 				guide.setCustomerName(orderComplete.getCustomerName());
+				guide.setDocumentUrl(gbd.getPdfUrl());
+				//guide.setDocumentTagUrl(gbd.getPdfRotuleUrl());
 				try {
 					guide.setOrderDate(UtilDate.fromIsoToDateTime(orderComplete.getCreationDate()));
 				} catch (ParseException e) {
@@ -1128,40 +1137,39 @@ public class OrderVitexService extends BaseVitexService {
 				guideService.saveGuide(guide);
 				gbd.setGuide(guide);
 				guideInfoList.add(gbd);
+				
+				guideService.saveGuide(guide);
+				gbd.setGuide(guide);
+				guideInfoList.add(gbd);
+
+				List<GuideDetail> details = gbd.getDetails();
+				// Guardar los detalles de la guia
+				if (details != null && !details.isEmpty()) {
+					guideService.saveGuideDetail(guide, details);
+				}
 			}
 
 			guideDTO.setGuideBeanList(guideInfoList);
-			// LLamar ahora al servicio de pdfs
-			/*
-			 * resultGuideInfo = tccService.generateGuidesPDF(guideDTO);
-			 * guideInfoBeanList = resultGuideInfo.getGuideBeanList();
-			 * List<Guide> guides = new ArrayList<Guide>(); for(GuideBeanDTO
-			 * gbd:guideInfoBeanList){ Guide guide = gbd.getGuide();
-			 * guide.setStatus("GENERATED-PDF");
-			 * guide.setDocumentUrl(gbd.getPdfUrl());
-			 * guide.setDeliveryName("TRAMACO"); guideService.saveGuide(guide);
-			 * guides.add(guide);
-			 * response.getPdfPathList().add(gbd.getPdfUrl()); }
-			 * 
-			 * responseList.add(resultGuideInfo); guideDTO=resultGuideInfo;
-			 */
+			
 			orderService.saveOrder(order);
 		}
 
 		result.setGuideInfoBean(response);
 
 		result.setGuides(responseList);
-		/*
-		 * List<MailInfo> mailInfoList=
-		 * prepareMailOrder(orderComplete,supplierDeliveryInfoList,guideInfoBean
-		 * .getDeliverySelected());
-		 * 
-		 * for(MailInfo mailInfo:mailInfoList){ for(GuideBeanDTO
-		 * gDto:guideDTO.getGuideBeanList()){
-		 * if(gDto.getSupplier().getId()==mailInfo.getRefId()){
-		 * mailInfo.getAttachmentList().add(gDto.getPdfUrl()); } }
-		 * mailService.sendMailTemplate(mailInfo, "guideNotification.vm"); }
-		 */
+		
+		 List<MailInfo> mailInfoList=
+		 prepareMailOrder(orderComplete,supplierDeliveryInfoList,guideInfoBean.getDeliverySelected(),null);
+		  
+		 for(MailInfo mailInfo:mailInfoList){ 
+			 for(GuideBeanDTO gDto:guideDTO.getGuideBeanList()){
+				 if(gDto.getSupplier().getId()==mailInfo.getRefId()){
+					 mailInfo.getAttachmentList().add(gDto.getPdfUrl()); 
+				  } 
+			  }
+			 mailService.sendMailTemplate(mailInfo, "guideNotification.vm"); 
+	   }
+		 
 
 		if (mailNotifyCustomer.equals("Y")) {
 			sendGuideMailCustomer(orderComplete);

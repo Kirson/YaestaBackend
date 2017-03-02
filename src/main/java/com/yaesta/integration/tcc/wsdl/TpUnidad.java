@@ -2,7 +2,7 @@
 // Este archivo ha sido generado por la arquitectura JavaTM para la implantación de la referencia de enlace (JAXB) XML v2.2.11 
 // Visite <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
 // Todas las modificaciones realizadas en este archivo se perderán si se vuelve a compilar el esquema de origen. 
-// Generado el: 2016.09.06 a las 03:08:21 PM ECT 
+// Generado el: 2017.02.26 a las 08:51:58 PM ECT 
 //
 
 
@@ -29,12 +29,12 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="claseempaque" type="{http://www.w3.org/2001/XMLSchema}string" form="unqualified"/&gt;
  *         &lt;element name="dicecontener" type="{http://www.w3.org/2001/XMLSchema}string" form="unqualified"/&gt;
  *         &lt;element name="cantidadunidades" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0" form="unqualified"/&gt;
- *         &lt;element name="kilosreales" type="{http://www.w3.org/2001/XMLSchema}string" form="unqualified"/&gt;
+ *         &lt;element name="kilosreales" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0" form="unqualified"/&gt;
  *         &lt;element name="largo" type="{http://www.w3.org/2001/XMLSchema}string" form="unqualified"/&gt;
  *         &lt;element name="alto" type="{http://www.w3.org/2001/XMLSchema}string" form="unqualified"/&gt;
  *         &lt;element name="ancho" type="{http://www.w3.org/2001/XMLSchema}string" form="unqualified"/&gt;
- *         &lt;element name="pesovolumen" type="{http://www.w3.org/2001/XMLSchema}string" form="unqualified"/&gt;
- *         &lt;element name="valormercancia" type="{http://www.w3.org/2001/XMLSchema}string" form="unqualified"/&gt;
+ *         &lt;element name="pesovolumen" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0" form="unqualified"/&gt;
+ *         &lt;element name="valormercancia" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0" form="unqualified"/&gt;
  *         &lt;element name="codigobarras" type="{http://www.w3.org/2001/XMLSchema}string" form="unqualified"/&gt;
  *         &lt;element name="numerobolsa" type="{http://www.w3.org/2001/XMLSchema}string" form="unqualified"/&gt;
  *         &lt;element name="referencias" type="{http://www.w3.org/2001/XMLSchema}string" form="unqualified"/&gt;
@@ -75,7 +75,7 @@ public class TpUnidad {
     protected String dicecontener;
     @XmlElement(namespace = "")
     protected String cantidadunidades;
-    @XmlElement(namespace = "", required = true, nillable = true)
+    @XmlElement(namespace = "")
     protected String kilosreales;
     @XmlElement(namespace = "", required = true, nillable = true)
     protected String largo;
@@ -83,9 +83,9 @@ public class TpUnidad {
     protected String alto;
     @XmlElement(namespace = "", required = true, nillable = true)
     protected String ancho;
-    @XmlElement(namespace = "", required = true, nillable = true)
+    @XmlElement(namespace = "")
     protected String pesovolumen;
-    @XmlElement(namespace = "", required = true, nillable = true)
+    @XmlElement(namespace = "")
     protected String valormercancia;
     @XmlElement(namespace = "", required = true, nillable = true)
     protected String codigobarras;
