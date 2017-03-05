@@ -171,7 +171,7 @@ public class SupplierService implements Serializable {
 			
 			UserResponseContainer resp = sellerCenterService.createUser(su);
 			
-			if(!resp.getEstado().equals("error")){
+			if(!resp.getEstado().equals("error")&&!resp.getEstado().equals("DEVELOPMENT")){
 				entity.setPassword(resp.getUsuario().getPassword());
 				supplierRepository.save(entity);
 				//enviar notificacion de acceso al proveedor

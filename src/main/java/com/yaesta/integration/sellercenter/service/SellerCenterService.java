@@ -25,7 +25,6 @@ import com.yaesta.integration.sellercenter.json.bean.UserBean;
 import com.yaesta.integration.sellercenter.json.bean.UserResponseContainer;
 import com.yaesta.integration.sellercenter.json.bean.UserResponseError;
 
-
 @Service
 public class SellerCenterService {
 
@@ -33,96 +32,93 @@ public class SellerCenterService {
 	protected PropertySourcesPlaceholderConfigurer propertyConfigurer;
 
 	protected @Value("${sellercenter.service.url}") String serviceUrl;
-	
-	
+
+	protected @Value("${sellercenter.enviroment}") String enviroment;
+
 	private Client client;
 	private WebTarget target;
-	
+
 	@Autowired
 	SystemOutService systemOut;
-	
-	
 
 	@SuppressWarnings("unchecked")
-	public List<SellerUser> getSellerUsers(){
+	public List<SellerUser> getSellerUsers() {
 		List<SellerUser> result = new ArrayList<SellerUser>();
-		
-			
+
 		String restUrl = serviceUrl + "/usuarios";
-		RestTemplateTEXTPLAIN restTemplate = new RestTemplateTEXTPLAIN();		
+		RestTemplateTEXTPLAIN restTemplate = new RestTemplateTEXTPLAIN();
 		String resultText = restTemplate.getForObject(restUrl, String.class);
-		int index =resultText.indexOf("[");
+		int index = resultText.indexOf("[");
 		systemOut.println(resultText);
-		systemOut.println("index "+index);
+		systemOut.println("index " + index);
 		resultText = resultText.substring(index, resultText.length());
 		systemOut.println(resultText);
-		
+
 		result = new Gson().fromJson(resultText, List.class);
-		
+
 		return result;
 	}
-	
-	public UserResponseContainer createUser(UserBean sellerUser){
+
+	public UserResponseContainer createUser(UserBean sellerUser) {
 		UserResponseContainer response = new UserResponseContainer();
-		
-		String restUrl = serviceUrl + "/crearUsuario";
-		
-		Gson gson =  new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY).create();
-		
-		String json = gson.toJson(sellerUser);
-		systemOut.println(json);
-		
-		client = ClientBuilder.newClient();
-		target = client.target(restUrl);
-		
-		
-		systemOut.println("Usuario:"+json);
-		String responseJson = target.request(MediaType.APPLICATION_JSON_TYPE).post(Entity.json(json), String.class);
-		responseJson = responseJson.trim();
-		systemOut.println("==>>"+responseJson);
-		
-		String respJ[] = responseJson.split("\\{");
-		
-		String jsonObj = "{"+respJ[1] +"{"+respJ[2];
-		
-		systemOut.println("jsonObj "+jsonObj);
-		
-		if(!responseJson.contains("error")){
-		
-			response = gson.fromJson(jsonObj, UserResponseContainer.class);
+		if (enviroment.equals("PROD")) {
+			String restUrl = serviceUrl + "/crearUsuario";
+
+			Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY).create();
+
+			String json = gson.toJson(sellerUser);
+			systemOut.println(json);
+
+			client = ClientBuilder.newClient();
+			target = client.target(restUrl);
+
+			systemOut.println("Usuario:" + json);
+			String responseJson = target.request(MediaType.APPLICATION_JSON_TYPE).post(Entity.json(json), String.class);
+			responseJson = responseJson.trim();
+			systemOut.println("==>>" + responseJson);
+
+			String respJ[] = responseJson.split("\\{");
+
+			String jsonObj = "{" + respJ[1] + "{" + respJ[2];
+
+			systemOut.println("jsonObj " + jsonObj);
+
+			if (!responseJson.contains("error")) {
+
+				response = gson.fromJson(jsonObj, UserResponseContainer.class);
+			} else {
+
+				UserResponseError resp = gson.fromJson(jsonObj, UserResponseError.class);
+
+				response.setEstado(resp.getEstado());
+				response.setMsg(resp.getMsg());
+			}
 		}else{
-			
-			UserResponseError resp = gson.fromJson(jsonObj, UserResponseError.class);
-		
-			response.setEstado(resp.getEstado());
-			response.setMsg(resp.getMsg());
+			response.setEstado("DEVELOPMENT");
+			response.setMsg("Ambiente de desarrollo no se crea seller");
 		}
-		
 		return response;
-		
-		
+
 	}
-	
-	
-	public UserResponseContainer createUserBean(UserBean sellerUser){
+
+	public UserResponseContainer createUserBean(UserBean sellerUser) {
 		UserResponseContainer response = new UserResponseContainer();
-		
+
 		String restUrl = serviceUrl + "/crearUsuario";
-		
+
 		RestTemplateJSON restTemplate = new RestTemplateJSON();
-		
-		Gson gson =  new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY).create();
-		
+
+		Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY).create();
+
 		String json = gson.toJson(sellerUser);
 		systemOut.println(json);
-		
+
 		String responseJson = restTemplate.postForObject(restUrl, json, String.class);
-		
+
 		systemOut.println(responseJson);
-		
+
 		response = gson.fromJson(responseJson, UserResponseContainer.class);
 		return response;
-		
-		
+
 	}
 }

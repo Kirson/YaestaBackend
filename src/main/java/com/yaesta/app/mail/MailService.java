@@ -22,6 +22,7 @@ import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import com.yaesta.app.persistence.entity.YaEstaLog;
 import com.yaesta.app.persistence.service.YaEstaLogService;
+import com.yaesta.app.service.SystemOutService;
 
 @Service
 public class MailService implements Serializable {
@@ -36,6 +37,9 @@ public class MailService implements Serializable {
 
 	@Autowired
 	YaEstaLogService yaEstaLogService;
+	
+	@Autowired
+	SystemOutService systemOut;
 
 	// Invoking mail.smtp properties
 	private @Value("${mail.smtp.protocol}") String mailProtocol;
@@ -82,12 +86,13 @@ public class MailService implements Serializable {
 		try {
 			MimeMessagePreparator preparator = new MimeMessagePreparator() {
 				public void prepare(javax.mail.internet.MimeMessage mimeMessage) throws Exception {
-					System.out.println("==>> inicio mail Template");
+					systemOut.println("==>> inicio mail Template");
 					File logo = new File(mailPathLogoImage);
 					FileSystemResource resLogo = new FileSystemResource(mailPathLogoImage);
 					mailInfo.setFile(logo);
 					MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 					message.setTo(mailInfo.getMailReceiver().getEmail());
+					systemOut.println("==>> antes de colocar receptores de email");
 					if (mailInfo.getReceivers() != null && !mailInfo.getReceivers().isEmpty()) {
 						String cc[] = new String[mailInfo.getReceivers().size()];
 						for (int i = 0; i < mailInfo.getReceivers().size(); i++) {
@@ -95,11 +100,13 @@ public class MailService implements Serializable {
 						}
 						message.setCc(cc);
 					}
+					systemOut.println("==>> antes de colocar sender de email");
 					message.setFrom(mailInfo.getMailSender().getEmail());
 					message.setSubject(mailInfo.getSubject());
 					message.addInline("logoYaesta", new FileSystemResource(logo));
 					message.addAttachment(resLogo.getFilename(), resLogo);
 
+					systemOut.println("==>> antes de colocar adjuntos de email");
 					if (mailInfo.getAttachmentList() != null && !mailInfo.getAttachmentList().isEmpty()) {
 						for (String attachement : mailInfo.getAttachmentList()) {
 							if (attachement != null && !attachement.equals("")) {
@@ -108,22 +115,25 @@ public class MailService implements Serializable {
 							}
 						}
 					}
+					systemOut.println("==>> luego de colocar adjuntos de email");
 					Map<String, Object> model = new HashMap<String, Object>();
 					model.put("mailInfo", mailInfo);
 					model.put("cid", "logoYaesta");
 					String text = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, template, "UTF-8", model);
 					message.setText(text, true);
+					systemOut.println("==>> despues de usar mail template");
 				}
 			};
 			JavaMailSender javaMailSender = getJavaMailSender();
 			javaMailSender.send(preparator);
-			System.out.println("==>> fin mail Template");
+			systemOut.println("==>> fin mail Template");
 		} catch (Exception e) {
 			YaEstaLog yaestalog = new YaEstaLog();
 			yaestalog.setLogDate(new Date());
 			yaestalog.setProcessName("MAILSENDING");
 			yaestalog.setOrderId(mailInfo.getReferenceId());
 			yaestalog.setErrorInfo("MAILEXCEPTION: "+e.getMessage());
+			yaestalog.setTextinfo("MAILEXCEPTION: "+e.getMessage());
 			yaEstaLogService.save(yaestalog);
 		}
 	}
@@ -143,7 +153,7 @@ public class MailService implements Serializable {
 		JavaMailSender javaMailSender = getJavaMailSender();
 
 		if (javaMailSender == null) {
-			System.out.println("Mail Sender es nulo");
+			systemOut.println("Mail Sender es nulo");
 		}
 
 		javaMailSender.send(preparator);

@@ -118,6 +118,8 @@ public class TccServiceJaxWs  {
 			for(SupplierDeliveryInfo sdi:guideInfo.getOrderComplete().getSupplierDeliveryInfoList()){
 				GuideBeanDTO gbd = new GuideBeanDTO();
 				List<String> errorInfo = SupplierUtil.validateSupplierInfo(sdi.getSupplier());
+				gbd.setSupplier(sdi.getSupplier());
+				boolean addGdb = true;
 				
 				if(errorInfo.isEmpty() && sdi.getSelected() && guideInfo.getDeliverySelected()!=null && guideInfo.getDeliverySelected().getNemonic().equals(DeliveryEnum.TCC.getNemonic())){
 					TpGrabarRemesaCompleta objDespacho = objectFactoryXSD.createTpGrabarRemesaCompleta();
@@ -411,7 +413,8 @@ public class TccServiceJaxWs  {
 					
 					systemOut.println("Objeto "+ json);
 					//Intentar mandar a grabar el objeto antes de generar la llamada a servicio de TCC
-					buildLog(json,guideInfo.getOrderComplete().getOrderId(),null);					
+//					buildLog(json,guideInfo.getOrderComplete().getOrderId(),null);
+					buildLog(gdes,guideInfo.getOrderComplete().getOrderId(),null);
 					GrabarDespacho4Response gdesResponse = (GrabarDespacho4Response)webServiceTemplateTCC.marshalSendAndReceive("http://clientes.tcc.com.co/servicios/wsdespachos.asmx",gdes,new SoapActionCallback("http://clientes.tcc.com.co/GrabarDespacho4"));
 				
 					//"http://clientes.tcc.com.co/"
@@ -424,14 +427,25 @@ public class TccServiceJaxWs  {
 					
 					systemOut.println("Objeto2 "+ json2);
 					//Intentar mandar a grabar el objeto antes de generar la llamada a servicio de TCC
-					buildLog(json2,guideInfo.getOrderComplete().getOrderId(),"RESPONSE");	
+					buildLog(gdesResponse,guideInfo.getOrderComplete().getOrderId(),"RESPONSE");	
 					
-					//Escribir los archivos
-					if(gdesResponse!=null && gdesResponse.getRemesa()!=null){
+					
+					String message = gdesResponse.getMensaje();
+					
+					if(message.contains("ORA-") || message.contains("ERROR")  || message.contains("Exception") ){
+						YaEstaLog yaestalog = new YaEstaLog();
+						yaestalog.setLogDate(new Date());
+						yaestalog.setProcessName("WAYBILL-TCC");
+						yaestalog.setTextinfo("TCC Remesa : Error: " + message);
+						yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
+						logService.save(yaestalog);
+						result.setResponse("ERROR");
+						addGdb = false;
+					}
+					else if(gdesResponse!=null && gdesResponse.getRemesa()!=null){ //escribir los archivos
 						gbd.setItemValue(itemValue);
 						gbd.setDeliveryCost(deliveryCost);
 						gbd.setDeliveryPayment(deliveryPayment);
-						gbd.setSupplier(sdi.getSupplier());
 						gbd.setItemList(sdi.getItems());
 						gbd.setHasPayment(hasAdjunto);
 						gbd.setTotalValue(totalValue);
@@ -440,18 +454,27 @@ public class TccServiceJaxWs  {
 						gbd.setGuideNumber(gdesResponse.getRemesa());
 						gbd.setDetails(detailList);
 						
-						if(gdesResponse.getIMGRemesa()!=null && gdesResponse.getIMGRotulos()!=null){
+						if(gdesResponse.getIMGRelacionEnvio()!=null && gdesResponse.getIMGRotulos()!=null){
 							String guideName = tccServicePdfPath+tccServicePdfGuidePrefix+guideInfo.getOrderComplete().getOrderId()+"_"+gdesResponse.getRemesa()+"_"+(new Date()).getTime() + ".pdf";
 							String rotuleName = tccServicePdfPath+tccServicePdfRotulePrefix+guideInfo.getOrderComplete().getOrderId()+"_"+gdesResponse.getRemesa()+"_"+(new Date()).getTime() + ".pdf";
 							
 							System.out.println("GuideName "+guideName);
 							System.out.println("RotuleName "+rotuleName);
-							FileUtils.writeByteArrayToFile(new File(guideName),gdesResponse.getIMGRemesa());
+//							FileUtils.writeByteArrayToFile(new File(guideName),gdesResponse.getIMGRemesa());							
+							FileUtils.writeByteArrayToFile(new File(guideName),gdesResponse.getIMGRelacionEnvio());
 							FileUtils.writeByteArrayToFile(new File(rotuleName),gdesResponse.getIMGRotulos());
 							gbd.setPdfUrl(guideName);
 							gbd.setPdfRotuleUrl(rotuleName);
+							result.setResponse("OK");
 						}else{
 							System.out.println("No contiene salida PDF");
+							YaEstaLog yaestalog = new YaEstaLog();
+							yaestalog.setLogDate(new Date());
+							yaestalog.setProcessName("WAYBILL-TCC");
+							yaestalog.setTextinfo("TCC Remesa : Error: " + "No contiene salida PDF");
+							yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
+							logService.save(yaestalog);
+							addGdb = false;
 						}
 						
 						//Grabar log en caso de exito
@@ -463,9 +486,13 @@ public class TccServiceJaxWs  {
 						logService.save(yaestalog);
 						//
 					}else{
+						result.setResponse("ERROR");
 						System.out.println("No hay response en objeto");
+						addGdb = false;
 					}
-					resultGuideBeanList.add(gbd);
+					if(addGdb){
+						resultGuideBeanList.add(gbd);
+					}
 				}//fin no hay error
 			
 			}//fin SDI
@@ -549,13 +576,14 @@ public class TccServiceJaxWs  {
 	 * Metodo para grabar el log de lo que se envia a TCC en un archivo
 	 * @param jsonLog
 	 */
-	private void buildLog(String jsonLog, String orderId, String sufix){
+//	private void buildLog(String jsonLog, String orderId, String sufix){
+	private void buildLog(Object grabarDespacho, String orderId, String sufix){
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 
 			mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-			Object oJson = mapper.readValue(jsonLog, GrabarDespacho4.class);
-			String indented = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(oJson);
+//			Object oJson = sufix != null ? mapper.readValue(jsonLog, GrabarDespacho4Response.class) : mapper.readValue(jsonLog, GrabarDespacho4.class);
+			String indented = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(grabarDespacho);
 			String fileName = yaestaLogPath + yaestaPrefixTcc + orderId +"_" + (new Date()).getTime() + ".txt";
 			
 			if(sufix!=null){
