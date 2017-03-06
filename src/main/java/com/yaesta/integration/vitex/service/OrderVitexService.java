@@ -1626,7 +1626,8 @@ public class OrderVitexService extends BaseVitexService {
 			}
 
 			if (fc != null) {
-				is.setInvoiceNumber(fc.getAutorizacion().getNumero());
+				//is.setInvoiceNumber(fc.getAutorizacion().getNumero());
+				is.setInvoiceNumber(datilService.formatInvoiceNumber(fc.getSecuencial()));
 				is.setIssuanceDate(fc.getFechaEmision());
 				is.setCourier(order.getDeliveryName());
 				is.setInvoiceValue(order.getTotalPrice().doubleValue());
@@ -1659,7 +1660,8 @@ public class OrderVitexService extends BaseVitexService {
 
 			FacturaConsulta fc = datilService.findInvoice(facturaRespuestaSRI.getId());
 			if (fc != null) {
-				is.setInvoiceNumber(fc.getAutorizacion().getNumero());
+				//is.setInvoiceNumber(fc.getAutorizacion().getNumero());
+				is.setInvoiceNumber(datilService.formatInvoiceNumber(fc.getSecuencial()));
 				is.setIssuanceDate(fc.getFechaEmision());
 				is.setCourier("");
 				is.setInvoiceValue(facturaRespuestaSRI.getTotales().getImporteTotal());
@@ -1732,7 +1734,8 @@ public class OrderVitexService extends BaseVitexService {
 					if (order != null && order.getInvoiceReference() != null) {
 						FacturaConsulta fc = datilService.findInvoice(order.getInvoiceReference());
 						if (fc != null) {
-							order.setInvoiceNumber(fc.getAutorizacion().getNumero());
+							order.setSriAut(fc.getAutorizacion().getNumero());
+							order.setInvoiceNumber(datilService.formatInvoiceNumber(fc.getSecuencial()));
 							orderService.saveOrder(order);
 						}
 					}
@@ -1903,6 +1906,8 @@ public class OrderVitexService extends BaseVitexService {
 					} else {
 						oi.setValueReceivables(0D);
 					}
+					oi.setInvoiceNumber(order.getInvoiceNumber());
+					oi.setInvoiceReference(order.getInvoiceReference());
 
 					if (ic.getAdditionalInfo() != null) {
 						oi.setBrandName(ic.getAdditionalInfo().getBrandName());

@@ -19,6 +19,7 @@ import com.yaesta.app.persistence.entity.OrderItem;
 import com.yaesta.app.persistence.service.OrderService;
 import com.yaesta.app.persistence.vo.DateRangeVO;
 import com.yaesta.app.persistence.vo.OrderItemBeanVO;
+import com.yaesta.app.persistence.vo.OrderUpdVO;
 import com.yaesta.app.persistence.vo.WarehouseVO;
 import com.yaesta.app.util.UtilDate;
 
@@ -210,6 +211,14 @@ public class OrderController {
 		List<Order> found = orderService.getPendingInvoiceOrders(flag);
 		
 		return new ResponseEntity<List<Order>>(found,HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/updateOrdersWithInvoice", method = RequestMethod.GET)
+	public ResponseEntity<OrderUpdVO> updateOrdersWithInvoice(){
+		OrderUpdVO ouvo = orderService.updateOrdersWithInvoice();
+		
+		
+		return new ResponseEntity<OrderUpdVO>(ouvo,HttpStatus.OK);
 	}
 
 }

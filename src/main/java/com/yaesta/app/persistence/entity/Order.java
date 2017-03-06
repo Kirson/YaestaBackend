@@ -125,6 +125,9 @@ public class Order implements Serializable{
 	@Column(name="payment_method")
 	private String paymentMethod;
 	
+	@Column(name="sri_aut")
+	private String sriAut;
+	
 	public Order(){
 		this.status = "registered";
 		this.hasItems = "0";
@@ -361,6 +364,16 @@ public class Order implements Serializable{
 
 	public void setPaymentMethod(String paymentMethod) {
 		this.paymentMethod = paymentMethod;
+	}
+	
+	
+
+	public String getSriAut() {
+		return sriAut;
+	}
+
+	public void setSriAut(String sriAut) {
+		this.sriAut = sriAut;
 	}
 
 	@Override

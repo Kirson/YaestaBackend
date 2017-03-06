@@ -48,17 +48,20 @@ public class DatilIntegrationController {
 	@RequestMapping(value = "/testFacturaMapper/", method = RequestMethod.GET)
 	public FacturaConsulta testFacturaMapper(){
 		
-		String orderId = "650141505758-01";
+		//String orderId = "650141505758-01";
 		
-		Order order = orderService.findByVitexId(orderId);
-		
-		
-		Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+		//Order order = orderService.findByVitexId(orderId);
 		
 		
-		FacturaRespuestaSRI fr = gson.fromJson(order.getInvoice(), FacturaRespuestaSRI.class);
+		//Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+		
+		
+		//FacturaRespuestaSRI fr = gson.fromJson(order.getInvoice(), FacturaRespuestaSRI.class);
 	
-		FacturaConsulta fc = datilService.findInvoice(fr.getId());
+		//FacturaConsulta fc = datilService.findInvoice(fr.getId());
+		
+		FacturaConsulta fc = datilService.findInvoice("2010201601260117924781030010000026019");
+		
 		
 		
 		

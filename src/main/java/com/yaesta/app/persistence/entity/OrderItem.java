@@ -161,6 +161,9 @@ public class OrderItem implements Serializable{
 	@Column(name="programmed_date")
 	private Date programmedDate;
 	
+	@Column(name="sri_aut")
+	private String sriAut;
+	
 	public OrderItem(){
 		isWarehouse=Boolean.FALSE;
 		itemPartialValue=0D;
@@ -495,6 +498,14 @@ public class OrderItem implements Serializable{
 
 	public void setProgrammedDate(Date programmedDate) {
 		this.programmedDate = programmedDate;
+	}
+
+	public String getSriAut() {
+		return sriAut;
+	}
+
+	public void setSriAut(String sriAut) {
+		this.sriAut = sriAut;
 	}
 	
 	

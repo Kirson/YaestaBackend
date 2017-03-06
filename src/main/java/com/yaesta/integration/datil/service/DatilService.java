@@ -500,6 +500,15 @@ public class DatilService implements Serializable {
 
 		orderService.saveOrder(order);
 
+		// Consultar la factura generada
+		FacturaConsulta fc = findInvoice(order.getInvoiceReference());
+		if (fc != null) {
+			String invoiceNumber = formatInvoiceNumber(fc.getSecuencial());
+			order.setInvoiceNumber(invoiceNumber);
+			order.setSriAut(fc.getAutorizacion().getNumero());
+
+			orderService.saveOrder(order);
+		}
 		return response;
 	}
 
@@ -918,7 +927,7 @@ public class DatilService implements Serializable {
 		return myHeaders;
 	}
 
-	private String formatInvoiceNumber(String sequence) {
+	public String formatInvoiceNumber(String sequence) {
 		String sequencePart = "" + sequence;
 
 		while (sequencePart.length() < 9) {
