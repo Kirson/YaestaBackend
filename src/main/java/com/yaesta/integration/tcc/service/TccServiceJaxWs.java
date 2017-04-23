@@ -44,6 +44,7 @@ import com.yaesta.integration.vitex.json.bean.Dimension;
 import com.yaesta.integration.vitex.json.bean.ItemComplete;
 import com.yaesta.integration.vitex.json.bean.Payment;
 import com.yaesta.integration.vitex.json.bean.PriceTag;
+import com.yaesta.integration.vitex.json.bean.Total;
 import com.yaesta.integration.vitex.json.bean.Transaction;
 import com.yaesta.integration.vitex.json.bean.enums.PaymentEnum;
 import com.yaesta.integration.base.enums.DeliveryEnum;
@@ -124,10 +125,11 @@ public class TccServiceJaxWs implements Serializable {
 	public GuideDTO generateGuides(GuideDTO guideInfo) {
 
 		GuideDTO result = new GuideDTO();
+		result.setResponse("OK");
 
 		try {
 
-			result.setResponse("OK");
+			
 
 			// String response = "OK";
 
@@ -151,18 +153,16 @@ public class TccServiceJaxWs implements Serializable {
 					objDespacho.setCuentaremitente(tccBusinessAccount);
 					objDespacho.setIdentificacionremitente(yaestaRuc);
 					objDespacho.setTipoidentificacionremitente("NIT");
+					
 
 					String localeSource = sdi.getSupplier().getTccCode();
 					if (localeSource != null) {
 						objDespacho.setCiudadorigen(localeSource);
-					} else {
-						objDespacho.setCiudadorigen("17001050");
-
 					}
+					
 					objDespacho.setDireccionremitente(sdi.getSupplier().getAddress());
 					objDespacho.setTelefonoremitente(sdi.getSupplier().getPhone());
-					// objDespacho.setDirecciondestinatario(guideInfo.getOrderComplete().getShippingData().getAddress().getStreet());
-
+					
 					String province = guideInfo.getOrderComplete().getShippingData().getAddress().getState()
 							.toUpperCase();
 					String canton = guideInfo.getOrderComplete().getShippingData().getAddress().getCity().toUpperCase();
@@ -238,6 +238,34 @@ public class TccServiceJaxWs implements Serializable {
 						}
 					}
 
+					Double shippingValue = 0D;
+					Double partialShipping = 0D;
+					Double ivaPartial = 0D;
+
+					for (Total vtot : guideInfo.getOrderComplete().getTotals()) {
+
+						if (vtot.getId().equals("Shipping")) {
+							shippingValue = shippingValue + vtot.getValue();
+						}
+					}
+
+					if (shippingValue > 0) {
+
+						if (guideInfo.getOrderComplete().getSupplierDeliveryInfoList() != null
+								&& !guideInfo.getOrderComplete().getSupplierDeliveryInfoList().isEmpty()) {
+
+							partialShipping = shippingValue
+									/ guideInfo.getOrderComplete().getSupplierDeliveryInfoList().size();
+							partialShipping = BaseUtil.roundValue(partialShipping);
+							ivaPartial = BaseUtil.calculateIVA(partialShipping, new Integer(datilIvaValue),
+									datilIvaPercentValue);
+							partialShipping = partialShipping + ivaPartial;
+							partialShipping = BaseUtil.roundValue(partialShipping);
+						}
+					}
+
+					systemOut.println("PartialShipping " + partialShipping);
+
 					Double deliveryPayment = 0D;
 					Boolean hasAdjunto = false;
 					if (guideInfo.getOrderComplete().getPaymentData().getTransactions() != null
@@ -255,11 +283,14 @@ public class TccServiceJaxWs implements Serializable {
 							} //
 						}
 					} // fin payment data
-
+					/*
 					String observacionText = "Orden: " + guideInfo.getOrderComplete().getOrderId() + " de "
 							+ guideInfo.getOrderComplete().getCustomerName() + " "
 							+ guideInfo.getOrderComplete().getClientProfileData().getDocument() + " \n ";
 					observacionText = observacionText + "Forma de Pago: " + formaPago;
+					*/
+					String observacionText = "Orden: " + guideInfo.getOrderComplete().getOrderId()+ " ";
+						   observacionText = observacionText + " Forma de Pago: " + formaPago+ " \n ";
 
 					if (guideInfo.getCustomerAdditionalInfo() != null
 							&& !guideInfo.getCustomerAdditionalInfo().equals("")) {
@@ -272,12 +303,13 @@ public class TccServiceJaxWs implements Serializable {
 													// vacio
 
 					// remitente
+					//objDespacho.setPrimernombreremitente("YAESTA: " +sdi.getSupplier().getName()); //En atencion a solicitud del 21-04-2017
 					objDespacho.setPrimernombreremitente(sdi.getSupplier().getName());
 					objDespacho.setPrimerapellidoremitente(
 							sdi.getSupplier().getContactName() + " " + sdi.getSupplier().getContactLastName());
 					objDespacho.setDireccionremitente(sdi.getSupplier().getAddress());
 					objDespacho.setTelefonoremitente(sdi.getSupplier().getPhone());
-					// objDespacho.setCiudadorigen(sdi.getSupplier().getTccCode());
+				
 
 					String docTypeSup[] = determineDocumentType(yaestaRuc);
 
@@ -287,12 +319,18 @@ public class TccServiceJaxWs implements Serializable {
 					objDespacho.setRazonsocialremitente(yaestaRazonSocial);
 
 					// Items
+                    String desc = "";
 					Long ite = new Long(1);
 					Double itemValue = 0D;
 					Double deliveryCost = 0D;
 					Double totalValue = 0D;
 					Double totalAsegurado = 0D;
-					String desc = "";
+					
+					
+					if (hasAdjunto && partialShipping > 0) {
+								totalValue = partialShipping;
+					}
+					
 					TpUnidad unidad = new TpUnidad();
 					systemOut.println("# items " + sdi.getItems().size());
 					List<GuideDetail> detailList = new ArrayList<GuideDetail>();
@@ -410,10 +448,30 @@ public class TccServiceJaxWs implements Serializable {
 						} else {
 
 							systemOut.println("No hay adjunto");
+							objDespacho.setTotalvalorproducto("");
+							
+							
 						}
+						
+						objDespacho.setTotalvalorproducto("");
 
-						systemOut.println("Total Valor mercancia " + totalValue);
-						objDespacho.setTotalvalormercancia(totalValue.toString());
+						systemOut.println("Total Valor producto " + totalValue);
+						objDespacho.setTotalvalormercancia(totalAsegurado.toString());
+						
+						if(hasAdjunto){
+							objDespacho.setTotalvalorproducto(totalValue.toString());
+				//			objDespacho.setTotalvalorproducto("");
+						}else
+						{
+							TpDocumentoReferencia docReferencia = new TpDocumentoReferencia();
+
+							docReferencia.setNumerodocumento("0");
+							docReferencia.setTipodocumento("FA"); // confirmar
+							docReferencia.setFechadocumento(UtilDate.fromDateToString(new Date()));
+
+							objDespacho.getDocumentoreferencia().add(docReferencia);
+						}
+						
 
 						// documentacion dice enviar vacio
 						// objDespacho.setCodigolote(guideInfo.getOrderComplete().getOrderId());
@@ -431,9 +489,17 @@ public class TccServiceJaxWs implements Serializable {
 						detailList.add(guiD);
 
 					} // for de items
-
+					StringBuilder temp = new StringBuilder(objDespacho.getObservaciones()+" "+desc);
+					if(hasAdjunto){
+						
+						temp.append("\n VALOR A RECAUDAR: " + totalValue);
+						
+					}
+					objDespacho.setObservaciones(temp.toString());
+					
+					
 					systemOut.println("Total Asegurado " + totalAsegurado);
-					// unidad.setValormercancia(formatProductValue(totalValue));
+					// unidad.setValormercancia(formatProductValue(totalAsegurado));
 					unidad.setValormercancia("00");
 					unidad.setNumerobolsa("1");
 					unidad.setReferencias("");
@@ -484,9 +550,11 @@ public class TccServiceJaxWs implements Serializable {
 						logService.save(yaestalog);
 						result.setResponse("ERROR");
 						addGdb = false;
-					} else if (gdesResponse != null && gdesResponse.getRemesa() != null) { // escribir
-																							// los
-																							// archivos
+					} else if (   gdesResponse != null 
+							   && gdesResponse.getRemesa() != null 
+							   && !gdesResponse.getRemesa().equals("-1")) { 	// escribir
+																				// los
+																				// archivos
 						gbd.setItemValue(itemValue);
 						gbd.setDeliveryCost(deliveryCost);
 						gbd.setDeliveryPayment(deliveryPayment);
@@ -524,6 +592,7 @@ public class TccServiceJaxWs implements Serializable {
 							yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
 							logService.save(yaestalog);
 							addGdb = false;
+							result.setResponse("ERROR");
 						}
 
 						// Grabar log en caso de exito
@@ -537,6 +606,13 @@ public class TccServiceJaxWs implements Serializable {
 					} else {
 						result.setResponse("ERROR");
 						System.out.println("No hay response en objeto");
+						YaEstaLog yaestalog = new YaEstaLog();
+						yaestalog.setLogDate(new Date());
+						yaestalog.setProcessName("WAYBILL-TCC");
+						yaestalog.setTextinfo("TCC Remesa : Error Response: " + message);
+						yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
+						logService.save(yaestalog);
+						
 						addGdb = false;
 					}
 					if (addGdb) {
@@ -595,7 +671,7 @@ public class TccServiceJaxWs implements Serializable {
 				result[0] = "NIT";
 				result[1] = "J";
 			} else {
-				result[0] = "PAS";
+				result[0] = "CC"; //PAS validar TCC
 				result[1] = "N";
 			}
 		} else {

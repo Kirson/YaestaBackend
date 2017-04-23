@@ -44,6 +44,7 @@ public class VitexIntegrationTestController {
 	@Autowired
 	SystemOutService systemOut;
 
+	@Deprecated
 	@RequestMapping(value = "/createDummyProduct/", method = RequestMethod.POST)
 	public ResponseEntity<ProductDTO> createDummyProduct() {	  		 		
 		systemOut.println("==>>A<<===");
@@ -65,7 +66,7 @@ public class VitexIntegrationTestController {
 		return new ResponseEntity<ProductDTO>(result, HttpStatus.OK);
 	}
 	
-	
+	@Deprecated
 	@RequestMapping(value = "/createDummyCategory/", method = RequestMethod.POST)
 	public ResponseEntity<CategoryDTO> createDummyCategory() {	  		 		
 		Category category = new Category();
@@ -74,6 +75,7 @@ public class VitexIntegrationTestController {
 		return new ResponseEntity<CategoryDTO>(result, HttpStatus.OK);
 	}
 	
+	@Deprecated
 	@RequestMapping(value = "/sendTestMail/", method = RequestMethod.GET)
 	public ResponseEntity<String> sendTestMail(){
 		String result = "OK";
@@ -118,6 +120,7 @@ public class VitexIntegrationTestController {
 		return new ResponseEntity<String>(result, HttpStatus.OK);
 	}
 	
+	@Deprecated
 	@RequestMapping(value = "/testCancelOrder/", method = RequestMethod.GET)
 	public ResponseEntity<OrderCancel> testCancelOrder(){
 		String orderId = "655002549427-01";
@@ -128,6 +131,7 @@ public class VitexIntegrationTestController {
 		return new ResponseEntity<OrderCancel>(response, HttpStatus.OK);
 	}
 	
+	@Deprecated
 	@RequestMapping(value = "/testChangeOrder/", method = RequestMethod.GET)
 	public ResponseEntity<OrderComplete> testChangeOrder(){
 		String orderId = "655012405841-01";
@@ -137,6 +141,7 @@ public class VitexIntegrationTestController {
 		return new ResponseEntity<OrderComplete>(response, HttpStatus.OK);
 	}
 	
+	@Deprecated
 	@RequestMapping(value = "/getCategoryFromPath/", method = RequestMethod.GET)
 	public ResponseEntity<CategoryVtex> getCategoryFromPath(){
 		String path = "/10/255/19/";

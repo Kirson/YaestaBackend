@@ -7,10 +7,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.jsondoc.core.annotation.Api;
+import org.jsondoc.core.annotation.ApiAuthNone;
+import org.jsondoc.core.annotation.ApiMethod;
+import org.jsondoc.core.annotation.ApiResponseObject;
+import org.jsondoc.core.annotation.ApiVersion;
+import org.jsondoc.core.pojo.ApiStage;
+import org.jsondoc.core.pojo.ApiVisibility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +39,13 @@ import com.yaesta.app.persistence.vo.GuideVO;
 import com.yaesta.app.persistence.vo.TrackingVO;
 import com.yaesta.integration.vitex.json.bean.enums.PaymentEnum;
 
+@Controller
+@Api(name = "Guide API", 
+     description = "Methods for managing orders", 
+     group = "Persistence",
+     visibility = ApiVisibility.PUBLIC, stage = ApiStage.RC)
+@ApiVersion(since = "0.1", until = "1.0")
+@ApiAuthNone
 @RestController
 @RequestMapping(value = "/guide")
 public class GuideController implements Serializable {
@@ -46,8 +61,13 @@ public class GuideController implements Serializable {
 	@Autowired
 	GuideProcessService guideProcessService;
 	
+
+	@ApiMethod(description="Get all guides",
+			   path="/guide/getAll",
+			   produces = { MediaType.APPLICATION_JSON_VALUE }, 
+			   consumes = { MediaType.APPLICATION_JSON_VALUE })
 	@RequestMapping(value = "/getAll/", method = RequestMethod.GET)
-	public ResponseEntity<List<Guide>> getAll(){
+	public @ApiResponseObject ResponseEntity<List<Guide>> getAll(){
 		List<Guide> found = guideService.getAll();
 		
 		if(found!=null && !found.isEmpty()){

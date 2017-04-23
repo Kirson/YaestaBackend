@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MailInfo implements Serializable {
+public final class MailInfo implements Serializable {
 
 	
 	/**

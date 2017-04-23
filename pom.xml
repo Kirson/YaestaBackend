@@ -181,6 +181,18 @@
     		<artifactId>cliente</artifactId>
     		<version>2.0</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.jsondoc</groupId>
+			<artifactId>spring-boot-starter-jsondoc</artifactId>
+			<version>1.2.17</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jsondoc</groupId>
+			<artifactId>jsondoc-ui-webjar</artifactId>
+			<version>1.2.17</version>
+		</dependency>
 		 
 	</dependencies>
 	<repositories>
@@ -205,6 +217,117 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.jvnet.jax-ws-commons</groupId>
+				<artifactId>jaxws-maven-plugin</artifactId>
+				<version>2.3</version>
+				<configuration>
+					<vmArgs>
+						<vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
+					</vmArgs>
+					<xdebug>true</xdebug>
+					<sourceDestDir>src/main/java</sourceDestDir>
+					<wsdlUrls>
+						<wsdlUrl>http://clientes.tcc.com.co/servicios/informacionremesas.asmx?wsdl</wsdlUrl>
+					</wsdlUrls>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jsondoc</groupId>
+				<artifactId>jsondoc-maven-plugin</artifactId>
+				<version>1.2.17</version>
+				<configuration>
+					<version>1.1</version>
+					<basePath>http://159.203.110.228:28080/yaestawar-1.0</basePath>
+					<packages>
+						<package>com.yaesta.app.persistence.controller</package>
+						<package>com.yaesta.app.persistence.service</package>
+						<package>com.yaesta.integration.datil.controller</package>
+						<package>com.yaesta.integration.datil.service</package>
+						<package>com.yaesta.integration.sellercenter.controller</package>
+						<package>com.yaesta.integration.sellercenter.service</package>
+						<package>com.yaesta.integration.tcc.service</package>
+						<package>com.yaesta.integration.tramaco.controller</package>
+						<package>com.yaesta.integration.tramaco.service</package>
+						<package>com.yaesta.integration.vitex.controller</package>
+						<package>com.yaesta.integration.vitex.service</package>
+					</packages>
+					<outputFile>${project.build.directory}/jsondoc-ui/jsondoc.json</outputFile>
+					<scanner>org.jsondoc.core.scanner.DefaultJSONDocScanner</scanner>
+					<playgroundEnabled>true</playgroundEnabled> <!-- optional -->
+					<displayMethodAs>URI</displayMethodAs> <!-- optional -->
+				</configuration>
+				<executions>
+					<execution>
+						<id>generate-jsondoc</id>
+						<phase>package</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<version>4.1</version>
+							<basePath>http://159.203.110.228:28080/yaestawar-1.0</basePath>
+							<packages>
+								<package>com.yaesta.app.persistence.controller</package>
+								<package>com.yaesta.app.persistence.service</package>
+								<package>com.yaesta.integration.datil.controller</package>
+								<package>com.yaesta.integration.datil.service</package>
+								<package>com.yaesta.integration.sellercenter.controller</package>
+								<package>com.yaesta.integration.sellercenter.service</package>
+								<package>com.yaesta.integration.tcc.service</package>
+								<package>com.yaesta.integration.tramaco.controller</package>
+								<package>com.yaesta.integration.tramaco.service</package>
+								<package>com.yaesta.integration.vitex.controller</package>
+								<package>com.yaesta.integration.vitex.service</package>
+							</packages>
+							<outputFile>${project.build.directory}/jsondoc-ui/jsondoc.json</outputFile>
+							<scanner>org.jsondoc.core.scanner.DefaultJSONDocScanner</scanner>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+
+			<plugin>
+				<groupId>com.google.code.maven-replacer-plugin</groupId>
+				<artifactId>replacer</artifactId>
+				<version>1.5.3</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>replace</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<includes>
+						<include>${project.build.directory}/jsondoc-ui/jsondoc-ui.html</include>
+					</includes>
+					<token>'_JSONDOC_OFFLINE_PLACEHOLDER_'</token> <!-- Do not change this value! -->
+					<valueFile>${project.build.directory}/jsondoc-ui/jsondoc.json</valueFile>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>create-distribution</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<finalName>jsondoc</finalName>
+							<descriptors>
+								<descriptor>assembly/jsondoc-assembly.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 
 

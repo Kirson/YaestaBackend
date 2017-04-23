@@ -3,9 +3,19 @@ package com.yaesta.app.persistence.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jsondoc.core.annotation.Api;
+import org.jsondoc.core.annotation.ApiAuthNone;
+import org.jsondoc.core.annotation.ApiMethod;
+import org.jsondoc.core.annotation.ApiPathParam;
+import org.jsondoc.core.annotation.ApiResponseObject;
+import org.jsondoc.core.annotation.ApiVersion;
+import org.jsondoc.core.pojo.ApiStage;
+import org.jsondoc.core.pojo.ApiVisibility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +33,13 @@ import com.yaesta.app.persistence.vo.ProvinciaVO;
 import com.yaesta.app.persistence.vo.SupplierBeanVO;
 import com.yaesta.app.persistence.vo.SupplierResponseVO;
 
+@Controller
+@Api(name = "Supplier API", 
+     description = "Methods for managing supplier", 
+     group = "Persistence",
+     visibility = ApiVisibility.PUBLIC, stage = ApiStage.RC)
+@ApiVersion(since = "0.1", until = "1.0")
+@ApiAuthNone
 @RestController
 @RequestMapping(value = "/supplier")
 public class SupplierController {
@@ -36,8 +53,12 @@ public class SupplierController {
 	@Autowired
 	TramacoZoneService tramacoZoneService;
 	
+	@ApiMethod(description="Get all supplier",
+			   path="/supplier/getAll",
+			   produces = { MediaType.APPLICATION_JSON_VALUE }, 
+			   consumes = { MediaType.APPLICATION_JSON_VALUE })
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET)
-	public  ResponseEntity<List<Supplier>> getAll(){
+	public ResponseEntity<List<Supplier>> getAll(){
 		
 		List<Supplier> found = supplierService.getSuppliers();
 	
@@ -48,8 +69,12 @@ public class SupplierController {
 	    }
 	}
 	
+	@ApiMethod(description="Find Supplier by ID",
+			   path="/supplier/findById",
+			   produces = { MediaType.APPLICATION_JSON_VALUE }, 
+			   consumes = { MediaType.APPLICATION_JSON_VALUE })
 	@RequestMapping(value = "/findById/{id}", method = RequestMethod.GET)
-	public  ResponseEntity<Supplier> findById(@PathVariable("id")Long id){
+	public @ApiResponseObject ResponseEntity<Supplier> findById(@ApiPathParam(description = "The supplier id") @PathVariable("id")Long id){
 		
 		Supplier found = supplierService.findById(id);
 	
@@ -171,6 +196,15 @@ public class SupplierController {
 		SupplierResponseVO response = supplierService.deleteSupplier(supplierVO);
 		
 		return new ResponseEntity<SupplierResponseVO>(response,HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/updateTCCZone", method = RequestMethod.GET)
+	public ResponseEntity<String> updateTCCZone(){
+		String response = "OK";
+		 
+		response=supplierService.updateTCCCode();
+		
+		return new ResponseEntity<String>(response,HttpStatus.OK);
 	}
 
 }

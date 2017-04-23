@@ -65,6 +65,9 @@ public class User implements Serializable{
 	
 	@Transient
 	private Catalog userRole;
+	
+	@Transient
+	private String clearPassword;
 
 	public User(){
 		isNew = Boolean.FALSE;
@@ -167,11 +170,22 @@ public class User implements Serializable{
 	public void setUserRole(Catalog userRole) {
 		this.userRole = userRole;
 	}
+	
+	
+
+	public String getClearPassword() {
+		return clearPassword;
+	}
+
+	public void setClearPassword(String clearPassword) {
+		this.clearPassword = clearPassword;
+	}
 
 	@PostLoad
 	public void postLoad(){
 		roleId = role.getId();
 		userRole = role;
+		clearPassword="";
 	}
 	
 }

@@ -1,15 +1,17 @@
 package com.yaesta.integration.datil.controller;
 
+import org.jsondoc.core.annotation.Api;
+import org.jsondoc.core.annotation.ApiAuthNone;
+import org.jsondoc.core.annotation.ApiVersion;
+import org.jsondoc.core.pojo.ApiStage;
+import org.jsondoc.core.pojo.ApiVisibility;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.yaesta.app.persistence.entity.Catalog;
-import com.yaesta.app.persistence.entity.Order;
 import com.yaesta.app.persistence.service.CatalogService;
 import com.yaesta.app.persistence.service.OrderService;
 import com.yaesta.integration.datil.json.bean.FacturaConsulta;
@@ -21,6 +23,13 @@ import com.yaesta.integration.vitex.bean.WayBillSchema;
 import com.yaesta.integration.vitex.json.bean.OrderComplete;
 import com.yaesta.integration.vitex.service.OrderVitexService;
 
+@Controller
+@Api(name = "DATIL API", 
+     description = "Methods for managing DATIL INTEGRATION", 
+     group = "Integration",
+     visibility = ApiVisibility.PUBLIC, stage = ApiStage.RC)
+@ApiVersion(since = "0.1", until = "1.0")
+@ApiAuthNone
 @RestController
 @RequestMapping(value = "/datilIntegration")
 public class DatilIntegrationController {
@@ -37,6 +46,7 @@ public class DatilIntegrationController {
 	@Autowired
 	CatalogService catalogService;
 
+	@Deprecated
 	@RequestMapping(value = "/testFactura/", method = RequestMethod.POST)
 	public FacturaRespuestaSRI testFactura(){
 		
@@ -45,6 +55,7 @@ public class DatilIntegrationController {
 		return datilService.processInvoiceOrder(oc);
 	}
 	
+	@Deprecated
 	@RequestMapping(value = "/testFacturaMapper/", method = RequestMethod.GET)
 	public FacturaConsulta testFacturaMapper(){
 		
@@ -68,7 +79,7 @@ public class DatilIntegrationController {
 		return fc;
 	}
 	
-	
+	@Deprecated
 	@RequestMapping(value = "/testNotaCredito/", method = RequestMethod.GET)
 	public NotaCreditoRespuesta testNotaCredito(){
 		
@@ -86,6 +97,7 @@ public class DatilIntegrationController {
 		return ncr;
 	}
 	
+	@Deprecated
 	@RequestMapping(value = "/testGuiaRemision/", method = RequestMethod.POST)
 	public WayBillSchema testGuiaRemision(){
 		

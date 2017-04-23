@@ -2,16 +2,28 @@ package com.yaesta.integration.vitex.controller;
 
 import java.util.List;
 
+import org.jsondoc.core.annotation.Api;
+import org.jsondoc.core.annotation.ApiAuthNone;
+import org.jsondoc.core.annotation.ApiMethod;
+import org.jsondoc.core.annotation.ApiPathParam;
+import org.jsondoc.core.annotation.ApiBodyObject;
+import org.jsondoc.core.annotation.ApiResponseObject;
+import org.jsondoc.core.annotation.ApiVersion;
+import org.jsondoc.core.pojo.ApiStage;
+import org.jsondoc.core.pojo.ApiVerb;
+import org.jsondoc.core.pojo.ApiVisibility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.yaesta.app.persistence.vo.OrderUpdVO;
 import com.yaesta.app.service.SystemOutService;
 import com.yaesta.integration.datil.json.bean.FacturaRespuestaSRI;
 import com.yaesta.integration.datil.json.bean.NotaCreditoRespuesta;
@@ -38,6 +50,13 @@ import com.yaesta.integration.vitex.wsdl.dto.ProductDTO;
 import com.yaesta.integration.vitex.wsdl.vo.OrderStatusVO;
 import com.yaesta.integration.vitex.wsdl.vo.OrderVO;
 
+@Controller
+@Api(name = "VTEX API", 
+     description = "Methods for managing VTEX INTEGRATION", 
+     group = "Integration",
+     visibility = ApiVisibility.PUBLIC, stage = ApiStage.RC)
+@ApiVersion(since = "0.1", until = "1.0")
+@ApiAuthNone
 @RestController
 @RequestMapping(value = "/vitextIntegration")
 public class VitexIntegrationController {
@@ -118,8 +137,12 @@ public class VitexIntegrationController {
 		return new ResponseEntity<OrderSchema>(json, HttpStatus.OK);
 	}
 
+	@ApiMethod(description="OrderSchema page query",
+			   path="/vitextIntegration/getOrdersVitexRest",
+			   produces = { MediaType.APPLICATION_JSON_VALUE }, 
+			   consumes = { MediaType.APPLICATION_JSON_VALUE })
 	@RequestMapping(value = "/getOrdersVitexRest", method = RequestMethod.GET)
-	public ResponseEntity<OrderSchemaContainerBean> getOrdersVitexRest() {
+	public @ApiResponseObject ResponseEntity<OrderSchemaContainerBean> getOrdersVitexRest() {
 
 		OrderSchemaContainerBean json = orderVitexService.getVitexOrders(null);
 		return new ResponseEntity<OrderSchemaContainerBean>(json, HttpStatus.OK);
@@ -132,8 +155,12 @@ public class VitexIntegrationController {
 		return new ResponseEntity<OrderSchema>(json, HttpStatus.OK);
 	}
 
+	@ApiMethod(description="Order complete info",
+			   path="/vitextIntegration/getOrderComplete{orderId}",
+			   produces = { MediaType.APPLICATION_JSON_VALUE }, 
+			   consumes = { MediaType.APPLICATION_JSON_VALUE })
 	@RequestMapping(value = "/getOrderComplete{orderId}", method = RequestMethod.GET)
-	public ResponseEntity<OrderComplete> getOrderComplete(@PathVariable("orderId") String orderId) {
+	public @ApiResponseObject ResponseEntity<OrderComplete> getOrderComplete(@ApiPathParam(description = "The order id") @PathVariable("orderId") String orderId) {
 
 		OrderComplete json = orderVitexService.getOrderComplete(orderId);
 		return new ResponseEntity<OrderComplete>(json, HttpStatus.OK);
@@ -154,8 +181,12 @@ public class VitexIntegrationController {
 		return new ResponseEntity<OrderComplete>(json, HttpStatus.OK);
 	}
 
+	@ApiMethod(description="Cancel order", verb = ApiVerb.POST,
+			   path="/vitextIntegration/cancelOrder",
+			   produces = { MediaType.APPLICATION_JSON_VALUE }, 
+			   consumes = { MediaType.APPLICATION_JSON_VALUE })
 	@RequestMapping(value = "/cancelOrder", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<OrderCancel> cancelOrder(@RequestBody OrderCompleteBean orderCompleteBean) {
+	public @ApiResponseObject ResponseEntity<OrderCancel> cancelOrder(@ApiBodyObject @RequestBody OrderCompleteBean orderCompleteBean) {
 
 		OrderComplete oc = orderCompleteBean.getOrder();
 		if (oc.getMotiveCancelId() == null) {
@@ -210,8 +241,12 @@ public class VitexIntegrationController {
 		return new ResponseEntity<GuideContainerBean>(response, HttpStatus.OK);
 	}
 
+	@ApiMethod(description="Invoice order", verb = ApiVerb.POST,
+			   path="/vitextIntegration/invoiceOrder",
+			   produces = { MediaType.APPLICATION_JSON_VALUE }, 
+			   consumes = { MediaType.APPLICATION_JSON_VALUE })
 	@RequestMapping(value = "/invoiceOrder", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<FacturaRespuestaSRI> invoiceOrder(@RequestBody OrderCompleteBean orderCompleteBean) {
+	public @ApiResponseObject ResponseEntity<FacturaRespuestaSRI> invoiceOrder(@ApiBodyObject @RequestBody OrderCompleteBean orderCompleteBean) {
 
 		OrderComplete oc = orderCompleteBean.getOrder();
 		FacturaRespuestaSRI response = datilService.processInvoiceOrder(oc);
@@ -252,5 +287,13 @@ public class VitexIntegrationController {
 	public ResponseEntity<List<OrderComplete>> getPendingInvoiceOrders(@PathVariable("flag") String flag) {
 		List<OrderComplete> found = orderVitexService.getPendingInvoiceOrders(flag);
 		return new ResponseEntity<List<OrderComplete>>(found, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/updateOrdersStatus", method = RequestMethod.GET)
+	public ResponseEntity<OrderUpdVO> updateOrdersStatus(){
+		OrderUpdVO ouvo = orderVitexService.updateOrdersStatus();
+		
+		
+		return new ResponseEntity<OrderUpdVO>(ouvo,HttpStatus.OK);
 	}
 }

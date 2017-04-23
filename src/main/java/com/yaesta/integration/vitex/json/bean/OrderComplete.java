@@ -68,7 +68,8 @@ import com.yaesta.integration.vitex.bean.SupplierDeliveryInfo;
     "pending",
     "motivePendingText",
     "pendingSolutionText",
-    "guides"
+    "guides",
+    "defaultDelivery"
 })
 public class OrderComplete implements Serializable {
 
@@ -164,6 +165,8 @@ public class OrderComplete implements Serializable {
     private String pendingSolutionText;
     @JsonProperty("guides")
     private List<Guide> guides;
+    @JsonProperty("defaultDelivery")
+    private Catalog defaultDelivery;
     
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -983,6 +986,16 @@ public class OrderComplete implements Serializable {
 	@JsonProperty("guides")
 	public void setGuides(List<Guide> guides) {
 		this.guides = guides;
+	}
+
+	@JsonProperty("defaultDelivery")
+	public Catalog getDefaultDelivery() {
+		return defaultDelivery;
+	}
+
+	@JsonProperty("defaultDelivery")
+	public void setDefaultDelivery(Catalog defaultDelivery) {
+		this.defaultDelivery = defaultDelivery;
 	}
     
     

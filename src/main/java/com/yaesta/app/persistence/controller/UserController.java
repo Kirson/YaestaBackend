@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yaesta.app.persistence.entity.User;
 import com.yaesta.app.persistence.service.UserService;
+import com.yaesta.app.persistence.vo.UserProcessVO;
 import com.yaesta.app.persistence.vo.UserVO;
 
 @RestController
@@ -52,6 +53,33 @@ public class UserController {
 	    	return new ResponseEntity<User>(found, HttpStatus.OK);
 	    }else{
 	    	return new ResponseEntity<User>(new User(),HttpStatus.OK);
+	    }
+	}
+	
+	
+
+	@RequestMapping(value = "/getDecriptPassword/{login}", method = RequestMethod.GET)
+	public  ResponseEntity<List<User>> findByLoginPassword(@PathVariable("login")String login){
+		
+		List<User> found = userService.getDecriptPassword(login);
+	
+	    if(found!=null){
+	    	return new ResponseEntity<List<User>>(found, HttpStatus.OK);
+	    }else{
+	    	return new ResponseEntity<List<User>>(new ArrayList<User>(),HttpStatus.OK);
+	    }
+	}
+	
+	
+	@RequestMapping(value = "/updateUserPasswords", method = RequestMethod.GET)
+	public  ResponseEntity<UserProcessVO> updateUserPasswords(){
+		
+		UserProcessVO upvo = userService.updateUserPasswords();
+	
+	    if(upvo!=null){
+	    	return new ResponseEntity<UserProcessVO>(upvo, HttpStatus.OK);
+	    }else{
+	    	return new ResponseEntity<UserProcessVO>(new UserProcessVO(),HttpStatus.OK);
 	    }
 	}
 

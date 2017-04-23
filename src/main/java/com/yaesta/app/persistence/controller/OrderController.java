@@ -6,9 +6,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.jsondoc.core.annotation.Api;
+import org.jsondoc.core.annotation.ApiAuthNone;
+import org.jsondoc.core.annotation.ApiMethod;
+import org.jsondoc.core.annotation.ApiResponseObject;
+import org.jsondoc.core.annotation.ApiVersion;
+import org.jsondoc.core.pojo.ApiStage;
+import org.jsondoc.core.pojo.ApiVisibility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -23,6 +32,13 @@ import com.yaesta.app.persistence.vo.OrderUpdVO;
 import com.yaesta.app.persistence.vo.WarehouseVO;
 import com.yaesta.app.util.UtilDate;
 
+@Controller
+@Api(name = "Order API", 
+     description = "Methods for managing orders", 
+     group = "Persistence",
+     visibility = ApiVisibility.PUBLIC, stage = ApiStage.RC)
+@ApiVersion(since = "0.1", until = "1.0")
+@ApiAuthNone
 @RestController
 @RequestMapping(value = "/order")
 public class OrderController {
@@ -30,8 +46,12 @@ public class OrderController {
 	@Autowired
 	OrderService orderService;
 	
+	@ApiMethod(description="Get all orders",
+			   path="/order/getAll",
+			   produces = { MediaType.APPLICATION_JSON_VALUE }, 
+			   consumes = { MediaType.APPLICATION_JSON_VALUE })
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET)
-	public ResponseEntity<List<Order>> getAll(){
+	public @ApiResponseObject ResponseEntity<List<Order>> getAll(){
 		List<Order> found = orderService.getAll();
 		
 		if(found!=null && !found.isEmpty()){

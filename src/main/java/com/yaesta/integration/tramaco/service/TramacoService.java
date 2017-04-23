@@ -192,6 +192,9 @@ public class TramacoService implements Serializable {
 					 * systemOut.println("ID:" + servicio.getId() + " NOMBRE:" +
 					 * servicio.getNombre() + " TIPO:" + servicio.getTipo()); }
 					 */
+				}else{
+					response = "ERROR";
+					mensaje  = "No se recupera informacion de contratos y servicios activos";
 				}
 				tramacoAuth.setRespuestaAutenticarWs(respuestaAutenticarWs);
 			}
@@ -744,7 +747,7 @@ public class TramacoService implements Serializable {
 					yaestalog.setLogDate(new Date());
 					yaestalog.setProcessName("WAYBILL-TRAMACO");
 					yaestalog.setTextinfo(guideInfo.getOrderComplete().getOrderId());
-					yaestalog.setTextinfo("Error no se tiene respuesta de autenticacion");
+					yaestalog.setTextinfo("Error no se tiene respuesta de autenticacion "+tramacoAuth.getMessage());
 					yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
 					response = "ERROR";
 					logService.save(yaestalog);
@@ -757,7 +760,7 @@ public class TramacoService implements Serializable {
 				yaestalog.setLogDate(new Date());
 				yaestalog.setProcessName("WAYBILL-TRAMACO");
 				yaestalog.setTextinfo(guideInfo.getOrderComplete().getOrderId());
-				yaestalog.setTextinfo("Error no se encuentra autenticado");
+				yaestalog.setTextinfo("Error no se encuentra autenticado "+tramacoAuth.getMessage());
 				yaestalog.setOrderId(guideInfo.getOrderComplete().getOrderId());
 				response = "ERROR";
 				logService.save(yaestalog);
@@ -898,7 +901,7 @@ public class TramacoService implements Serializable {
 						}
 
 					} else {
-						systemOut.println("NO tienes salida");
+						systemOut.println("NO tienes salida PDF");
 					}
 				} // if respuesta
 				resultGuideBeanList.add(gbd);
